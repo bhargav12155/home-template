@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
+import White_background from "@assets/White background.jpg";
+
 export default function AboutMichael() {
   return (
     <section className="py-20 bg-white">
@@ -8,7 +10,7 @@ export default function AboutMichael() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div>
             <img 
-              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80"
+              src={White_background}
               alt="Michael Bjork, Luxury Real Estate Agent"
               className="w-full h-96 object-contain rounded-lg shadow-lg bg-gray-50"
             />
