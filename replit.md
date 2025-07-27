@@ -2,7 +2,9 @@
 
 ## Overview
 
-This is a full-stack real estate application built for Bjork Group, a luxury real estate team in Nebraska. The application features a modern frontend with property listings, community showcases, blog functionality, and comprehensive admin capabilities. It's built with React/TypeScript on the frontend, Express.js on the backend, and uses PostgreSQL with Drizzle ORM for data management.
+This is a full-stack luxury real estate application built for BjorkHomes.com, serving the Omaha and Lincoln, Nebraska markets. The application features a modern frontend with property listings, community showcases, blog functionality, video backgrounds, YouTube marketing integration, and comprehensive admin capabilities with code injection and pixel tracking. It's built with React/TypeScript on the frontend, Express.js on the backend, and uses PostgreSQL with Drizzle ORM for data management.
+
+**Current Status:** Fully operational luxury real estate website with all core features implemented and tested (January 27, 2025)
 
 ## User Preferences
 
