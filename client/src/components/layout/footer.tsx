@@ -10,11 +10,11 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
-            <div className="mb-6">
+            <div className="mb-8">
               <img 
                 src={logoImage} 
                 alt="Bjork Group" 
-                className="h-16 w-auto drop-shadow-sm"
+                className="h-24 w-auto drop-shadow-md hover:drop-shadow-lg transition-all duration-300"
               />
             </div>
             <p className="text-gray-600 mb-6 max-w-md">
