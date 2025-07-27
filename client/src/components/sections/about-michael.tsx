@@ -12,7 +12,7 @@ export default function AboutMichael() {
             <img 
               src={White_background}
               alt="Michael Bjork, Luxury Real Estate Agent"
-              className="w-full h-96 object-contain rounded-lg shadow-lg bg-gray-50"
+              className="w-full h-96 object-contain rounded-lg shadow-lg bg-white"
             />
           </div>
           <div>
