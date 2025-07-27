@@ -1,0 +1,266 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --background: hsl(0, 0%, 98%);
+  --foreground: hsl(0, 0%, 20%);
+  --muted: hsl(0, 0%, 96%);
+  --muted-foreground: hsl(0, 0%, 45%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(0, 0%, 20%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(0, 0%, 20%);
+  --border: hsl(0, 0%, 90%);
+  --input: hsl(0, 0%, 90%);
+  --primary: hsl(0, 0%, 0%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(0, 0%, 96%);
+  --secondary-foreground: hsl(0, 0%, 20%);
+  --accent: hsl(0, 0%, 96%);
+  --accent-foreground: hsl(0, 0%, 20%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(0, 0%, 20%);
+  --radius: 0.5rem;
+  
+  /* Bjork Group Brand Colors */
+  --bjork-black: hsl(0, 0%, 0%);
+  --bjork-beige: hsl(28, 15%, 58%);
+  --bjork-blue: hsl(197, 29%, 26%);
+  --soft-black: hsl(0, 0%, 20%);
+  --soft-white: hsl(0, 0%, 98%);
+}
+
+.dark {
+  --background: hsl(0, 0%, 4%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(0, 0%, 16%);
+  --muted-foreground: hsl(0, 0%, 65%);
+  --popover: hsl(0, 0%, 4%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(0, 0%, 4%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(0, 0%, 16%);
+  --input: hsl(0, 0%, 16%);
+  --primary: hsl(0, 0%, 0%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(0, 0%, 16%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(0, 0%, 16%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62%, 31%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(0, 0%, 84%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-body antialiased bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Dazzle Unicase font simulation using Inter with custom styling */
+  .font-display {
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .font-body {
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer utilities {
+  .text-bjork-black {
+    color: var(--bjork-black);
+  }
+  
+  .text-bjork-beige {
+    color: var(--bjork-beige);
+  }
+  
+  .text-bjork-blue {
+    color: var(--bjork-blue);
+  }
+  
+  .text-soft-black {
+    color: var(--soft-black);
+  }
+  
+  .text-soft-white {
+    color: var(--soft-white);
+  }
+  
+  .bg-bjork-black {
+    background-color: var(--bjork-black);
+  }
+  
+  .bg-bjork-beige {
+    background-color: var(--bjork-beige);
+  }
+  
+  .bg-bjork-blue {
+    background-color: var(--bjork-blue);
+  }
+  
+  .bg-soft-black {
+    background-color: var(--soft-black);
+  }
+  
+  .bg-soft-white {
+    background-color: var(--soft-white);
+  }
+  
+  .border-bjork-black {
+    border-color: var(--bjork-black);
+  }
+  
+  .border-bjork-beige {
+    border-color: var(--bjork-beige);
+  }
+  
+  .border-bjork-blue {
+    border-color: var(--bjork-blue);
+  }
+
+  .hover\:bg-bjork-black:hover {
+    background-color: var(--bjork-black);
+  }
+  
+  .hover\:bg-bjork-beige:hover {
+    background-color: var(--bjork-beige);
+  }
+  
+  .hover\:bg-bjork-blue:hover {
+    background-color: var(--bjork-blue);
+  }
+  
+  .hover\:text-bjork-black:hover {
+    color: var(--bjork-black);
+  }
+  
+  .hover\:text-bjork-beige:hover {
+    color: var(--bjork-beige);
+  }
+  
+  .hover\:text-bjork-blue:hover {
+    color: var(--bjork-blue);
+  }
+
+  .focus\:ring-bjork-black:focus {
+    --tw-ring-color: var(--bjork-black);
+  }
+  
+  .focus\:ring-bjork-beige:focus {
+    --tw-ring-color: var(--bjork-beige);
+  }
+  
+  .focus\:ring-bjork-blue:focus {
+    --tw-ring-color: var(--bjork-blue);
+  }
+}
+
+/* Custom animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Video background styles */
+.video-overlay {
+  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4));
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--muted);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bjork-beige);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--bjork-blue);
+}
+
+/* Property card hover effects */
+.property-card {
+  transition: all 0.3s ease;
+}
+
+.property-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+/* Button styles for brand consistency */
+.btn-primary {
+  background-color: var(--bjork-black);
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--bjork-blue);
+}
+
+.btn-secondary {
+  background-color: var(--bjork-beige);
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background-color: var(--bjork-blue);
+}
+
+/* Mobile responsiveness improvements */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
+    line-height: 1.2;
+  }
+  
+  .property-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Loading animations */
+.loading-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
