@@ -5,6 +5,8 @@ import { Link } from "wouter";
 import { Phone, Mail, MapPin, Award, Users, TrendingUp, Heart } from "lucide-react";
 import { CONTACT_INFO } from "@/lib/constants";
 
+import White_background from "@assets/White background.jpg";
+
 export default function About() {
   const achievements = [
     { icon: TrendingUp, label: "Total Sales Volume", value: "$200M+" },
@@ -88,7 +90,7 @@ export default function About() {
             </div>
             <div>
               <img 
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80"
+                src={White_background}
                 alt="Michael Bjork, Principal Broker"
                 className="w-full h-96 object-contain rounded-lg shadow-lg bg-white"
               />
@@ -96,7 +98,6 @@ export default function About() {
           </div>
         </div>
       </section>
-
       {/* Achievements Section */}
       <section className="py-20 bg-bjork-black text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -121,7 +122,6 @@ export default function About() {
           </div>
         </div>
       </section>
-
       {/* Meet Michael Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -188,7 +188,6 @@ export default function About() {
           </div>
         </div>
       </section>
-
       {/* Services Section */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -219,7 +218,6 @@ export default function About() {
           </div>
         </div>
       </section>
-
       {/* Testimonials Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -255,7 +253,6 @@ export default function About() {
           </div>
         </div>
       </section>
-
       {/* Call to Action */}
       <section className="py-20 bg-bjork-blue text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
