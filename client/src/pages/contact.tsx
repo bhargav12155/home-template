@@ -85,8 +85,8 @@ export default function Contact() {
     {
       icon: Clock,
       title: "Hours",
-      details: "Monday - Friday: 8AM - 7PM",
-      subtext: "Saturday: 9AM - 5PM, Sunday: By Appointment",
+      details: "Open 24 hours 7 days a week",
+      subtext: "Available whenever you need us",
       action: null
     }
   ];
