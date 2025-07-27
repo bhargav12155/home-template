@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, X } from "lucide-react";
 import { NAVIGATION_ITEMS } from "@/lib/constants";
+import logoImage from "@assets/2408BjorkGroupFinalLogo1_Bjork Group Black_1753648529804.png";
 
 export default function Header() {
   const [location] = useLocation();
@@ -14,9 +15,11 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <Link href="/" className="flex items-center">
-            <div className="text-2xl font-display font-bold text-bjork-black">
-              BJORK GROUP
-            </div>
+            <img 
+              src={logoImage} 
+              alt="Bjork Group" 
+              className="h-12 w-auto"
+            />
           </Link>
           
           {/* Desktop Navigation */}
@@ -48,8 +51,12 @@ export default function Header() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
               <div className="flex flex-col space-y-6 mt-8">
-                <div className="text-xl font-display font-bold text-bjork-black">
-                  BJORK GROUP
+                <div className="flex items-center">
+                  <img 
+                    src={logoImage} 
+                    alt="Bjork Group" 
+                    className="h-10 w-auto"
+                  />
                 </div>
                 {NAVIGATION_ITEMS.map((item) => (
                   <Link

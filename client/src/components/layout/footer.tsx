@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { CONTACT_INFO, SOCIAL_LINKS } from "@/lib/constants";
 import { Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
+import logoImage from "@assets/2408BjorkGroupFinalLogo1_Bjork Group Black_1753648529804.png";
 
 export default function Footer() {
   return (
@@ -9,8 +10,12 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
-            <div className="text-2xl font-display font-bold text-bjork-black mb-4">
-              BJORK GROUP
+            <div className="mb-4">
+              <img 
+                src={logoImage} 
+                alt="Bjork Group" 
+                className="h-12 w-auto"
+              />
             </div>
             <p className="text-gray-600 mb-6 max-w-md">
               Nebraska's premier luxury real estate team, delivering exceptional service and unparalleled results in Omaha, Lincoln, and surrounding communities.
