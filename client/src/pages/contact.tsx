@@ -71,9 +71,9 @@ export default function Contact() {
     {
       icon: Mail,
       title: "Email", 
-      details: "info@bjorkhomes.com",
+      details: "mike.bjork@bhhsamb.com",
       subtext: "We'll respond within 24 hours",
-      action: "mailto:info@bjorkhomes.com"
+      action: "mailto:mike.bjork@bhhsamb.com"
     },
     {
       icon: MapPin,
@@ -191,7 +191,7 @@ export default function Contact() {
                   </Button>
                   <Button 
                     className="w-full justify-start bg-transparent border border-bjork-beige text-bjork-black hover:bg-bjork-beige hover:text-white transition-colors duration-300"
-                    onClick={() => window.open('mailto:info@bjorkhomes.com', '_self')}
+                    onClick={() => window.open('mailto:mike.bjork@bhhsamb.com', '_self')}
                   >
                     <Mail className="w-4 h-4 mr-2" />
                     Send Email
