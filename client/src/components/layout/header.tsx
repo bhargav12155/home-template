@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, X } from "lucide-react";
 import { NAVIGATION_ITEMS } from "@/lib/constants";
-import logoImage from "@assets/2408BjorkGroupFinalLogo1_Bjork Group Black_1753648529804.png";
+import logoImage from "@assets/2408BjorkGroupFinalLogo1_Bjork Group Black Square BHHS_1753648666870.png";
 
 export default function Header() {
   const [location] = useLocation();

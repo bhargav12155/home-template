@@ -2,7 +2,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { CONTACT_INFO, SOCIAL_LINKS } from "@/lib/constants";
 import { Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
-import logoImage from "@assets/2408BjorkGroupFinalLogo1_Bjork Group Black_1753648529804.png";
+import logoImage from "@assets/2408BjorkGroupFinalLogo1_Bjork Group Black Square BHHS_1753648666870.png";
 
 export default function Footer() {
   return (
