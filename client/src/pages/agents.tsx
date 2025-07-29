@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Phone, Mail, Star, Award, Home, Users } from "lucide-react";
 import mikeBjorkPhoto from "@assets/White background_1753818665671.jpg";
+import mandyVistyPhoto from "@assets/Mandy Visty headshot (1)_1753818758165.jpg";
 
 export default function Agents() {
   const agents = [
@@ -26,12 +27,12 @@ export default function Agents() {
     },
     {
       id: 2,
-      name: "Sarah Johnson",
+      name: "Mandy Visty",
       title: "Senior Real Estate Advisor",
-      email: "sarah.johnson@bhhsamb.com",
+      email: "mandy.visty@bhhsamb.com",
       phone: "(402) 555-0123",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      bio: "Sarah brings a fresh perspective to real estate with her background in marketing and design. She excels at helping first-time buyers navigate the market and find their perfect home.",
+      image: mandyVistyPhoto,
+      bio: "Mandy brings a fresh perspective to real estate with her background in marketing and design. She excels at helping first-time buyers navigate the market and find their perfect home.",
       specialties: ["First-Time Buyers", "Condos & Townhomes", "Marketing", "Staging"],
       stats: {
         yearsSelling: 8,
