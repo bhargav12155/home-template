@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { analyzePropertyStyle, batchAnalyzeStyles, getStyleKeywords, SUPPORTED_STYLES } from "./ai-style-analyzer";
 import { 
   insertPropertySchema, 
   insertCommunitySchema, 
@@ -61,6 +62,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(property);
     } catch (error) {
       res.status(400).json({ message: "Invalid property data", error });
+    }
+  });
+
+  // AI Style Analysis endpoints
+  app.post("/api/properties/:id/analyze-style", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const property = await storage.getProperty(id);
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+      
+      if (!property.images || property.images.length === 0) {
+        return res.status(400).json({ message: "Property has no images to analyze" });
+      }
+
+      const primaryImage = property.images[0];
+      const styleAnalysis = await analyzePropertyStyle(primaryImage);
+      
+      // Update property with style data
+      await storage.updatePropertyStyle(id, {
+        architecturalStyle: styleAnalysis.primary,
+        secondaryStyle: styleAnalysis.secondary,
+        styleConfidence: styleAnalysis.confidence,
+        styleFeatures: styleAnalysis.features,
+        styleAnalyzed: true
+      });
+
+      res.json(styleAnalysis);
+    } catch (error) {
+      res.status(500).json({ message: "Style analysis failed", error });
+    }
+  });
+
+  app.get("/api/architectural-styles", async (req, res) => {
+    try {
+      res.json({ 
+        styles: SUPPORTED_STYLES,
+        keywords: SUPPORTED_STYLES.reduce((acc, style) => {
+          acc[style] = getStyleKeywords(style);
+          return acc;
+        }, {} as Record<string, string[]>)
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch styles", error });
+    }
+  });
+
+  app.post("/api/properties/batch-analyze-styles", async (req, res) => {
+    try {
+      const properties = await storage.getProperties({});
+      const imagesToAnalyze = properties
+        .filter(p => !p.styleAnalyzed && p.images && p.images.length > 0)
+        .map(p => ({ id: p.id.toString(), imageUrl: p.images![0] }));
+
+      if (imagesToAnalyze.length === 0) {
+        return res.json({ message: "No properties need style analysis", analyzed: 0 });
+      }
+
+      const styleResults = await batchAnalyzeStyles(imagesToAnalyze);
+      
+      let updated = 0;
+      for (const [propertyId, style] of Array.from(styleResults.entries())) {
+        await storage.updatePropertyStyle(parseInt(propertyId), {
+          architecturalStyle: style.primary,
+          secondaryStyle: style.secondary,
+          styleConfidence: style.confidence,
+          styleFeatures: style.features,
+          styleAnalyzed: true
+        });
+        updated++;
+      }
+
+      res.json({ message: `Analyzed ${updated} properties`, analyzed: updated });
+    } catch (error) {
+      res.status(500).json({ message: "Batch analysis failed", error });
     }
   });
 

@@ -30,6 +30,11 @@ export const properties = pgTable("properties", {
   neighborhood: text("neighborhood"),
   coordinates: jsonb("coordinates"), // {lat: number, lng: number}
   features: text("features").array(),
+  architecturalStyle: text("architectural_style"), // Primary style (Modern, Farmhouse, etc.)
+  secondaryStyle: text("secondary_style"), // Secondary style if mixed
+  styleConfidence: decimal("style_confidence", { precision: 3, scale: 2 }), // AI confidence score
+  styleFeatures: text("style_features").array(), // Style-specific features
+  styleAnalyzed: boolean("style_analyzed").default(false), // Whether AI analysis completed
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -150,6 +155,7 @@ export const propertySearchSchema = z.object({
   city: z.string().optional(),
   luxury: z.boolean().optional(),
   featured: z.boolean().optional(),
+  architecturalStyle: z.string().optional(),
 });
 
 // Types

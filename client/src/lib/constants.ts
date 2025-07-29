@@ -72,6 +72,29 @@ export const PRICE_RANGES = [
   { label: '$2M+', min: 2000000, max: null }
 ] as const;
 
+export const ARCHITECTURAL_STYLES = [
+  'Modern',
+  'Contemporary', 
+  'Farmhouse',
+  'Colonial',
+  'Victorian',
+  'Craftsman',
+  'Ranch',
+  'Tudor',
+  'Mediterranean',
+  'Mid-Century Modern',
+  'Traditional',
+  'Transitional',
+  'Industrial',
+  'Cape Cod',
+  'Georgian',
+  'Prairie',
+  'Neoclassical',
+  'Art Deco',
+  'Minimalist',
+  'Luxury Custom'
+] as const;
+
 export const NAVIGATION_ITEMS = [
   { name: 'Search Homes', href: '/search' },
   { name: 'Communities', href: '/communities' },

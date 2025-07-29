@@ -35,6 +35,13 @@ export interface IStorage {
   getPropertyByMLS(mlsId: string): Promise<Property | undefined>;
   createProperty(property: InsertProperty): Promise<Property>;
   updateProperty(id: number, property: Partial<InsertProperty>): Promise<Property | undefined>;
+  updatePropertyStyle(id: number, styleData: {
+    architecturalStyle?: string;
+    secondaryStyle?: string;
+    styleConfidence?: number;
+    styleFeatures?: string[];
+    styleAnalyzed?: boolean;
+  }): Promise<Property | undefined>;
   getFeaturedProperties(): Promise<Property[]>;
   getLuxuryProperties(): Promise<Property[]>;
 
@@ -104,6 +111,11 @@ export class MemStorage implements IStorage {
         status: "active",
         featured: true,
         luxury: true,
+        architecturalStyle: "Modern",
+        secondaryStyle: "Contemporary",
+        styleConfidence: "0.89",
+        styleFeatures: ["Clean lines", "Large windows", "Open concept", "Minimalist design"],
+        styleAnalyzed: true,
         images: [
           "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2053&q=80",
           "https://images.unsplash.com/photo-1613490493576-7fde63acd811?ixlib=rb-4.0.3&auto=format&fit=crop&w=2071&q=80"
@@ -129,6 +141,11 @@ export class MemStorage implements IStorage {
         status: "active",
         featured: true,
         luxury: true,
+        architecturalStyle: "Contemporary",
+        secondaryStyle: "Transitional",
+        styleConfidence: "0.85",
+        styleFeatures: ["Smart home integration", "Energy-efficient design", "Open layouts", "Contemporary finishes"],
+        styleAnalyzed: true,
         images: [
           "https://images.unsplash.com/photo-1613490493576-7fde63acd811?ixlib=rb-4.0.3&auto=format&fit=crop&w=2071&q=80"
         ],
@@ -153,6 +170,11 @@ export class MemStorage implements IStorage {
         status: "active",
         featured: true,
         luxury: true,
+        architecturalStyle: "Traditional",
+        secondaryStyle: "Colonial",
+        styleConfidence: "0.91",
+        styleFeatures: ["Symmetrical facade", "Classical proportions", "Premium finishes", "Formal layouts"],
+        styleAnalyzed: true,
         images: [
           "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
         ],
@@ -312,6 +334,12 @@ export class MemStorage implements IStorage {
       if (search.featured) {
         properties = properties.filter(p => p.featured === search.featured);
       }
+      if (search.architecturalStyle) {
+        properties = properties.filter(p => 
+          p.architecturalStyle === search.architecturalStyle ||
+          p.secondaryStyle === search.architecturalStyle
+        );
+      }
     }
 
     return properties.sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
@@ -344,6 +372,29 @@ export class MemStorage implements IStorage {
     const updated: Property = { 
       ...existing, 
       ...property, 
+      updatedAt: new Date() 
+    };
+    this.properties.set(id, updated);
+    return updated;
+  }
+
+  async updatePropertyStyle(id: number, styleData: {
+    architecturalStyle?: string;
+    secondaryStyle?: string;
+    styleConfidence?: number;
+    styleFeatures?: string[];
+    styleAnalyzed?: boolean;
+  }): Promise<Property | undefined> {
+    const existing = this.properties.get(id);
+    if (!existing) return undefined;
+
+    const updated: Property = { 
+      ...existing, 
+      architecturalStyle: styleData.architecturalStyle || existing.architecturalStyle,
+      secondaryStyle: styleData.secondaryStyle || existing.secondaryStyle,
+      styleConfidence: styleData.styleConfidence?.toString() || existing.styleConfidence,
+      styleFeatures: styleData.styleFeatures || existing.styleFeatures,
+      styleAnalyzed: styleData.styleAnalyzed ?? existing.styleAnalyzed,
       updatedAt: new Date() 
     };
     this.properties.set(id, updated);

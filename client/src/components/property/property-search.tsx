@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Search, Filter, SlidersHorizontal } from "lucide-react";
-import { PRICE_RANGES, PROPERTY_TYPES, COMMUNITIES } from "@/lib/constants";
+import { PRICE_RANGES, PROPERTY_TYPES, COMMUNITIES, ARCHITECTURAL_STYLES } from "@/lib/constants";
 import type { PropertySearch } from "@shared/schema";
 
 interface PropertySearchProps {
@@ -106,54 +106,79 @@ export default function PropertySearchComponent({ onSearch, initialParams }: Pro
 
           {/* Advanced Filters */}
           {showAdvanced && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
-              <Select value={searchParams.beds?.toString() || "any"} onValueChange={(value) => updateParam("beds", value === "any" ? null : parseInt(value))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Bedrooms" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="any">Any Beds</SelectItem>
-                  {[1, 2, 3, 4, 5, 6].map(num => (
-                    <SelectItem key={num} value={num.toString()}>{num}+ Beds</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="space-y-4 pt-4 border-t border-gray-200">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Select value={searchParams.beds?.toString() || "any"} onValueChange={(value) => updateParam("beds", value === "any" ? null : parseInt(value))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Bedrooms" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any Beds</SelectItem>
+                    {[1, 2, 3, 4, 5, 6].map(num => (
+                      <SelectItem key={num} value={num.toString()}>{num}+ Beds</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-              <Select value={searchParams.baths?.toString() || "any"} onValueChange={(value) => updateParam("baths", value === "any" ? null : parseFloat(value))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Bathrooms" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="any">Any Baths</SelectItem>
-                  {[1, 1.5, 2, 2.5, 3, 3.5, 4, 5].map(num => (
-                    <SelectItem key={num} value={num.toString()}>{num}+ Baths</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <Select value={searchParams.baths?.toString() || "any"} onValueChange={(value) => updateParam("baths", value === "any" ? null : parseFloat(value))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Bathrooms" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any Baths</SelectItem>
+                    {[1, 1.5, 2, 2.5, 3, 3.5, 4, 5].map(num => (
+                      <SelectItem key={num} value={num.toString()}>{num}+ Baths</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-              <Select value={searchParams.propertyType || "any"} onValueChange={(value) => updateParam("propertyType", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Property Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="any">Any Type</SelectItem>
-                  {PROPERTY_TYPES.map(type => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <Select value={searchParams.propertyType || "any"} onValueChange={(value) => updateParam("propertyType", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Property Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any Type</SelectItem>
+                    {PROPERTY_TYPES.map(type => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-              <Select value={searchParams.city || "any"} onValueChange={(value) => updateParam("city", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="City" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="any">Any City</SelectItem>
-                  {COMMUNITIES.map(community => (
-                    <SelectItem key={community.slug} value={community.name}>{community.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <Select value={searchParams.city || "any"} onValueChange={(value) => updateParam("city", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="City" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any City</SelectItem>
+                    {COMMUNITIES.map(community => (
+                      <SelectItem key={community.slug} value={community.name}>{community.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* AI-Powered Architectural Style Filter */}
+              <div className="bg-gradient-to-r from-bjork-beige/10 to-bjork-blue/10 p-4 rounded-lg border border-bjork-beige/20">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-2 h-2 bg-bjork-beige rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-bjork-black">AI-Powered Style Search</span>
+                  <Badge variant="secondary" className="text-xs bg-bjork-blue/10 text-bjork-blue">NEW</Badge>
+                </div>
+                <Select value={searchParams.architecturalStyle || "any"} onValueChange={(value) => updateParam("architecturalStyle", value)}>
+                  <SelectTrigger className="bg-white/80 backdrop-blur-sm">
+                    <SelectValue placeholder="🏛️ Search by Architectural Style" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any Style</SelectItem>
+                    {ARCHITECTURAL_STYLES.map(style => (
+                      <SelectItem key={style} value={style}>{style}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-600 mt-2">
+                  Our AI analyzes property images to identify architectural styles like Modern, Farmhouse, Colonial, and more.
+                </p>
+              </div>
             </div>
           )}
 

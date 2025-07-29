@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heart, Bed, Bath, Square } from "lucide-react";
+import PropertyStyleBadge from "./property-style-badge";
 import type { Property } from "@shared/schema";
 
 interface PropertyCardProps {
@@ -67,6 +68,15 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             {property.neighborhood}
           </p>
         )}
+        
+        <div className="mb-4">
+          <PropertyStyleBadge 
+            architecturalStyle={property.architecturalStyle}
+            secondaryStyle={property.secondaryStyle}
+            styleConfidence={property.styleConfidence}
+            styleFeatures={property.styleFeatures}
+          />
+        </div>
         
         <div className="flex items-center space-x-6 text-sm text-gray-500 mb-4">
           <div className="flex items-center space-x-1">
