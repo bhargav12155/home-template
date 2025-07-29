@@ -122,6 +122,7 @@ export class MemStorage implements IStorage {
         ],
         neighborhood: "Cimarron Ridge",
         schoolDistrict: "Elkhorn Public Schools",
+        style: "2 Story",
         coordinates: { lat: 41.2871, lng: -96.2394 },
         features: ["Gourmet Kitchen", "Master Suite", "3-Car Garage", "Covered Patio"]
       },
@@ -152,6 +153,7 @@ export class MemStorage implements IStorage {
         ],
         neighborhood: "Georgian Heights",
         schoolDistrict: "Lincoln Public Schools",
+        style: "1.5 Story",
         coordinates: { lat: 40.8136, lng: -96.7025 },
         features: ["Smart Home Technology", "Open Floor Plan", "Luxury Finishes"]
       },
@@ -182,6 +184,7 @@ export class MemStorage implements IStorage {
         ],
         neighborhood: "Regency",
         schoolDistrict: "Millard Public Schools",
+        style: "Ranch",
         coordinates: { lat: 41.2565, lng: -96.1951 },
         features: ["Wine Cellar", "Home Theater", "Pool", "Guest Suite"]
       }
@@ -348,6 +351,9 @@ export class MemStorage implements IStorage {
       }
       if (search.schoolDistrict) {
         properties = properties.filter(p => p.schoolDistrict?.toLowerCase() === search.schoolDistrict!.toLowerCase());
+      }
+      if (search.style) {
+        properties = properties.filter(p => p.style?.toLowerCase() === search.style!.toLowerCase());
       }
     }
 

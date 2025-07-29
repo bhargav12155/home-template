@@ -193,6 +193,20 @@ export default function PropertySearchComponent({ onSearch, initialParams }: Pro
                     <SelectItem value="Papillion-La Vista Schools">Papillion-La Vista Schools</SelectItem>
                   </SelectContent>
                 </Select>
+
+                <Select value={searchParams.style || "any"} onValueChange={(value) => updateParam("style", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Home Style" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any Style</SelectItem>
+                    <SelectItem value="Ranch">Ranch</SelectItem>
+                    <SelectItem value="1.5 Story">1.5 Story</SelectItem>
+                    <SelectItem value="2 Story">2 Story</SelectItem>
+                    <SelectItem value="Multi-level">Multi-level</SelectItem>
+                    <SelectItem value="Split Entry">Split Entry</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* AI-Powered Architectural Style Filter */}
