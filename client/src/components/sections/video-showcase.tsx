@@ -39,7 +39,7 @@ export default function VideoShowcase() {
               </>
             ) : (
               <VideoPlayer 
-                videoId="dQw4w9WgXcQ" // Replace with actual YouTube video ID
+                videoId="y0G0GOZfy9Y"
                 onClose={() => setIsPlaying(false)}
               />
             )}
