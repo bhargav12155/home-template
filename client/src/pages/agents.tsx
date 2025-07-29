@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Phone, Mail, Star, Award, Home, Users } from "lucide-react";
+import mikeBjorkPhoto from "@assets/White background_1753818665671.jpg";
 
 export default function Agents() {
   const agents = [
@@ -11,7 +12,7 @@ export default function Agents() {
       title: "Principal Broker & Team Leader",
       email: "mike.bjork@bhhsamb.com",
       phone: "(402) 522-6131",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+      image: mikeBjorkPhoto,
       bio: "With over 15 years of experience in luxury real estate, Michael leads the Bjork Group with unmatched expertise in the Omaha and Lincoln markets. Specializing in high-end properties and exceptional client service.",
       specialties: ["Luxury Homes", "Investment Properties", "New Construction", "Relocation"],
       stats: {
