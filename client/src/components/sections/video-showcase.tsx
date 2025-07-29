@@ -39,7 +39,7 @@ export default function VideoShowcase() {
               </>
             ) : (
               <VideoPlayer 
-                videoId="y0G0GOZfy9Y"
+                videoId="9GhY_DUBEGY"
                 onClose={() => setIsPlaying(false)}
               />
             )}
