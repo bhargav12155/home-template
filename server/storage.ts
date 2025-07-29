@@ -6,6 +6,9 @@ import {
   leads, 
   trackingCodes, 
   marketStats,
+  idxAgents,
+  idxMedia,
+  idxSyncLog,
   type User, 
   type InsertUser, 
   type Property, 
@@ -20,6 +23,12 @@ import {
   type InsertTrackingCode,
   type MarketStats,
   type InsertMarketStats,
+  type IdxAgent,
+  type InsertIdxAgent,
+  type IdxMedia,
+  type InsertIdxMedia,
+  type IdxSyncLog,
+  type InsertIdxSyncLog,
   type PropertySearch
 } from "@shared/schema";
 
@@ -67,6 +76,26 @@ export interface IStorage {
   // Market stats
   getMarketStats(area?: string): Promise<MarketStats[]>;
   createMarketStats(stats: InsertMarketStats): Promise<MarketStats>;
+
+  // IDX Agent methods
+  getIdxAgents(): Promise<IdxAgent[]>;
+  getIdxAgent(id: number): Promise<IdxAgent | undefined>;
+  getIdxAgentByMemberKey(memberKey: string): Promise<IdxAgent | undefined>;
+  createIdxAgent(agent: InsertIdxAgent): Promise<IdxAgent>;
+  updateIdxAgent(id: number, agent: Partial<InsertIdxAgent>): Promise<IdxAgent | undefined>;
+
+  // IDX Media methods
+  getIdxMediaForProperty(listingKey: string): Promise<IdxMedia[]>;
+  getIdxMedia(id: number): Promise<IdxMedia | undefined>;
+  getIdxMediaByKey(mediaKey: string): Promise<IdxMedia | undefined>;
+  createIdxMedia(media: InsertIdxMedia): Promise<IdxMedia>;
+  updateIdxMedia(id: number, media: Partial<InsertIdxMedia>): Promise<IdxMedia | undefined>;
+
+  // IDX Sync Log methods
+  getIdxSyncLogs(limit?: number): Promise<IdxSyncLog[]>;
+  getIdxSyncLog(id: number): Promise<IdxSyncLog | undefined>;
+  createIdxSyncLog(log: InsertIdxSyncLog): Promise<IdxSyncLog>;
+  updateIdxSyncLog(id: number, log: Partial<InsertIdxSyncLog>): Promise<IdxSyncLog | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -77,6 +106,9 @@ export class MemStorage implements IStorage {
   private leads: Map<number, Lead>;
   private trackingCodes: Map<number, TrackingCode>;
   private marketStats: Map<number, MarketStats>;
+  private idxAgents: Map<number, IdxAgent>;
+  private idxMedia: Map<number, IdxMedia>;
+  private idxSyncLogs: Map<number, IdxSyncLog>;
   private currentId: number;
 
   constructor() {
@@ -87,6 +119,9 @@ export class MemStorage implements IStorage {
     this.leads = new Map();
     this.trackingCodes = new Map();
     this.marketStats = new Map();
+    this.idxAgents = new Map();
+    this.idxMedia = new Map();
+    this.idxSyncLogs = new Map();
     this.currentId = 1;
     this.seedData();
   }
@@ -526,6 +561,114 @@ export class MemStorage implements IStorage {
     const newStats: MarketStats = { ...stats, id };
     this.marketStats.set(id, newStats);
     return newStats;
+  }
+
+  // IDX Agent methods
+  async getIdxAgents(): Promise<IdxAgent[]> {
+    return Array.from(this.idxAgents.values());
+  }
+
+  async getIdxAgent(id: number): Promise<IdxAgent | undefined> {
+    return this.idxAgents.get(id);
+  }
+
+  async getIdxAgentByMemberKey(memberKey: string): Promise<IdxAgent | undefined> {
+    return Array.from(this.idxAgents.values()).find(a => a.memberKey === memberKey);
+  }
+
+  async createIdxAgent(agent: InsertIdxAgent): Promise<IdxAgent> {
+    const id = this.currentId++;
+    const newAgent: IdxAgent = { 
+      ...agent, 
+      id,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.idxAgents.set(id, newAgent);
+    return newAgent;
+  }
+
+  async updateIdxAgent(id: number, agent: Partial<InsertIdxAgent>): Promise<IdxAgent | undefined> {
+    const existing = this.idxAgents.get(id);
+    if (!existing) return undefined;
+
+    const updated: IdxAgent = { 
+      ...existing, 
+      ...agent, 
+      updatedAt: new Date() 
+    };
+    this.idxAgents.set(id, updated);
+    return updated;
+  }
+
+  // IDX Media methods
+  async getIdxMediaForProperty(listingKey: string): Promise<IdxMedia[]> {
+    return Array.from(this.idxMedia.values()).filter(m => m.listingKey === listingKey);
+  }
+
+  async getIdxMedia(id: number): Promise<IdxMedia | undefined> {
+    return this.idxMedia.get(id);
+  }
+
+  async getIdxMediaByKey(mediaKey: string): Promise<IdxMedia | undefined> {
+    return Array.from(this.idxMedia.values()).find(m => m.mediaKey === mediaKey);
+  }
+
+  async createIdxMedia(media: InsertIdxMedia): Promise<IdxMedia> {
+    const id = this.currentId++;
+    const newMedia: IdxMedia = { 
+      ...media, 
+      id,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.idxMedia.set(id, newMedia);
+    return newMedia;
+  }
+
+  async updateIdxMedia(id: number, media: Partial<InsertIdxMedia>): Promise<IdxMedia | undefined> {
+    const existing = this.idxMedia.get(id);
+    if (!existing) return undefined;
+
+    const updated: IdxMedia = { 
+      ...existing, 
+      ...media, 
+      updatedAt: new Date() 
+    };
+    this.idxMedia.set(id, updated);
+    return updated;
+  }
+
+  // IDX Sync Log methods
+  async getIdxSyncLogs(limit?: number): Promise<IdxSyncLog[]> {
+    let logs = Array.from(this.idxSyncLogs.values())
+      .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+    
+    if (limit) {
+      logs = logs.slice(0, limit);
+    }
+    
+    return logs;
+  }
+
+  async getIdxSyncLog(id: number): Promise<IdxSyncLog | undefined> {
+    return this.idxSyncLogs.get(id);
+  }
+
+  async createIdxSyncLog(log: InsertIdxSyncLog): Promise<IdxSyncLog> {
+    const id = this.currentId++;
+    const newLog: IdxSyncLog = { ...log, id };
+    this.idxSyncLogs.set(id, newLog);
+    return newLog;
+  }
+
+  async updateIdxSyncLog(id: number, log: Partial<InsertIdxSyncLog>): Promise<IdxSyncLog | undefined> {
+    const existing = this.idxSyncLogs.get(id);
+    if (!existing) return undefined;
+
+    const updated: IdxSyncLog = { ...existing, ...log };
+    this.idxSyncLogs.set(id, updated);
+    return updated;
   }
 }
 

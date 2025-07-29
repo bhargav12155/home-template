@@ -2,6 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { analyzePropertyStyle, batchAnalyzeStyles, getStyleKeywords, SUPPORTED_STYLES } from "./ai-style-analyzer";
+import IdxSyncService from "./idx-sync-service";
+import { emailService } from "./email-service";
 import { 
   insertPropertySchema, 
   insertCommunitySchema, 
@@ -13,6 +15,8 @@ import {
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize IDX sync service
+  const idxSyncService = new IdxSyncService(storage);
   // Properties endpoints
   app.get("/api/properties", async (req, res) => {
     try {
@@ -200,6 +204,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: contactData.message,
         source: "website"
       });
+
+      // Send email notifications
+      if (emailService.isConfigured()) {
+        try {
+          // Send notification to admin
+          await emailService.sendLeadNotification(lead);
+          
+          // Send confirmation to lead
+          await emailService.sendLeadConfirmation(lead);
+          
+          console.log(`Email notifications sent for lead ${lead.id}`);
+        } catch (emailError) {
+          console.error('Failed to send email notifications:', emailError);
+          // Don't fail the request if email fails
+        }
+      }
+
       res.status(201).json({ message: "Contact form submitted successfully", leadId: lead.id });
     } catch (error) {
       res.status(400).json({ message: "Invalid contact form data", error });
@@ -258,6 +279,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(stats);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch market stats", error });
+    }
+  });
+
+  // IDX Integration endpoints
+  app.get("/api/idx/status", async (req, res) => {
+    try {
+      const status = await idxSyncService.getLastSyncStatus();
+      res.json(status);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get IDX status", error });
+    }
+  });
+
+  app.post("/api/idx/sync", async (req, res) => {
+    try {
+      const { type } = req.body;
+      let result;
+
+      if (type === 'properties') {
+        result = await idxSyncService.syncProperties();
+      } else if (type === 'agents') {
+        result = await idxSyncService.syncAgents();
+      } else if (type === 'full') {
+        result = await idxSyncService.fullSync();
+      } else {
+        return res.status(400).json({ message: "Invalid sync type. Use 'properties', 'agents', or 'full'" });
+      }
+
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: "IDX sync failed", error });
+    }
+  });
+
+  app.get("/api/idx/agents", async (req, res) => {
+    try {
+      const agents = await storage.getIdxAgents();
+      res.json(agents);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch IDX agents", error });
+    }
+  });
+
+  app.get("/api/idx/sync-logs", async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+      const logs = await storage.getIdxSyncLogs(limit);
+      res.json(logs);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch sync logs", error });
     }
   });
 

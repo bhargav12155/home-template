@@ -26,11 +26,13 @@ import {
   Save,
   Trash2,
   Edit,
-  Shield
+  Shield,
+  Database
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { insertTrackingCodeSchema, type TrackingCode, type InsertTrackingCode, type Lead } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
+import IdxAdmin from "@/components/sections/idx-admin";
 
 export default function Admin() {
   const { toast } = useToast();
@@ -200,7 +202,7 @@ export default function Admin() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="tracking" className="flex items-center">
               <Code className="w-4 h-4 mr-2" />
               Tracking Codes
@@ -208,6 +210,10 @@ export default function Admin() {
             <TabsTrigger value="leads" className="flex items-center">
               <Users className="w-4 h-4 mr-2" />
               Leads
+            </TabsTrigger>
+            <TabsTrigger value="idx" className="flex items-center">
+              <Database className="w-4 h-4 mr-2" />
+              IDX Management
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center">
               <TrendingUp className="w-4 h-4 mr-2" />
@@ -299,7 +305,7 @@ export default function Admin() {
                               </div>
                               <FormControl>
                                 <Switch
-                                  checked={field.value}
+                                  checked={field.value || false}
                                   onCheckedChange={field.onChange}
                                 />
                               </FormControl>
@@ -482,6 +488,11 @@ export default function Admin() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* IDX Management Tab */}
+          <TabsContent value="idx">
+            <IdxAdmin />
           </TabsContent>
 
           {/* Analytics Tab */}

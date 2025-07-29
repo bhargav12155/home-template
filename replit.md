@@ -4,7 +4,7 @@
 
 This is a full-stack luxury real estate application built for BjorkHomes.com, serving the Omaha and Lincoln, Nebraska markets. The application features a modern frontend with property listings, community showcases, blog functionality, video backgrounds, YouTube marketing integration, and comprehensive admin capabilities with code injection and pixel tracking. It's built with React/TypeScript on the frontend, Express.js on the backend, and uses PostgreSQL with Drizzle ORM for data management.
 
-**Current Status:** Fully operational luxury real estate website with all core features implemented and tested. Deployment issue resolved with file structure fix (January 29, 2025)
+**Current Status:** Fully operational luxury real estate website with comprehensive IDX integration, email notifications, and complete MLS data synchronization. All core features implemented and tested. (January 29, 2025)
 
 ## User Preferences
 
@@ -39,14 +39,21 @@ Preferred communication style: Simple, everyday language.
 - **Users**: Admin user management
 - **Tracking Codes**: Marketing analytics and conversion tracking
 - **Market Stats**: Real estate market data and trends
+- **IDX Agents**: Real estate agents synchronized from MLS (Great Plains Regional MLS)
+- **IDX Media**: Property images and media files from MLS
+- **IDX Sync Logs**: Synchronization history and status tracking for MLS data updates
 
 #### API Endpoints
 - `/api/properties` - Property search, featured listings, luxury properties
 - `/api/communities` - Community information and statistics
 - `/api/blog` - Blog post management and display
-- `/api/contact` - Contact form submissions and lead generation
+- `/api/contact` - Contact form submissions and lead generation (with email notifications)
 - `/api/leads` - Lead management and tracking
 - `/api/tracking` - Marketing tracking code management
+- `/api/idx/status` - IDX connection and synchronization status
+- `/api/idx/sync` - Trigger MLS data synchronization (properties, agents, or full)
+- `/api/idx/agents` - IDX agent data from MLS
+- `/api/idx/sync-logs` - Synchronization history and logs
 
 #### Frontend Pages
 - **Home**: Hero section, featured listings, communities grid, about section
@@ -64,6 +71,28 @@ Preferred communication style: Simple, everyday language.
 3. **Lead Generation**: Contact forms and property inquiries are captured as leads and stored for follow-up
 4. **Content Management**: Blog posts and community information are managed through the admin interface
 5. **Analytics**: Tracking codes can be dynamically injected for marketing analytics
+6. **IDX Synchronization**: Real-time MLS data synchronization using RESO Web API standards with Great Plains Regional MLS
+7. **Email Notifications**: Automated email confirmations to leads and notifications to agents using Nodemailer
+
+## Advanced Features
+
+### IDX Integration (Internet Data Exchange)
+- **MLS Provider**: Great Plains Regional MLS (Nebraska's primary MLS)
+- **API Standard**: RESO Web API 2.0 (modern replacement for legacy RETS)
+- **Authentication**: OAuth 2.0 with client credentials flow
+- **Real-time Sync**: Automated property, agent, and media synchronization
+- **Fallback System**: Mock data for development/testing without MLS credentials
+- **Admin Interface**: Comprehensive IDX management dashboard with sync controls and status monitoring
+- **Sync Types**: Properties, agents, media, and full synchronization options
+- **Error Handling**: Detailed logging and error recovery for robust data integrity
+
+### Email Service Integration
+- **Service**: Nodemailer with SMTP configuration support
+- **Development Mode**: Ethereal Email test accounts for development
+- **Lead Notifications**: Automated email notifications to agents when new leads are received
+- **Lead Confirmations**: Professional thank-you emails sent to prospects
+- **Templates**: HTML and text email templates with BjorkHomes branding
+- **Configuration**: Environment-based email settings (HOST, PORT, USER, PASS)
 
 ## External Dependencies
 

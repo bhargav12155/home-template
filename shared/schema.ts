@@ -11,6 +11,7 @@ export const users = pgTable("users", {
 export const properties = pgTable("properties", {
   id: serial("id").primaryKey(),
   mlsId: text("mls_id").notNull().unique(),
+  listingKey: text("listing_key"), // RESO Web API ListingKey
   title: text("title").notNull(),
   description: text("description"),
   price: decimal("price", { precision: 12, scale: 2 }).notNull(),
@@ -24,6 +25,7 @@ export const properties = pgTable("properties", {
   yearBuilt: integer("year_built"),
   propertyType: text("property_type").notNull(),
   status: text("status").notNull().default("active"),
+  standardStatus: text("standard_status"), // RESO StandardStatus
   featured: boolean("featured").default(false),
   luxury: boolean("luxury").default(false),
   images: text("images").array(),
@@ -37,6 +39,18 @@ export const properties = pgTable("properties", {
   styleConfidence: decimal("style_confidence", { precision: 3, scale: 2 }), // AI confidence score
   styleFeatures: text("style_features").array(), // Style-specific features
   styleAnalyzed: boolean("style_analyzed").default(false), // Whether AI analysis completed
+  // IDX/RESO specific fields
+  listingAgentKey: text("listing_agent_key"),
+  listingOfficeName: text("listing_office_name"),
+  listingContractDate: timestamp("listing_contract_date"),
+  daysOnMarket: integer("days_on_market"),
+  originalListPrice: decimal("original_list_price", { precision: 12, scale: 2 }),
+  mlsStatus: text("mls_status"), // MLS-specific status
+  modificationTimestamp: timestamp("modification_timestamp"),
+  photoCount: integer("photo_count"),
+  virtualTourUrl: text("virtual_tour_url"),
+  isIdxListing: boolean("is_idx_listing").default(false), // Flag for IDX vs manual listings
+  idxSyncedAt: timestamp("idx_synced_at"), // Last sync timestamp
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -99,6 +113,53 @@ export const marketStats = pgTable("market_stats", {
   area: text("area").notNull().default("omaha"),
 });
 
+// IDX Agents table for MLS agent data
+export const idxAgents = pgTable("idx_agents", {
+  id: serial("id").primaryKey(),
+  memberKey: text("member_key").notNull().unique(), // RESO MemberKey
+  memberMlsId: text("member_mls_id").notNull().unique(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  email: text("email"),
+  phone: text("phone"),
+  officeName: text("office_name"),
+  officeKey: text("office_key"),
+  stateLicense: text("state_license"),
+  isActive: boolean("is_active").default(true),
+  modificationTimestamp: timestamp("modification_timestamp"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// IDX Media table for property photos and media
+export const idxMedia = pgTable("idx_media", {
+  id: serial("id").primaryKey(),
+  mediaKey: text("media_key").notNull().unique(), // RESO MediaKey
+  listingKey: text("listing_key").notNull(), // Foreign key to property
+  mlsId: text("mls_id").notNull(),
+  mediaUrl: text("media_url").notNull(),
+  mediaType: text("media_type").notNull(), // Photo, VirtualTour, Video, etc.
+  mediaObjectId: text("media_object_id"),
+  shortDescription: text("short_description"),
+  longDescription: text("long_description"),
+  sequence: integer("sequence").default(0), // Order of media
+  modificationTimestamp: timestamp("modification_timestamp"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// IDX Sync Log table to track synchronization
+export const idxSyncLog = pgTable("idx_sync_log", {
+  id: serial("id").primaryKey(),
+  syncType: text("sync_type").notNull(), // properties, agents, media
+  status: text("status").notNull(), // success, error, in_progress
+  recordsProcessed: integer("records_processed").default(0),
+  recordsUpdated: integer("records_updated").default(0),
+  recordsCreated: integer("records_created").default(0),
+  errorMessage: text("error_message"),
+  startedAt: timestamp("started_at").notNull(),
+  completedAt: timestamp("completed_at"),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
@@ -132,6 +193,21 @@ export const insertTrackingCodeSchema = createInsertSchema(trackingCodes).omit({
 });
 
 export const insertMarketStatsSchema = createInsertSchema(marketStats).omit({
+  id: true,
+});
+
+export const insertIdxAgentSchema = createInsertSchema(idxAgents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertIdxMediaSchema = createInsertSchema(idxMedia).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertIdxSyncLogSchema = createInsertSchema(idxSyncLog).omit({
   id: true,
 });
 
@@ -185,5 +261,86 @@ export type TrackingCode = typeof trackingCodes.$inferSelect;
 export type InsertMarketStats = z.infer<typeof insertMarketStatsSchema>;
 export type MarketStats = typeof marketStats.$inferSelect;
 
+export type InsertIdxAgent = z.infer<typeof insertIdxAgentSchema>;
+export type IdxAgent = typeof idxAgents.$inferSelect;
+
+export type InsertIdxMedia = z.infer<typeof insertIdxMediaSchema>;
+export type IdxMedia = typeof idxMedia.$inferSelect;
+
+export type InsertIdxSyncLog = z.infer<typeof insertIdxSyncLogSchema>;
+export type IdxSyncLog = typeof idxSyncLog.$inferSelect;
+
 export type ContactForm = z.infer<typeof contactFormSchema>;
 export type PropertySearch = z.infer<typeof propertySearchSchema>;
+
+// RESO Web API specific types
+export interface ResoProperty {
+  ListingKey: string;
+  ListingId: string;
+  MlsStatus: string;
+  StandardStatus: string;
+  ListPrice: number;
+  OriginalListPrice?: number;
+  DaysOnMarket?: number;
+  ListingContractDate?: string;
+  ModificationTimestamp: string;
+  StreetNumber?: string;
+  StreetName?: string;
+  City?: string;
+  StateOrProvince?: string;
+  PostalCode?: string;
+  BedroomsTotal?: number;
+  BathroomsTotalInteger?: number;
+  LivingArea?: number;
+  YearBuilt?: number;
+  PropertyType?: string;
+  PropertySubType?: string;
+  ListAgentKey?: string;
+  ListOfficeName?: string;
+  PhotoCount?: number;
+  VirtualTourURLUnbranded?: string;
+  PublicRemarks?: string;
+  PrivateRemarks?: string;
+  Latitude?: number;
+  Longitude?: number;
+}
+
+export interface ResoAgent {
+  MemberKey: string;
+  MemberMlsId: string;
+  MemberFirstName: string;
+  MemberLastName: string;
+  MemberEmail?: string;
+  MemberPhoneNumber?: string;
+  MemberStateLicense?: string;
+  OfficeKey?: string;
+  OfficeName?: string;
+  MemberStatus?: string;
+  ModificationTimestamp: string;
+}
+
+export interface ResoMedia {
+  MediaKey: string;
+  MediaObjectID: string;
+  ResourceRecordKey: string; // ListingKey
+  MediaURL: string;
+  MediaType: string;
+  ShortDescription?: string;
+  LongDescription?: string;
+  Order?: number;
+  ModificationTimestamp: string;
+}
+
+export interface IdxSearchParams {
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  beds?: number;
+  baths?: number;
+  propertyType?: string;
+  status?: string[];
+  limit?: number;
+  offset?: number;
+}
