@@ -100,6 +100,7 @@ export const NAVIGATION_ITEMS = [
   { name: 'Communities', href: '/communities' },
   { name: 'Buyers', href: '/buyers' },
   { name: 'Sellers', href: '/sellers' },
+  { name: 'Agents', href: '/agents' },
   { name: 'About', href: '/about' },
   { name: 'Blog', href: '/blog' }
 ] as const;

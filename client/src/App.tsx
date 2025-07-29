@@ -11,6 +11,7 @@ import About from "@/pages/about";
 import Contact from "@/pages/contact";
 import Blog from "@/pages/blog";
 import Admin from "@/pages/admin";
+import Agents from "@/pages/agents";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 
@@ -24,6 +25,7 @@ function Router() {
           <Route path="/search" component={Search} />
           <Route path="/communities" component={Communities} />
           <Route path="/about" component={About} />
+          <Route path="/agents" component={Agents} />
           <Route path="/contact" component={Contact} />
           <Route path="/blog" component={Blog} />
           <Route path="/admin" component={Admin} />
