@@ -19,6 +19,12 @@ export default function VideoShowcase() {
       title: "Market Insights & Expertise", 
       description: "Discover our market knowledge and professional approach to real estate",
       thumbnail: "https://images.unsplash.com/photo-1560472355-536de3962603?ixlib=rb-4.0.3&auto=format&fit=crop&w=2126&q=80"
+    },
+    {
+      id: "fbcu6KBTXcI",
+      title: "Client Success Stories",
+      description: "Real testimonials and success stories from our satisfied clients",
+      thumbnail: "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
     }
   ];
 
