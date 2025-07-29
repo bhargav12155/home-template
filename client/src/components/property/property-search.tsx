@@ -107,7 +107,7 @@ export default function PropertySearchComponent({ onSearch, initialParams }: Pro
           {/* Advanced Filters */}
           {showAdvanced && (
             <div className="space-y-4 pt-4 border-t border-gray-200">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <Select value={searchParams.beds?.toString() || "any"} onValueChange={(value) => updateParam("beds", value === "any" ? null : parseInt(value))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Bedrooms" />
@@ -153,6 +153,44 @@ export default function PropertySearchComponent({ onSearch, initialParams }: Pro
                     {COMMUNITIES.map(community => (
                       <SelectItem key={community.slug} value={community.name}>{community.name}</SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={searchParams.neighborhood || "any"} onValueChange={(value) => updateParam("neighborhood", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Neighborhood" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any Neighborhood</SelectItem>
+                    <SelectItem value="Cimarron Ridge">Cimarron Ridge</SelectItem>
+                    <SelectItem value="Georgian Heights">Georgian Heights</SelectItem>
+                    <SelectItem value="Regency">Regency</SelectItem>
+                    <SelectItem value="Benson">Benson</SelectItem>
+                    <SelectItem value="Millard">Millard</SelectItem>
+                    <SelectItem value="Dundee">Dundee</SelectItem>
+                    <SelectItem value="Aksarben">Aksarben</SelectItem>
+                    <SelectItem value="West Omaha">West Omaha</SelectItem>
+                    <SelectItem value="Country Club">Country Club</SelectItem>
+                    <SelectItem value="Shadow Lake">Shadow Lake</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={searchParams.schoolDistrict || "any"} onValueChange={(value) => updateParam("schoolDistrict", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="School District" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any School District</SelectItem>
+                    <SelectItem value="Omaha Public Schools">Omaha Public Schools</SelectItem>
+                    <SelectItem value="Elkhorn Public Schools">Elkhorn Public Schools</SelectItem>
+                    <SelectItem value="Millard Public Schools">Millard Public Schools</SelectItem>
+                    <SelectItem value="Westside Community Schools">Westside Community Schools</SelectItem>
+                    <SelectItem value="Bennington Public Schools">Bennington Public Schools</SelectItem>
+                    <SelectItem value="Ralston Public Schools">Ralston Public Schools</SelectItem>
+                    <SelectItem value="Lincoln Public Schools">Lincoln Public Schools</SelectItem>
+                    <SelectItem value="Waverly School District">Waverly School District</SelectItem>
+                    <SelectItem value="Norris School District">Norris School District</SelectItem>
+                    <SelectItem value="Papillion-La Vista Schools">Papillion-La Vista Schools</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

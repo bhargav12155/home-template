@@ -28,6 +28,7 @@ export const properties = pgTable("properties", {
   luxury: boolean("luxury").default(false),
   images: text("images").array(),
   neighborhood: text("neighborhood"),
+  schoolDistrict: text("school_district"),
   coordinates: jsonb("coordinates"), // {lat: number, lng: number}
   features: text("features").array(),
   architecturalStyle: text("architectural_style"), // Primary style (Modern, Farmhouse, etc.)
@@ -153,6 +154,8 @@ export const propertySearchSchema = z.object({
   baths: z.number().optional(),
   propertyType: z.string().optional(),
   city: z.string().optional(),
+  neighborhood: z.string().optional(),
+  schoolDistrict: z.string().optional(),
   luxury: z.boolean().optional(),
   featured: z.boolean().optional(),
   architecturalStyle: z.string().optional(),

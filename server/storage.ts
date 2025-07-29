@@ -121,6 +121,7 @@ export class MemStorage implements IStorage {
           "https://images.unsplash.com/photo-1613490493576-7fde63acd811?ixlib=rb-4.0.3&auto=format&fit=crop&w=2071&q=80"
         ],
         neighborhood: "Cimarron Ridge",
+        schoolDistrict: "Elkhorn Public Schools",
         coordinates: { lat: 41.2871, lng: -96.2394 },
         features: ["Gourmet Kitchen", "Master Suite", "3-Car Garage", "Covered Patio"]
       },
@@ -150,6 +151,7 @@ export class MemStorage implements IStorage {
           "https://images.unsplash.com/photo-1613490493576-7fde63acd811?ixlib=rb-4.0.3&auto=format&fit=crop&w=2071&q=80"
         ],
         neighborhood: "Georgian Heights",
+        schoolDistrict: "Lincoln Public Schools",
         coordinates: { lat: 40.8136, lng: -96.7025 },
         features: ["Smart Home Technology", "Open Floor Plan", "Luxury Finishes"]
       },
@@ -179,6 +181,7 @@ export class MemStorage implements IStorage {
           "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
         ],
         neighborhood: "Regency",
+        schoolDistrict: "Millard Public Schools",
         coordinates: { lat: 41.2565, lng: -96.1951 },
         features: ["Wine Cellar", "Home Theater", "Pool", "Guest Suite"]
       }
@@ -339,6 +342,12 @@ export class MemStorage implements IStorage {
           p.architecturalStyle === search.architecturalStyle ||
           p.secondaryStyle === search.architecturalStyle
         );
+      }
+      if (search.neighborhood) {
+        properties = properties.filter(p => p.neighborhood?.toLowerCase() === search.neighborhood!.toLowerCase());
+      }
+      if (search.schoolDistrict) {
+        properties = properties.filter(p => p.schoolDistrict?.toLowerCase() === search.schoolDistrict!.toLowerCase());
       }
     }
 
