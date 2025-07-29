@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Play } from "lucide-react";
+import { Play, ChevronLeft, ChevronRight } from "lucide-react";
 import VideoPlayer from "@/components/ui/video-player";
 
 export default function VideoShowcase() {
-  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const videos = [
     {
@@ -21,6 +22,18 @@ export default function VideoShowcase() {
     }
   ];
 
+  const currentVideo = videos[currentVideoIndex];
+
+  const nextVideo = () => {
+    setCurrentVideoIndex((prev) => (prev + 1) % videos.length);
+    setIsPlaying(false);
+  };
+
+  const prevVideo = () => {
+    setCurrentVideoIndex((prev) => (prev - 1 + videos.length) % videos.length);
+    setIsPlaying(false);
+  };
+
   return (
     <section className="py-20 bg-bjork-blue">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -33,41 +46,77 @@ export default function VideoShowcase() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          {videos.map((video) => (
-            <div key={video.id} className="group">
-              <div className="relative aspect-video rounded-lg overflow-hidden shadow-2xl mb-4">
-                {playingVideo !== video.id ? (
-                  <>
-                    <img 
-                      src={video.thumbnail}
-                      alt={video.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-bjork-black/30 group-hover:bg-bjork-black/20 flex items-center justify-center transition-colors duration-300">
-                      <Button 
-                        onClick={() => setPlayingVideo(video.id)}
-                        className="bg-white/90 backdrop-blur-sm rounded-full p-4 hover:bg-white transition-colors duration-300 group/btn"
-                        size="lg"
-                      >
-                        <Play className="w-8 h-8 text-bjork-black group-hover/btn:scale-110 transition-transform duration-300" fill="currentColor" />
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <VideoPlayer 
-                    videoId={video.id}
-                    onClose={() => setPlayingVideo(null)}
-                  />
-                )}
-              </div>
+        <div className="max-w-4xl mx-auto relative">
+          <div className="relative aspect-video rounded-lg overflow-hidden shadow-2xl">
+            {!isPlaying ? (
+              <>
+                <img 
+                  src={currentVideo.thumbnail}
+                  alt={currentVideo.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-bjork-black/30 flex items-center justify-center">
+                  <Button 
+                    onClick={() => setIsPlaying(true)}
+                    className="bg-white/90 backdrop-blur-sm rounded-full p-6 hover:bg-white transition-colors duration-300 group"
+                    size="lg"
+                  >
+                    <Play className="w-12 h-12 text-bjork-black group-hover:scale-110 transition-transform duration-300" fill="currentColor" />
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <VideoPlayer 
+                videoId={currentVideo.id}
+                onClose={() => setIsPlaying(false)}
+              />
+            )}
+          </div>
+
+          {/* Navigation Arrows */}
+          {videos.length > 1 && (
+            <>
+              <Button
+                onClick={prevVideo}
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm rounded-full p-3 hover:bg-white transition-colors duration-300 shadow-lg"
+                size="sm"
+              >
+                <ChevronLeft className="w-6 h-6 text-bjork-black" />
+              </Button>
               
-              <div className="text-center">
-                <h3 className="text-xl font-medium text-white mb-2">{video.title}</h3>
-                <p className="text-white/80 text-sm">{video.description}</p>
+              <Button
+                onClick={nextVideo}
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm rounded-full p-3 hover:bg-white transition-colors duration-300 shadow-lg"
+                size="sm"
+              >
+                <ChevronRight className="w-6 h-6 text-bjork-black" />
+              </Button>
+            </>
+          )}
+
+          {/* Video Info */}
+          <div className="text-center mt-8">
+            <h3 className="text-2xl font-medium text-white mb-2">{currentVideo.title}</h3>
+            <p className="text-white/80 text-sm mb-4">{currentVideo.description}</p>
+            
+            {/* Video Indicators */}
+            {videos.length > 1 && (
+              <div className="flex justify-center space-x-2">
+                {videos.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setCurrentVideoIndex(index);
+                      setIsPlaying(false);
+                    }}
+                    className={`w-2 h-2 rounded-full transition-colors duration-300 ${
+                      index === currentVideoIndex ? 'bg-bjork-beige' : 'bg-white/40'
+                    }`}
+                  />
+                ))}
               </div>
-            </div>
-          ))}
+            )}
+          </div>
         </div>
       </div>
     </section>
