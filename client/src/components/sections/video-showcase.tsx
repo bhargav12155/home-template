@@ -16,7 +16,7 @@ export default function VideoShowcase() {
     },
     {
       id: "mPczwu1pnD8",
-      title: "Market Insights & Expertise", 
+      title: "Bjork Group", 
       description: "Discover our market knowledge and professional approach to real estate",
       thumbnail: "https://images.unsplash.com/photo-1560472355-536de3962603?ixlib=rb-4.0.3&auto=format&fit=crop&w=2126&q=80"
     },
