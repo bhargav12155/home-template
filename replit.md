@@ -4,7 +4,7 @@
 
 This is a full-stack luxury real estate application built for BjorkHomes.com, serving the Omaha and Lincoln, Nebraska markets. The application features a modern frontend with property listings, community showcases, blog functionality, video backgrounds, YouTube marketing integration, and comprehensive admin capabilities with code injection and pixel tracking. It's built with React/TypeScript on the frontend, Express.js on the backend, and uses PostgreSQL with Drizzle ORM for data management.
 
-**Current Status:** Fully operational luxury real estate website with all core features implemented and tested (January 27, 2025)
+**Current Status:** Fully operational luxury real estate website with all core features implemented and tested. Deployment issue resolved with file structure fix (January 29, 2025)
 
 ## User Preferences
 
@@ -99,6 +99,7 @@ Preferred communication style: Simple, everyday language.
 - Backend bundled with ESBuild for Node.js deployment
 - Database migrations managed through Drizzle Kit
 - Environment variables for database connection and configuration
+- **Deployment Fix**: Created `deploy-fix.sh` script to resolve file structure mismatch between Vite build output (`dist/public`) and deployment expectations (`dist`)
 
 ### Environment Configuration
 - `DATABASE_URL` required for PostgreSQL connection
