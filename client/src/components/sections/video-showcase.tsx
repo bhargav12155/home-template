@@ -4,7 +4,22 @@ import { Play } from "lucide-react";
 import VideoPlayer from "@/components/ui/video-player";
 
 export default function VideoShowcase() {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
+
+  const videos = [
+    {
+      id: "9GhY_DUBEGY",
+      title: "Luxury Real Estate Showcase",
+      description: "Experience our premium property presentations and client success stories",
+      thumbnail: "https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80"
+    },
+    {
+      id: "mPczwu1pnD8",
+      title: "Market Insights & Expertise", 
+      description: "Discover our market knowledge and professional approach to real estate",
+      thumbnail: "https://images.unsplash.com/photo-1560472355-536de3962603?ixlib=rb-4.0.3&auto=format&fit=crop&w=2126&q=80"
+    }
+  ];
 
   return (
     <section className="py-20 bg-bjork-blue">
@@ -18,38 +33,41 @@ export default function VideoShowcase() {
           </p>
         </div>
 
-        <div className="max-w-4xl mx-auto">
-          <div className="relative aspect-video rounded-lg overflow-hidden shadow-2xl">
-            {!isPlaying ? (
-              <>
-                <img 
-                  src="https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80"
-                  alt="Modern real estate office interior"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-bjork-black/30 flex items-center justify-center">
-                  <Button 
-                    onClick={() => setIsPlaying(true)}
-                    className="bg-white/90 backdrop-blur-sm rounded-full p-6 hover:bg-white transition-colors duration-300 group"
-                    size="lg"
-                  >
-                    <Play className="w-12 h-12 text-bjork-black group-hover:scale-110 transition-transform duration-300" fill="currentColor" />
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <VideoPlayer 
-                videoId="9GhY_DUBEGY"
-                onClose={() => setIsPlaying(false)}
-              />
-            )}
-          </div>
-          
-          <div className="text-center mt-8">
-            <p className="text-white/80 text-sm">
-              Discover our luxury real estate showcase and client success stories
-            </p>
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          {videos.map((video) => (
+            <div key={video.id} className="group">
+              <div className="relative aspect-video rounded-lg overflow-hidden shadow-2xl mb-4">
+                {playingVideo !== video.id ? (
+                  <>
+                    <img 
+                      src={video.thumbnail}
+                      alt={video.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-bjork-black/30 group-hover:bg-bjork-black/20 flex items-center justify-center transition-colors duration-300">
+                      <Button 
+                        onClick={() => setPlayingVideo(video.id)}
+                        className="bg-white/90 backdrop-blur-sm rounded-full p-4 hover:bg-white transition-colors duration-300 group/btn"
+                        size="lg"
+                      >
+                        <Play className="w-8 h-8 text-bjork-black group-hover/btn:scale-110 transition-transform duration-300" fill="currentColor" />
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <VideoPlayer 
+                    videoId={video.id}
+                    onClose={() => setPlayingVideo(null)}
+                  />
+                )}
+              </div>
+              
+              <div className="text-center">
+                <h3 className="text-xl font-medium text-white mb-2">{video.title}</h3>
+                <p className="text-white/80 text-sm">{video.description}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
