@@ -41,22 +41,11 @@ interface IdxStatus {
   };
 }
 
-interface IdxAgent {
-  id: number;
-  memberKey: string;
-  memberMlsId: string;
-  fullName: string;
-  email?: string;
-  phone?: string;
-  office?: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+// IdxAgent interface removed per user request - IDX will not pull agent information
 
 export default function IdxAdmin() {
   const queryClient = useQueryClient();
-  const [selectedSyncType, setSelectedSyncType] = useState<'properties' | 'agents' | 'full'>('properties');
+  const [selectedSyncType, setSelectedSyncType] = useState<'properties' | 'full'>('properties');
 
   // Fetch IDX status
   const { data: idxStatus, isLoading: statusLoading, refetch: refetchStatus } = useQuery<IdxStatus>({
@@ -64,14 +53,9 @@ export default function IdxAdmin() {
     refetchInterval: 10000, // Refresh every 10 seconds
   });
 
-  // Fetch IDX agents
-  const { data: idxAgents, isLoading: agentsLoading } = useQuery<IdxAgent[]>({
-    queryKey: ['/api/idx/agents'],
-  });
-
-  // Sync mutation
+  // Sync mutation (agent sync removed per user request)
   const syncMutation = useMutation({
-    mutationFn: async (syncType: 'properties' | 'agents' | 'full') => {
+    mutationFn: async (syncType: 'properties' | 'full') => {
       const response = await fetch('/api/idx/sync', {
         method: 'POST',
         headers: {
@@ -88,12 +72,11 @@ export default function IdxAdmin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/idx/status'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/idx/agents'] });
       queryClient.invalidateQueries({ queryKey: ['/api/properties'] });
     },
   });
 
-  const handleSync = (syncType: 'properties' | 'agents' | 'full') => {
+  const handleSync = (syncType: 'properties' | 'full') => {
     syncMutation.mutate(syncType);
   };
 
@@ -193,7 +176,6 @@ export default function IdxAdmin() {
       <Tabs defaultValue="sync" className="space-y-4">
         <TabsList>
           <TabsTrigger value="sync">Synchronization</TabsTrigger>
-          <TabsTrigger value="agents">Agents</TabsTrigger>
           <TabsTrigger value="history">Sync History</TabsTrigger>
         </TabsList>
 
@@ -251,7 +233,7 @@ export default function IdxAdmin() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Button
                     onClick={() => handleSync('properties')}
                     disabled={syncMutation.isPending}
@@ -264,20 +246,6 @@ export default function IdxAdmin() {
                       <Database className="h-6 w-6 mb-2" />
                     )}
                     <span>Sync Properties</span>
-                  </Button>
-
-                  <Button
-                    onClick={() => handleSync('agents')}
-                    disabled={syncMutation.isPending}
-                    variant="outline"
-                    className="h-20 flex flex-col items-center justify-center"
-                  >
-                    {syncMutation.isPending && selectedSyncType === 'agents' ? (
-                      <Loader2 className="h-6 w-6 animate-spin mb-2" />
-                    ) : (
-                      <Users className="h-6 w-6 mb-2" />
-                    )}
-                    <span>Sync Agents</span>
                   </Button>
 
                   <Button
@@ -308,56 +276,7 @@ export default function IdxAdmin() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="agents" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Users className="h-5 w-5 mr-2" />
-                IDX Agents ({idxAgents?.length || 0})
-              </CardTitle>
-              <CardDescription>
-                Real estate agents synchronized from the MLS
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {agentsLoading ? (
-                <div className="flex items-center justify-center p-4">
-                  <Loader2 className="h-6 w-6 animate-spin mr-2" />
-                  <span>Loading agents...</span>
-                </div>
-              ) : idxAgents && idxAgents.length > 0 ? (
-                <div className="space-y-2">
-                  {idxAgents.map((agent) => (
-                    <div key={agent.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">{agent.fullName}</p>
-                        <p className="text-sm text-gray-600">
-                          {agent.memberMlsId} | {agent.email || 'No email'}
-                        </p>
-                        {agent.office && (
-                          <p className="text-sm text-gray-500">{agent.office}</p>
-                        )}
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant={agent.isActive ? "default" : "secondary"}>
-                          {agent.isActive ? 'Active' : 'Inactive'}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center p-8">
-                  <Users className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                  <p className="text-gray-600">No agents synchronized yet</p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Run an agent sync to populate this list
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+        {/* Agents tab removed per user request - IDX will not pull agent information */}
 
         <TabsContent value="history" className="space-y-4">
           <Card>

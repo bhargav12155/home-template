@@ -51,8 +51,8 @@ Preferred communication style: Simple, everyday language.
 - `/api/leads` - Lead management and tracking
 - `/api/tracking` - Marketing tracking code management
 - `/api/idx/status` - IDX connection and synchronization status
-- `/api/idx/sync` - Trigger MLS data synchronization (properties, agents, or full)
-- `/api/idx/agents` - IDX agent data from MLS
+- `/api/idx/sync` - Trigger MLS data synchronization (properties or full)
+
 - `/api/idx/sync-logs` - Synchronization history and logs
 
 #### Frontend Pages
@@ -80,10 +80,10 @@ Preferred communication style: Simple, everyday language.
 - **MLS Provider**: Great Plains Regional MLS (Nebraska's primary MLS)
 - **API Standard**: RESO Web API 2.0 (modern replacement for legacy RETS)
 - **Authentication**: OAuth 2.0 with client credentials flow
-- **Real-time Sync**: Automated property, agent, and media synchronization
+- **Real-time Sync**: Automated property and media synchronization
 - **Fallback System**: Mock data for development/testing without MLS credentials
 - **Admin Interface**: Comprehensive IDX management dashboard with sync controls and status monitoring
-- **Sync Types**: Properties, agents, media, and full synchronization options
+- **Sync Types**: Properties, media, and full synchronization options (agent sync removed per user request)
 - **Error Handling**: Detailed logging and error recovery for robust data integrity
 
 ### Email Service Integration

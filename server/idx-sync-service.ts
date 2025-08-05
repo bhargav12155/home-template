@@ -112,68 +112,7 @@ export class IdxSyncService {
     }
   }
 
-  async syncAgents(): Promise<{ success: boolean; stats: any; error?: string }> {
-    const logId = await this.logSyncStart('agents');
-    let processed = 0;
-    let created = 0;
-    let updated = 0;
-
-    try {
-      console.log('Starting IDX agent synchronization...');
-      
-      const resoAgents = await idxService.getAgents(200);
-      console.log(`Found ${resoAgents.length} agents from RESO API`);
-
-      for (const resoAgent of resoAgents) {
-        try {
-          processed++;
-          
-          // Check if agent already exists
-          const existingAgent = await this.storage.getIdxAgentByMemberKey(resoAgent.MemberKey);
-          
-          // Convert RESO format to internal format
-          const agentData = idxService.convertResoAgentToInternal(resoAgent);
-          
-          if (existingAgent) {
-            // Update existing agent
-            await this.storage.updateIdxAgent(existingAgent.id, agentData);
-            updated++;
-            console.log(`Updated agent: ${resoAgent.MemberMlsId}`);
-          } else {
-            // Create new agent
-            await this.storage.createIdxAgent(agentData);
-            created++;
-            console.log(`Created agent: ${resoAgent.MemberMlsId}`);
-          }
-
-        } catch (error) {
-          console.error(`Error syncing agent ${resoAgent.MemberMlsId}:`, error);
-        }
-      }
-
-      const stats = { processed, updated, created };
-      await this.logSyncComplete(logId, 'success', stats);
-
-      console.log(`Agent sync completed: ${processed} processed, ${created} created, ${updated} updated`);
-
-      return {
-        success: true,
-        stats
-      };
-
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      await this.logSyncComplete(logId, 'error', { processed, updated, created }, errorMessage);
-      
-      console.error('Agent sync failed:', error);
-      
-      return {
-        success: false,
-        stats: { processed, updated, created },
-        error: errorMessage
-      };
-    }
-  }
+  // Agent sync removed per user request - IDX will not pull agent information from MLS
 
   private async syncMediaForProperty(listingKey: string, mlsId: string): Promise<void> {
     try {
@@ -231,11 +170,7 @@ export class IdxSyncService {
         console.log('IDX API not connected, using mock data for development');
       }
 
-      // Sync agents first
-      const agentResult = await this.syncAgents();
-      results.push({ type: 'agents', ...agentResult });
-
-      // Sync properties
+      // Sync properties (agent sync removed per user request)
       const propertyResult = await this.syncProperties(50);
       results.push({ type: 'properties', ...propertyResult });
 

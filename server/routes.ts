@@ -299,12 +299,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (type === 'properties') {
         result = await idxSyncService.syncProperties();
-      } else if (type === 'agents') {
-        result = await idxSyncService.syncAgents();
       } else if (type === 'full') {
         result = await idxSyncService.fullSync();
       } else {
-        return res.status(400).json({ message: "Invalid sync type. Use 'properties', 'agents', or 'full'" });
+        return res.status(400).json({ message: "Invalid sync type. Use 'properties' or 'full'" });
       }
 
       res.json(result);
@@ -313,14 +311,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/idx/agents", async (req, res) => {
-    try {
-      const agents = await storage.getIdxAgents();
-      res.json(agents);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch IDX agents", error });
-    }
-  });
+  // IDX agents endpoint removed per user request
 
   app.get("/api/idx/sync-logs", async (req, res) => {
     try {
