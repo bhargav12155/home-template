@@ -31,6 +31,8 @@ import {
   type InsertIdxSyncLog,
   type PropertySearch
 } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -672,4 +674,268 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// DatabaseStorage implementation using real PostgreSQL
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async getProperties(search?: PropertySearch): Promise<Property[]> {
+    // For now, return empty array - properties will be added via MLS sync or admin
+    return [];
+  }
+
+  async getProperty(id: number): Promise<Property | undefined> {
+    const [property] = await db.select().from(properties).where(eq(properties.id, id));
+    return property || undefined;
+  }
+
+  async getPropertyByMLS(mlsId: string): Promise<Property | undefined> {
+    const [property] = await db.select().from(properties).where(eq(properties.mlsId, mlsId));
+    return property || undefined;
+  }
+
+  async createProperty(property: InsertProperty): Promise<Property> {
+    const [newProperty] = await db
+      .insert(properties)
+      .values(property)
+      .returning();
+    return newProperty;
+  }
+
+  async updateProperty(id: number, property: Partial<InsertProperty>): Promise<Property | undefined> {
+    const [updated] = await db
+      .update(properties)
+      .set(property)
+      .where(eq(properties.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async updatePropertyStyle(id: number, styleData: {
+    architecturalStyle?: string;
+    secondaryStyle?: string;
+    styleConfidence?: number;
+    styleFeatures?: string[];
+    styleAnalyzed?: boolean;
+  }): Promise<Property | undefined> {
+    const [updated] = await db
+      .update(properties)
+      .set(styleData)
+      .where(eq(properties.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async getFeaturedProperties(): Promise<Property[]> {
+    return await db.select().from(properties).limit(6);
+  }
+
+  async getLuxuryProperties(): Promise<Property[]> {
+    return await db.select().from(properties).limit(10);
+  }
+
+  // Community methods
+  async getCommunities(): Promise<Community[]> {
+    return await db.select().from(communities);
+  }
+
+  async getCommunity(slug: string): Promise<Community | undefined> {
+    const [community] = await db.select().from(communities).where(eq(communities.slug, slug));
+    return community || undefined;
+  }
+
+  async createCommunity(community: InsertCommunity): Promise<Community> {
+    const [newCommunity] = await db
+      .insert(communities)
+      .values(community)
+      .returning();
+    return newCommunity;
+  }
+
+  // Blog methods
+  async getBlogPosts(published?: boolean): Promise<BlogPost[]> {
+    return await db.select().from(blogPosts);
+  }
+
+  async getBlogPost(slug: string): Promise<BlogPost | undefined> {
+    const [post] = await db.select().from(blogPosts).where(eq(blogPosts.slug, slug));
+    return post || undefined;
+  }
+
+  async createBlogPost(post: InsertBlogPost): Promise<BlogPost> {
+    const [newPost] = await db
+      .insert(blogPosts)
+      .values(post)
+      .returning();
+    return newPost;
+  }
+
+  // Lead methods
+  async createLead(lead: InsertLead): Promise<Lead> {
+    const [newLead] = await db
+      .insert(leads)
+      .values(lead)
+      .returning();
+    return newLead;
+  }
+
+  async getLeads(): Promise<Lead[]> {
+    return await db.select().from(leads);
+  }
+
+  // Tracking methods
+  async getTrackingCodes(active?: boolean): Promise<TrackingCode[]> {
+    return await db.select().from(trackingCodes);
+  }
+
+  async createTrackingCode(code: InsertTrackingCode): Promise<TrackingCode> {
+    const [newCode] = await db
+      .insert(trackingCodes)
+      .values(code)
+      .returning();
+    return newCode;
+  }
+
+  async updateTrackingCode(id: number, code: Partial<InsertTrackingCode>): Promise<TrackingCode | undefined> {
+    const [updated] = await db
+      .update(trackingCodes)
+      .set(code)
+      .where(eq(trackingCodes.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  // Market Stats methods
+  async getMarketStats(): Promise<MarketStats[]> {
+    return await db.select().from(marketStats);
+  }
+
+  async createMarketStats(stats: InsertMarketStats): Promise<MarketStats> {
+    const [newStats] = await db
+      .insert(marketStats)
+      .values(stats)
+      .returning();
+    return newStats;
+  }
+
+  async updateMarketStats(id: number, stats: Partial<InsertMarketStats>): Promise<MarketStats | undefined> {
+    const [updated] = await db
+      .update(marketStats)
+      .set(stats)
+      .where(eq(marketStats.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  // IDX Agent methods
+  async getIdxAgents(): Promise<IdxAgent[]> {
+    return await db.select().from(idxAgents);
+  }
+
+  async getIdxAgent(id: number): Promise<IdxAgent | undefined> {
+    const [agent] = await db.select().from(idxAgents).where(eq(idxAgents.id, id));
+    return agent || undefined;
+  }
+
+  async getIdxAgentByMemberKey(memberKey: string): Promise<IdxAgent | undefined> {
+    const [agent] = await db.select().from(idxAgents).where(eq(idxAgents.memberKey, memberKey));
+    return agent || undefined;
+  }
+
+  async createIdxAgent(agent: InsertIdxAgent): Promise<IdxAgent> {
+    const [newAgent] = await db
+      .insert(idxAgents)
+      .values(agent)
+      .returning();
+    return newAgent;
+  }
+
+  async updateIdxAgent(id: number, agent: Partial<InsertIdxAgent>): Promise<IdxAgent | undefined> {
+    const [updated] = await db
+      .update(idxAgents)
+      .set(agent)
+      .where(eq(idxAgents.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  // IDX Media methods
+  async getIdxMediaForProperty(listingKey: string): Promise<IdxMedia[]> {
+    return await db.select().from(idxMedia).where(eq(idxMedia.listingKey, listingKey));
+  }
+
+  async getIdxMedia(id: number): Promise<IdxMedia | undefined> {
+    const [media] = await db.select().from(idxMedia).where(eq(idxMedia.id, id));
+    return media || undefined;
+  }
+
+  async getIdxMediaByKey(mediaKey: string): Promise<IdxMedia | undefined> {
+    const [media] = await db.select().from(idxMedia).where(eq(idxMedia.mediaKey, mediaKey));
+    return media || undefined;
+  }
+
+  async createIdxMedia(media: InsertIdxMedia): Promise<IdxMedia> {
+    const [newMedia] = await db
+      .insert(idxMedia)
+      .values(media)
+      .returning();
+    return newMedia;
+  }
+
+  async updateIdxMedia(id: number, media: Partial<InsertIdxMedia>): Promise<IdxMedia | undefined> {
+    const [updated] = await db
+      .update(idxMedia)
+      .set(media)
+      .where(eq(idxMedia.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  // IDX Sync Log methods
+  async getIdxSyncLogs(limit?: number): Promise<IdxSyncLog[]> {
+    let query = db.select().from(idxSyncLog);
+    if (limit) {
+      query = query.limit(limit);
+    }
+    return await query;
+  }
+
+  async getIdxSyncLog(id: number): Promise<IdxSyncLog | undefined> {
+    const [log] = await db.select().from(idxSyncLog).where(eq(idxSyncLog.id, id));
+    return log || undefined;
+  }
+
+  async createIdxSyncLog(log: InsertIdxSyncLog): Promise<IdxSyncLog> {
+    const [newLog] = await db
+      .insert(idxSyncLog)
+      .values(log)
+      .returning();
+    return newLog;
+  }
+
+  async updateIdxSyncLog(id: number, log: Partial<InsertIdxSyncLog>): Promise<IdxSyncLog | undefined> {
+    const [updated] = await db
+      .update(idxSyncLog)
+      .set(log)
+      .where(eq(idxSyncLog.id, id))
+      .returning();
+    return updated || undefined;
+  }
+}
+
+export const storage = new DatabaseStorage();
