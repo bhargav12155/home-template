@@ -52,11 +52,11 @@ export default function Hero() {
       </div>
 
       {/* Main Title - Centered */}
-      <div
-        className="absolute inset-0 z-10 flex items-center justify-center pt-16"
-        style={{ marginTop: -60 }}
-      >
-        <h1 className="hero-title text-4xl md:text-6xl lg:text-7xl font-display font-light text-white text-center leading-tight animate-fade-in-up">
+      <div className="absolute inset-0 z-10 flex items-center justify-center pt-16">
+        <h1
+          className="hero-title text-4xl md:text-6xl lg:text-7xl font-display font-light text-white text-center leading-tight animate-fade-in-up"
+          style={{ marginTop: -60 }}
+        >
           Luxury is an <br />
           <span className="text-bjork-beige">Experience</span>
         </h1>
