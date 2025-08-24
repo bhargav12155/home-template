@@ -4,7 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronDown } from "lucide-react";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { PRICE_RANGES } from "@/lib/constants";
+import { Template } from "@/types/template";
 import heroVideo from "@assets/Web page video_1753809980517.mp4";
 
 export default function Hero() {
@@ -12,6 +14,11 @@ export default function Hero() {
   const [searchQuery, setSearchQuery] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
+
+  // Fetch template configuration
+  const { data: template } = useQuery<Template>({
+    queryKey: ["/api/template"],
+  });
 
   const handleSearch = () => {
     const params = new URLSearchParams();
@@ -45,7 +52,7 @@ export default function Hero() {
           <span className="text-bjork-beige">Experience</span>
         </h1>
         <p className="text-xl md:text-2xl mb-8 font-light max-w-2xl mx-auto leading-relaxed">
-          Discover exceptional homes in Omaha and Lincoln with Nebraska's premier luxury real estate team
+          {template?.companyDescription || "Discover exceptional homes with Nebraska's premier luxury real estate team"}
         </p>
         
         {/* Search Bar */}

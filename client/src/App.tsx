@@ -12,6 +12,7 @@ import Contact from "@/pages/contact";
 import Blog from "@/pages/blog";
 import Admin from "@/pages/admin";
 import Agents from "@/pages/agents";
+import TemplateAdmin from "@/pages/template-admin";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 
@@ -29,6 +30,7 @@ function Router() {
           <Route path="/contact" component={Contact} />
           <Route path="/blog" component={Blog} />
           <Route path="/admin" component={Admin} />
+          <Route path="/template-admin" component={TemplateAdmin} />
           <Route component={NotFound} />
         </Switch>
       </main>

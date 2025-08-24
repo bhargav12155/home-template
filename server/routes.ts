@@ -323,6 +323,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // **TEMPLATE ROUTES** - Multi-tenant customization
+  app.get("/api/template", async (req, res) => {
+    try {
+      const template = await storage.getTemplate();
+      res.json(template || {
+        companyName: "Your Real Estate Company",
+        agentName: "Your Name",
+        agentTitle: "Principal Broker",
+        companyDescription: "We believe that luxury is not a price point but an experience.",
+        homesSold: 500,
+        totalSalesVolume: "$200M+",
+        serviceAreas: ["Your Primary City", "Your Secondary City"]
+      });
+    } catch (error) {
+      console.error("Error fetching template:", error);
+      res.status(500).json({ message: "Failed to fetch template" });
+    }
+  });
+
+  app.post("/api/template", async (req, res) => {
+    try {
+      const template = await storage.updateTemplate(req.body);
+      res.json(template);
+    } catch (error) {
+      console.error("Error updating template:", error);
+      res.status(500).json({ message: "Failed to update template" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

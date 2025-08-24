@@ -9,6 +9,7 @@ import {
   idxAgents,
   idxMedia,
   idxSyncLog,
+  templates,
   type User, 
   type InsertUser, 
   type Property, 
@@ -98,6 +99,10 @@ export interface IStorage {
   getIdxSyncLog(id: number): Promise<IdxSyncLog | undefined>;
   createIdxSyncLog(log: InsertIdxSyncLog): Promise<IdxSyncLog>;
   updateIdxSyncLog(id: number, log: Partial<InsertIdxSyncLog>): Promise<IdxSyncLog | undefined>;
+
+  // Template methods
+  getTemplate(): Promise<any>;
+  updateTemplate(template: any): Promise<any>;
 }
 
 export class MemStorage implements IStorage {
@@ -935,6 +940,31 @@ export class DatabaseStorage implements IStorage {
       .where(eq(idxSyncLog.id, id))
       .returning();
     return updated || undefined;
+  }
+
+  // Template methods
+  async getTemplate(): Promise<any> {
+    const [template] = await db.select().from(templates).limit(1);
+    return template;
+  }
+
+  async updateTemplate(templateData: any): Promise<any> {
+    const [existingTemplate] = await db.select().from(templates).limit(1);
+    
+    if (existingTemplate) {
+      const [updated] = await db
+        .update(templates)
+        .set({ ...templateData, updatedAt: new Date() })
+        .where(eq(templates.id, existingTemplate.id))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db
+        .insert(templates)
+        .values(templateData)
+        .returning();
+      return created;
+    }
   }
 }
 
