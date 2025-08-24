@@ -123,5 +123,13 @@ export const NAVIGATION_ITEMS = [
   },
   { name: 'Agents', href: '/agents' },
   { name: 'About', href: '/about' },
-  { name: 'Blog', href: '/blog' }
+  { name: 'Blog', href: '/blog' },
+  {
+    name: 'Quick Links',
+    href: '/admin',
+    dropdown: [
+      { name: 'Template Admin', href: '/template-admin' },
+      { name: 'Admin Panel', href: '/admin' }
+    ]
+  }
 ] as const;

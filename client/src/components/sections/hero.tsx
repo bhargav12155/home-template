@@ -30,7 +30,7 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative h-screen flex items-end lg:items-center justify-center overflow-hidden">
+    <section className="relative h-screen flex items-end justify-center overflow-hidden">
       {/* Video Background */}
       <div className="absolute inset-0 z-0">
         <video
@@ -46,7 +46,7 @@ export default function Hero() {
       </div>
 
       {/* Hero Content */}
-      <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4 pb-8 lg:pb-0 lg:mb-32 animate-fade-in-up">
+      <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4 pb-16 lg:pb-20 animate-fade-in-up">
         <h1 className="hero-title text-4xl md:text-6xl lg:text-7xl font-display font-light mb-4 lg:mb-6 leading-tight">
           Luxury is an <br />
           <span className="text-bjork-beige">Experience</span>
