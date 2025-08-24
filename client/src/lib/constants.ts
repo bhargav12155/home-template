@@ -98,8 +98,29 @@ export const ARCHITECTURAL_STYLES = [
 export const NAVIGATION_ITEMS = [
   { name: 'Search Homes', href: '/search' },
   { name: 'Communities', href: '/communities' },
-  { name: 'Buyers', href: '/buyers' },
-  { name: 'Sellers', href: '/sellers' },
+  { 
+    name: 'Buy', 
+    href: '/buy',
+    dropdown: [
+      { name: 'Buying', href: '/buying' },
+      { name: 'Lincoln Homes for Sale', href: '/lincoln-homes' },
+      { name: 'Search Listings', href: '/search' },
+      { name: 'Open Houses', href: '/open-houses' },
+      { name: 'Featured Listings', href: '/featured' },
+      { name: 'New Construction Homes', href: '/new-construction' },
+      { name: 'Home Builders', href: '/home-builders' }
+    ]
+  },
+  { 
+    name: 'Sell', 
+    href: '/sell',
+    dropdown: [
+      { name: 'Selling', href: '/selling' },
+      { name: 'Market Analysis', href: '/market-analysis' },
+      { name: 'Home Valuation', href: '/home-valuation' },
+      { name: 'Listing Services', href: '/listing-services' }
+    ]
+  },
   { name: 'Agents', href: '/agents' },
   { name: 'About', href: '/about' },
   { name: 'Blog', href: '/blog' }

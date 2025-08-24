@@ -2,7 +2,13 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { NAVIGATION_ITEMS } from "@/lib/constants";
 import logoImage from "@assets/2408BjorkGroupFinalLogo1_Bjork Group Black Square BHHS_1753648666870.png";
 
@@ -24,17 +30,41 @@ export default function Header() {
           
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            {NAVIGATION_ITEMS.map((item) => (
-              <Link 
-                key={item.name}
-                href={item.href}
-                className={`text-soft-black hover:text-bjork-blue transition-colors duration-300 ${
-                  location === item.href ? 'text-bjork-blue font-medium' : ''
-                }`}
-              >
-                {item.name}
-              </Link>
-            ))}
+            {NAVIGATION_ITEMS.map((item) => {
+              if ('dropdown' in item && item.dropdown) {
+                return (
+                  <DropdownMenu key={item.name}>
+                    <DropdownMenuTrigger className="flex items-center gap-1 text-soft-black hover:text-bjork-blue transition-colors duration-300 bg-transparent border-none outline-none">
+                      {item.name}
+                      <ChevronDown className="h-4 w-4" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56 bg-white border border-gray-200 shadow-lg">
+                      {item.dropdown.map((dropdownItem) => (
+                        <DropdownMenuItem key={dropdownItem.name} className="p-0">
+                          <Link 
+                            href={dropdownItem.href}
+                            className="w-full px-3 py-2 text-soft-black hover:text-bjork-blue hover:bg-gray-50 transition-colors duration-300"
+                          >
+                            {dropdownItem.name}
+                          </Link>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                );
+              }
+              return (
+                <Link 
+                  key={item.name}
+                  href={item.href}
+                  className={`text-soft-black hover:text-bjork-blue transition-colors duration-300 ${
+                    location === item.href ? 'text-bjork-blue font-medium' : ''
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              );
+            })}
             <Link href="/contact">
               <Button className="bg-bjork-black text-white hover:bg-bjork-blue transition-colors duration-300">
                 Contact Us
@@ -58,18 +88,39 @@ export default function Header() {
                     className="h-10 w-auto"
                   />
                 </div>
-                {NAVIGATION_ITEMS.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    onClick={() => setIsOpen(false)}
-                    className={`text-lg text-soft-black hover:text-bjork-blue transition-colors duration-300 ${
-                      location === item.href ? 'text-bjork-blue font-medium' : ''
-                    }`}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
+                {NAVIGATION_ITEMS.map((item) => {
+                  if ('dropdown' in item && item.dropdown) {
+                    return (
+                      <div key={item.name} className="space-y-2">
+                        <div className="text-lg font-medium text-soft-black">{item.name}</div>
+                        <div className="pl-4 space-y-2">
+                          {item.dropdown.map((dropdownItem) => (
+                            <Link
+                              key={dropdownItem.name}
+                              href={dropdownItem.href}
+                              onClick={() => setIsOpen(false)}
+                              className="block text-base text-gray-600 hover:text-bjork-blue transition-colors duration-300"
+                            >
+                              {dropdownItem.name}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      onClick={() => setIsOpen(false)}
+                      className={`text-lg text-soft-black hover:text-bjork-blue transition-colors duration-300 ${
+                        location === item.href ? 'text-bjork-blue font-medium' : ''
+                      }`}
+                    >
+                      {item.name}
+                    </Link>
+                  );
+                })}
                 <Link href="/contact" onClick={() => setIsOpen(false)}>
                   <Button className="w-full bg-bjork-black text-white hover:bg-bjork-blue transition-colors duration-300">
                     Contact Us
