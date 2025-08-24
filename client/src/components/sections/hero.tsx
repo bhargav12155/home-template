@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ChevronDown } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -25,7 +31,7 @@ export default function Hero() {
     if (searchQuery) params.set("query", searchQuery);
     if (minPrice) params.set("minPrice", minPrice);
     if (maxPrice) params.set("maxPrice", maxPrice);
-    
+
     setLocation(`/search?${params.toString()}`);
   };
 
@@ -46,7 +52,10 @@ export default function Hero() {
       </div>
 
       {/* Main Title - Centered */}
-      <div className="absolute inset-0 z-10 flex items-center justify-center pt-16">
+      <div
+        className="absolute inset-0 z-10 flex items-center justify-center pt-16"
+        style={{ marginTop: -60 }}
+      >
         <h1 className="hero-title text-4xl md:text-6xl lg:text-7xl font-display font-light text-white text-center leading-tight animate-fade-in-up">
           Luxury is an <br />
           <span className="text-bjork-beige">Experience</span>
@@ -56,9 +65,10 @@ export default function Hero() {
       {/* Bottom Content */}
       <div className="absolute bottom-0 left-0 right-0 z-10 text-center text-white max-w-4xl mx-auto px-4 pb-16 lg:pb-20 animate-fade-in-up">
         <p className="text-lg md:text-xl lg:text-2xl mb-6 lg:mb-8 font-light max-w-2xl mx-auto leading-relaxed">
-          {template?.companyDescription || "Discover exceptional homes with Nebraska's premier luxury real estate team"}
+          {template?.companyDescription ||
+            "Discover exceptional homes with Nebraska's premier luxury real estate team"}
         </p>
-        
+
         {/* Search Bar */}
         <div className="bg-white/95 backdrop-blur-sm rounded-lg p-6 max-w-2xl mx-auto">
           <div className="flex flex-col md:flex-row gap-4">
@@ -69,7 +79,12 @@ export default function Hero() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1 text-soft-black border-gray-200 focus:ring-bjork-blue"
             />
-            <Select value={minPrice || "any"} onValueChange={(value) => setMinPrice(value === "any" ? "" : value)}>
+            <Select
+              value={minPrice || "any"}
+              onValueChange={(value) =>
+                setMinPrice(value === "any" ? "" : value)
+              }
+            >
               <SelectTrigger className="text-soft-black border-gray-200 focus:ring-bjork-blue">
                 <SelectValue placeholder="Min Price" />
               </SelectTrigger>
@@ -82,20 +97,28 @@ export default function Hero() {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={maxPrice || "any"} onValueChange={(value) => setMaxPrice(value === "any" ? "" : value)}>
+            <Select
+              value={maxPrice || "any"}
+              onValueChange={(value) =>
+                setMaxPrice(value === "any" ? "" : value)
+              }
+            >
               <SelectTrigger className="text-soft-black border-gray-200 focus:ring-bjork-blue">
                 <SelectValue placeholder="Max Price" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="any">Any Max</SelectItem>
                 {PRICE_RANGES.map((range) => (
-                  <SelectItem key={range.max || 999999999} value={(range.max || 999999999).toString()}>
-                    {range.max ? `$${range.max.toLocaleString()}` : '$2M+'}
+                  <SelectItem
+                    key={range.max || 999999999}
+                    value={(range.max || 999999999).toString()}
+                  >
+                    {range.max ? `$${range.max.toLocaleString()}` : "$2M+"}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Button 
+            <Button
               onClick={handleSearch}
               className="bg-bjork-black text-white hover:bg-bjork-blue transition-colors duration-300 whitespace-nowrap px-8"
             >
