@@ -30,7 +30,7 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative h-screen flex items-end justify-center overflow-hidden">
+    <section className="relative h-screen overflow-hidden">
       {/* Video Background */}
       <div className="absolute inset-0 z-0">
         <video
@@ -45,12 +45,16 @@ export default function Hero() {
         <div className="absolute inset-0 bg-bjork-black/40 video-overlay" />
       </div>
 
-      {/* Hero Content */}
-      <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4 pb-16 lg:pb-20 animate-fade-in-up">
-        <h1 className="hero-title text-4xl md:text-6xl lg:text-7xl font-display font-light mb-4 lg:mb-6 leading-tight">
+      {/* Main Title - Centered */}
+      <div className="absolute inset-0 z-10 flex items-center justify-center">
+        <h1 className="hero-title text-4xl md:text-6xl lg:text-7xl font-display font-light text-white text-center leading-tight animate-fade-in-up">
           Luxury is an <br />
           <span className="text-bjork-beige">Experience</span>
         </h1>
+      </div>
+
+      {/* Bottom Content */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 text-center text-white max-w-4xl mx-auto px-4 pb-16 lg:pb-20 animate-fade-in-up">
         <p className="text-lg md:text-xl lg:text-2xl mb-6 lg:mb-8 font-light max-w-2xl mx-auto leading-relaxed">
           {template?.companyDescription || "Discover exceptional homes with Nebraska's premier luxury real estate team"}
         </p>
