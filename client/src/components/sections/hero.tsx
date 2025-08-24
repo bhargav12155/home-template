@@ -46,12 +46,12 @@ export default function Hero() {
       </div>
 
       {/* Hero Content */}
-      <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4 pb-8 lg:pb-0 lg:mb-20 animate-fade-in-up">
-        <h1 className="hero-title text-5xl md:text-7xl font-display font-light mb-6 leading-tight">
+      <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4 pb-8 lg:pb-0 lg:mb-32 animate-fade-in-up">
+        <h1 className="hero-title text-4xl md:text-6xl lg:text-7xl font-display font-light mb-4 lg:mb-6 leading-tight">
           Luxury is an <br />
           <span className="text-bjork-beige">Experience</span>
         </h1>
-        <p className="text-xl md:text-2xl mb-8 font-light max-w-2xl mx-auto leading-relaxed">
+        <p className="text-lg md:text-xl lg:text-2xl mb-6 lg:mb-8 font-light max-w-2xl mx-auto leading-relaxed">
           {template?.companyDescription || "Discover exceptional homes with Nebraska's premier luxury real estate team"}
         </p>
         
