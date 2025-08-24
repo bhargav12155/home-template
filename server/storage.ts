@@ -34,6 +34,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
+import { externalPropertyAPI } from "./external-api";
 
 export interface IStorage {
   // User methods
@@ -459,7 +460,22 @@ export class MemStorage implements IStorage {
   }
 
   async getFeaturedProperties(): Promise<Property[]> {
-    return Array.from(this.properties.values()).filter(p => p.featured);
+    try {
+      // Get luxury properties from external API
+      const externalProperties = await externalPropertyAPI.getLuxuryProperties();
+      
+      if (externalProperties.length > 0) {
+        // Transform external properties to our schema format
+        return externalProperties.map(prop => externalPropertyAPI.transformToProperty(prop));
+      }
+      
+      // Fallback to local properties if API fails
+      return Array.from(this.properties.values()).filter(p => p.featured);
+    } catch (error) {
+      console.error('Error fetching featured properties from external API:', error);
+      // Return local featured properties as fallback
+      return Array.from(this.properties.values()).filter(p => p.featured);
+    }
   }
 
   async getLuxuryProperties(): Promise<Property[]> {
@@ -676,6 +692,24 @@ export class MemStorage implements IStorage {
     const updated: IdxSyncLog = { ...existing, ...log };
     this.idxSyncLogs.set(id, updated);
     return updated;
+  }
+
+  // Template methods
+  async getTemplate(): Promise<any> {
+    return {
+      id: "default-template",
+      companyName: "Bjork Group",
+      companyDescription: "Discover exceptional homes with Nebraska's premier luxury real estate team",
+      heroTitle: "Luxury is an Experience",
+      primaryColor: "#D4B895",
+      secondaryColor: "#1A1A1A"
+    };
+  }
+
+  async updateTemplate(template: any): Promise<any> {
+    // For MemStorage, we just return the updated template
+    // In a real implementation, this would save to database
+    return template;
   }
 }
 
