@@ -93,14 +93,7 @@ function transformExternalProperty(external: ExternalProperty): Property {
 
 export default function FeaturedListings() {
   const { data: externalData, isLoading, error } = useQuery<ExternalApiResponse>({
-    queryKey: ["external-featured-properties"],
-    queryFn: async () => {
-      const response = await fetch("http://gbcma.us-east-2.elasticbeanstalk.com/api/cma-comparables?city=Omaha&min_price=200000&max_price=400000");
-      if (!response.ok) {
-        throw new Error('Failed to fetch properties');
-      }
-      return response.json();
-    },
+    queryKey: ["/api/properties/external/featured"],
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 

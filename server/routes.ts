@@ -69,6 +69,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // External API proxy endpoint for featured luxury listings
+  app.get("/api/properties/external/featured", async (req, res) => {
+    try {
+      const response = await fetch("http://gbcma.us-east-2.elasticbeanstalk.com/api/cma-comparables?city=Omaha&min_price=200000&max_price=400000");
+      if (!response.ok) {
+        throw new Error(`External API returned ${response.status}: ${response.statusText}`);
+      }
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error("Failed to fetch external properties:", error);
+      res.status(500).json({ message: "Failed to fetch external properties", error: error.message });
+    }
+  });
+
   // AI Style Analysis endpoints
   app.post("/api/properties/:id/analyze-style", async (req, res) => {
     try {
