@@ -244,7 +244,7 @@ export default function Agents() {
             <Button size="lg" className="bg-bjork-blue text-white hover:bg-bjork-beige hover:text-bjork-black transition-colors duration-300">
               Schedule Consultation
             </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-bjork-black transition-colors duration-300">
+            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-bjork-black transition-colors duration-300 bg-transparent">
               Call (402) 522-6131
             </Button>
           </div>

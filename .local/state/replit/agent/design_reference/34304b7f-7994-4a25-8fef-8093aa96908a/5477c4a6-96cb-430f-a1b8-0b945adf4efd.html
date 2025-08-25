@@ -1,0 +1,715 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bjork Group Real Estate - Luxury Homes in Omaha & Lincoln, Nebraska</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'bjork-black': '#000000',
+                        'bjork-beige': '#9b8b7e',
+                        'bjork-blue': '#304652',
+                        'bjork-beige-light': 'rgba(155, 139, 126, 0.1)',
+                        'bjork-blue-light': 'rgba(48, 70, 82, 0.1)',
+                    },
+                    fontFamily: {
+                        'dazzle': ['Arial', 'sans-serif'], // Fallback for Dazzle Unicase
+                    }
+                }
+            }
+        };
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .luxury-gradient {
+            background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(48,70,82,0.6) 100%);
+        }
+        .property-card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .property-card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .search-overlay {
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(2px);
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-900">
+    <!-- @COMPONENT: Header Navigation -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <div class="text-2xl font-bold font-dazzle tracking-wider text-bjork-black">
+                        BJORK GROUP
+                    </div>
+                    <div class="hidden md:block text-sm text-bjork-beige">
+                        REAL ESTATE
+                    </div>
+                </div>
+                
+                <nav class="hidden lg:flex items-center space-x-8">
+                    <a href="#" class="text-gray-700 hover:text-bjork-blue transition-colors">Properties</a>
+                    <a href="#" class="text-gray-700 hover:text-bjork-blue transition-colors">Communities</a>
+                    <a href="#" class="text-gray-700 hover:text-bjork-blue transition-colors">About</a>
+                    <a href="#" class="text-gray-700 hover:text-bjork-blue transition-colors">Market Insights</a>
+                    <a href="#" class="text-gray-700 hover:text-bjork-blue transition-colors">Contact</a>
+                </nav>
+                
+                <div class="flex items-center space-x-4">
+                    <a href="tel:+14025226131" class="hidden md:flex items-center text-bjork-blue hover:text-bjork-black transition-colors">
+                        <i class="fas fa-phone mr-2"></i>
+                        (402) 522-6131
+                    </a>
+                    <button class="lg:hidden text-gray-700">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: Header Navigation -->
+
+    <!-- @COMPONENT: Hero Section with Property Search -->
+    <section class="relative h-screen flex items-center justify-center">
+        <!-- A stunning panoramic view of Omaha skyline at golden hour with the Missouri River -->
+        <div class="absolute inset-0 bg-cover bg-center bg-fixed" 
+             style="background-image: url('https://pixabay.com/get/g56f97a106a0240327b82e61a2a53ed947c9372c7b667d850eee21b10e5978c0544acdf0916047001ba4af3fd956d23e6661a3d45e588c4b97732e7070864618f_1280.jpg');">
+        </div>
+        <div class="absolute inset-0 luxury-gradient"></div>
+        
+        <div class="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
+            <h1 class="text-5xl md:text-7xl font-light font-dazzle tracking-wider mb-6">
+                LUXURY AS AN EXPERIENCE
+            </h1>
+            <p class="text-xl md:text-2xl mb-8 font-light opacity-90">
+                Discover exceptional homes in Omaha & Lincoln, Nebraska
+            </p>
+            
+            <!-- Property Search Form -->
+            <div class="bg-white rounded-lg p-6 max-w-3xl mx-auto shadow-2xl">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                        <input type="text" placeholder="Enter Location, Zip, Address or MLS #" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-bjork-blue focus:border-transparent text-gray-900">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Min Price</label>
+                        <select class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-bjork-blue text-gray-900">
+                            <option>Any</option>
+                            <option>$200,000</option>
+                            <option>$500,000</option>
+                            <option>$1,000,000</option>
+                            <option>$2,000,000</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button class="w-full bg-bjork-black text-white py-3 px-6 rounded-md hover:bg-bjork-blue transition-colors font-medium">
+                            <i class="fas fa-search mr-2"></i>
+                            Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: Hero Section -->
+
+    <!-- @COMPONENT: Featured Luxury Listings -->
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-light font-dazzle tracking-wider text-bjork-black mb-4">
+                    LUXURY LISTINGS
+                </h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Discover exceptional properties that define luxury living in Nebraska
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Property Card 1 -->
+                <div class="bg-white rounded-lg overflow-hidden shadow-lg property-card-hover">
+                    <!-- A luxurious modern home exterior with manicured landscaping in Elkhorn, Nebraska -->
+                    <div class="relative h-64 bg-cover bg-center" 
+                         style="background-image: url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400');">
+                        <div class="absolute top-4 left-4">
+                            <span class="bg-bjork-black text-white px-3 py-1 rounded-full text-sm font-medium">
+                                LUXURY
+                            </span>
+                        </div>
+                        <div class="absolute top-4 right-4">
+                            <button class="bg-white bg-opacity-90 hover:bg-opacity-100 p-2 rounded-full transition-all">
+                                <i class="far fa-heart text-gray-600"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-2xl font-semibold text-bjork-black">$1,100,000</h3>
+                            <span class="text-sm text-bjork-beige">MLS #22520502</span>
+                        </div>
+                        <p class="text-gray-600 mb-3">21727 Cimarron Road, Elkhorn, NE 68022</p>
+                        <div class="flex items-center space-x-6 text-sm text-gray-500 mb-4">
+                            <span><i class="fas fa-bed mr-1"></i> 4 Beds</span>
+                            <span><i class="fas fa-bath mr-1"></i> 5 Baths</span>
+                            <span><i class="fas fa-ruler-combined mr-1"></i> 3,694 Sq.Ft.</span>
+                        </div>
+                        <button class="w-full bg-bjork-blue text-white py-2 px-4 rounded-md hover:bg-bjork-black transition-colors">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Property Card 2 -->
+                <div class="bg-white rounded-lg overflow-hidden shadow-lg property-card-hover">
+                    <!-- An elegant brick home with professional landscaping in Lincoln, Nebraska -->
+                    <div class="relative h-64 bg-cover bg-center" 
+                         style="background-image: url('https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400');">
+                        <div class="absolute top-4 left-4">
+                            <span class="bg-bjork-beige text-white px-3 py-1 rounded-full text-sm font-medium">
+                                FEATURED
+                            </span>
+                        </div>
+                        <div class="absolute top-4 right-4">
+                            <button class="bg-white bg-opacity-90 hover:bg-opacity-100 p-2 rounded-full transition-all">
+                                <i class="far fa-heart text-gray-600"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-2xl font-semibold text-bjork-black">$800,000</h3>
+                            <span class="text-sm text-bjork-beige">MLS #22520385</span>
+                        </div>
+                        <p class="text-gray-600 mb-3">2904 Georgian Court, Lincoln, NE 68502</p>
+                        <div class="flex items-center space-x-6 text-sm text-gray-500 mb-4">
+                            <span><i class="fas fa-bed mr-1"></i> 4 Beds</span>
+                            <span><i class="fas fa-bath mr-1"></i> 4 Baths</span>
+                            <span><i class="fas fa-ruler-combined mr-1"></i> 3,244 Sq.Ft.</span>
+                        </div>
+                        <button class="w-full bg-bjork-blue text-white py-2 px-4 rounded-md hover:bg-bjork-black transition-colors">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Property Card 3 -->
+                <div class="bg-white rounded-lg overflow-hidden shadow-lg property-card-hover">
+                    <!-- A contemporary luxury home with large windows and modern architecture in Omaha -->
+                    <div class="relative h-64 bg-cover bg-center" 
+                         style="background-image: url('https://images.unsplash.com/photo-1613977257363-707ba9348227?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400');">
+                        <div class="absolute top-4 left-4">
+                            <span class="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                                NEW
+                            </span>
+                        </div>
+                        <div class="absolute top-4 right-4">
+                            <button class="bg-white bg-opacity-90 hover:bg-opacity-100 p-2 rounded-full transition-all">
+                                <i class="far fa-heart text-gray-600"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-2xl font-semibold text-bjork-black">$1,995,000</h3>
+                            <span class="text-sm text-bjork-beige">MLS #22520377</span>
+                        </div>
+                        <p class="text-gray-600 mb-3">13824 Cuming Street, Omaha, NE 68154</p>
+                        <div class="flex items-center space-x-6 text-sm text-gray-500 mb-4">
+                            <span><i class="fas fa-bed mr-1"></i> 5 Beds</span>
+                            <span><i class="fas fa-bath mr-1"></i> 6 Baths</span>
+                            <span><i class="fas fa-ruler-combined mr-1"></i> 7,460 Sq.Ft.</span>
+                        </div>
+                        <button class="w-full bg-bjork-blue text-white py-2 px-4 rounded-md hover:bg-bjork-black transition-colors">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <button class="bg-transparent border-2 border-bjork-black text-bjork-black px-8 py-3 rounded-md hover:bg-bjork-black hover:text-white transition-all font-medium">
+                    View All Luxury Listings
+                </button>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: Featured Luxury Listings -->
+
+    <!-- @COMPONENT: About Michael Bjork -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <!-- A professional headshot of a real estate agent in a modern office setting -->
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=800" 
+                             alt="Michael Bjork - Luxury Real Estate Agent" 
+                             class="w-full h-96 object-cover rounded-lg shadow-2xl">
+                        <div class="absolute -bottom-6 -right-6 bg-bjork-beige text-white p-6 rounded-lg">
+                            <div class="text-2xl font-bold">$3B+</div>
+                            <div class="text-sm">Career Sales</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h2 class="text-4xl md:text-5xl font-light font-dazzle tracking-wider text-bjork-black mb-6">
+                        MICHAEL BJORK
+                    </h2>
+                    <h3 class="text-xl text-bjork-beige mb-6">Principal Broker & Founder</h3>
+                    
+                    <p class="text-lg text-gray-600 mb-6 leading-relaxed">
+                        At Bjork Group Real Estate, we believe that luxury is not a price point but an experience. 
+                        Our commitment to delivering unparalleled service, attention to detail, and a personalized 
+                        approach ensures that every client feels like a priority, no matter their budget.
+                    </p>
+                    
+                    <p class="text-lg text-gray-600 mb-8 leading-relaxed">
+                        With Bjork Group, luxury means going beyond expectations to create a friendly, personal 
+                        experience that transforms the way you buy and sell real estate in Nebraska.
+                    </p>
+                    
+                    <div class="grid grid-cols-2 gap-6 mb-8">
+                        <div class="text-center p-4 bg-bjork-beige-light rounded-lg">
+                            <div class="text-2xl font-bold text-bjork-black">15+</div>
+                            <div class="text-sm text-gray-600">Years Experience</div>
+                        </div>
+                        <div class="text-center p-4 bg-bjork-blue-light rounded-lg">
+                            <div class="text-2xl font-bold text-bjork-black">500+</div>
+                            <div class="text-sm text-gray-600">Homes Sold</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                        <button class="bg-bjork-black text-white px-6 py-3 rounded-md hover:bg-bjork-blue transition-colors font-medium">
+                            Schedule Consultation
+                        </button>
+                        <button class="border-2 border-bjork-black text-bjork-black px-6 py-3 rounded-md hover:bg-bjork-black hover:text-white transition-all font-medium">
+                            View Testimonials
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: About Michael Bjork -->
+
+    <!-- @COMPONENT: Communities Section -->
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-light font-dazzle tracking-wider text-bjork-black mb-4">
+                    EXPLORE COMMUNITIES
+                </h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Discover the finest neighborhoods across Omaha, Lincoln, and surrounding areas
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Omaha -->
+                <div class="relative group cursor-pointer overflow-hidden rounded-lg shadow-lg">
+                    <!-- Downtown Omaha skyline with modern buildings and urban development -->
+                    <div class="h-64 bg-cover bg-center transition-transform duration-300 group-hover:scale-110" 
+                         style="background-image: url('https://images.unsplash.com/photo-1449824913935-59a10b8d2000?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300');">
+                    </div>
+                    <div class="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-30 transition-all duration-300"></div>
+                    <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+                        <h3 class="text-2xl font-semibold mb-2">Omaha</h3>
+                        <p class="text-sm opacity-90">Downtown, Midtown, West Omaha</p>
+                        <div class="mt-2 text-sm">
+                            <span class="bg-white bg-opacity-20 px-2 py-1 rounded">3,715 Listings</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lincoln -->
+                <div class="relative group cursor-pointer overflow-hidden rounded-lg shadow-lg">
+                    <!-- Lincoln Nebraska state capitol building and surrounding residential area -->
+                    <div class="h-64 bg-cover bg-center transition-transform duration-300 group-hover:scale-110" 
+                         style="background-image: url('https://pixabay.com/get/gc8723ca3e100a6d52e33fd5c704f6c7644f22f8f06caf9b1e011e4f53dfdb2558ff31bccd92975ad42235dcec92546a32ab5078ed12536cbe161bf903cb04cac_1280.jpg');">
+                    </div>
+                    <div class="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-30 transition-all duration-300"></div>
+                    <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+                        <h3 class="text-2xl font-semibold mb-2">Lincoln</h3>
+                        <p class="text-sm opacity-90">Historic Haymarket, University Area</p>
+                        <div class="mt-2 text-sm">
+                            <span class="bg-white bg-opacity-20 px-2 py-1 rounded">1,247 Listings</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Elkhorn -->
+                <div class="relative group cursor-pointer overflow-hidden rounded-lg shadow-lg">
+                    <!-- Suburban neighborhood with tree-lined streets and well-maintained homes -->
+                    <div class="h-64 bg-cover bg-center transition-transform duration-300 group-hover:scale-110" 
+                         style="background-image: url('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300');">
+                    </div>
+                    <div class="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-30 transition-all duration-300"></div>
+                    <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+                        <h3 class="text-2xl font-semibold mb-2">Elkhorn</h3>
+                        <p class="text-sm opacity-90">Family-Friendly, Top Schools</p>
+                        <div class="mt-2 text-sm">
+                            <span class="bg-white bg-opacity-20 px-2 py-1 rounded">456 Listings</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Luxury Homes -->
+                <div class="relative group cursor-pointer overflow-hidden rounded-lg shadow-lg">
+                    <!-- Luxury estate with pool and landscaped grounds -->
+                    <div class="h-64 bg-cover bg-center transition-transform duration-300 group-hover:scale-110" 
+                         style="background-image: url('https://images.unsplash.com/photo-1613490493576-7fde63acd811?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300');">
+                    </div>
+                    <div class="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-30 transition-all duration-300"></div>
+                    <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+                        <h3 class="text-2xl font-semibold mb-2">Luxury Homes</h3>
+                        <p class="text-sm opacity-90">$1M+ Properties Statewide</p>
+                        <div class="mt-2 text-sm">
+                            <span class="bg-white bg-opacity-20 px-2 py-1 rounded">89 Listings</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: Communities Section -->
+
+    <!-- @COMPONENT: Market Insights -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-light font-dazzle tracking-wider text-bjork-black mb-4">
+                    MARKET INSIGHTS
+                </h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Stay informed with the latest real estate trends and market data
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Market Stats -->
+                <div class="lg:col-span-2">
+                    <div class="bg-gray-50 rounded-lg p-8">
+                        <h3 class="text-2xl font-semibold mb-6">Omaha Market Overview</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-bjork-blue mb-2">3,715</div>
+                                <div class="text-sm text-gray-600">Active Listings</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-bjork-beige mb-2">81</div>
+                                <div class="text-sm text-gray-600">Avg. Days on Market</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-bjork-black mb-2">$175</div>
+                                <div class="text-sm text-gray-600">Avg. Price/Sq.Ft.</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-green-600 mb-2">+5.2%</div>
+                                <div class="text-sm text-gray-600">YoY Price Growth</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Tools -->
+                <div class="space-y-6">
+                    <div class="bg-bjork-beige-light rounded-lg p-6">
+                        <h4 class="text-lg font-semibold mb-4">Property Valuation</h4>
+                        <p class="text-sm text-gray-600 mb-4">Get an instant estimate of your home's value</p>
+                        <button class="w-full bg-bjork-beige text-white py-2 px-4 rounded-md hover:bg-bjork-black transition-colors">
+                            Value My Home
+                        </button>
+                    </div>
+                    
+                    <div class="bg-bjork-blue-light rounded-lg p-6">
+                        <h4 class="text-lg font-semibold mb-4">Mortgage Calculator</h4>
+                        <p class="text-sm text-gray-600 mb-4">Calculate your monthly payments</p>
+                        <button class="w-full bg-bjork-blue text-white py-2 px-4 rounded-md hover:bg-bjork-black transition-colors">
+                            Calculate Payment
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: Market Insights -->
+
+    <!-- @COMPONENT: Recent Blog Posts -->
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-light font-dazzle tracking-wider text-bjork-black mb-4">
+                    MARKET UPDATES
+                </h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Expert insights and advice from Michael Bjork and the team
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Blog Post 1 -->
+                <article class="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+                    <!-- Modern real estate office interior with professional meeting space -->
+                    <div class="h-48 bg-cover bg-center" 
+                         style="background-image: url('https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300');">
+                    </div>
+                    <div class="p-6">
+                        <div class="text-sm text-bjork-beige mb-2">Buying a Home • July 30, 2024</div>
+                        <h3 class="text-xl font-semibold mb-3 text-bjork-black">
+                            Is Getting a Home Mortgage Still Too Difficult?
+                        </h3>
+                        <p class="text-gray-600 text-sm mb-4">
+                            Understanding the current mortgage landscape and how to improve your chances of approval in today's market.
+                        </p>
+                        <a href="#" class="text-bjork-blue hover:text-bjork-black transition-colors font-medium">
+                            Read More →
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Blog Post 2 -->
+                <article class="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+                    <!-- Winter home exterior with snow showing seasonal selling advantages -->
+                    <div class="h-48 bg-cover bg-center" 
+                         style="background-image: url('https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300');">
+                    </div>
+                    <div class="p-6">
+                        <div class="text-sm text-bjork-beige mb-2">Selling Your Home • July 30, 2024</div>
+                        <h3 class="text-xl font-semibold mb-3 text-bjork-black">
+                            Why You Should Consider Selling in the Winter
+                        </h3>
+                        <p class="text-gray-600 text-sm mb-4">
+                            Discover the unique advantages of listing your home during the winter months and how to attract serious buyers.
+                        </p>
+                        <a href="#" class="text-bjork-blue hover:text-bjork-black transition-colors font-medium">
+                            Read More →
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Blog Post 3 -->
+                <article class="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+                    <!-- Professional home inspection with inspector examining property details -->
+                    <div class="h-48 bg-cover bg-center" 
+                         style="background-image: url('https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300');">
+                    </div>
+                    <div class="p-6">
+                        <div class="text-sm text-bjork-beige mb-2">Buying a Home • July 30, 2024</div>
+                        <h3 class="text-xl font-semibold mb-3 text-bjork-black">
+                            Common Things to Look Out for Before Buying Your Dream Home
+                        </h3>
+                        <p class="text-gray-600 text-sm mb-4">
+                            Essential checklist items every buyer should consider before making an offer on their dream property.
+                        </p>
+                        <a href="#" class="text-bjork-blue hover:text-bjork-black transition-colors font-medium">
+                            Read More →
+                        </a>
+                    </div>
+                </article>
+            </div>
+            
+            <div class="text-center mt-12">
+                <button class="bg-transparent border-2 border-bjork-black text-bjork-black px-8 py-3 rounded-md hover:bg-bjork-black hover:text-white transition-all font-medium">
+                    View All Blog Posts
+                </button>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: Recent Blog Posts -->
+
+    <!-- @COMPONENT: Contact Section -->
+    <section class="py-20 bg-bjork-black text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div>
+                    <h2 class="text-4xl md:text-5xl font-light font-dazzle tracking-wider mb-6">
+                        LET'S CONNECT
+                    </h2>
+                    <p class="text-xl text-gray-300 mb-8">
+                        Ready to experience luxury real estate differently? 
+                        Contact us today for a personalized consultation.
+                    </p>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-center space-x-4">
+                            <div class="bg-bjork-beige p-3 rounded-lg">
+                                <i class="fas fa-phone text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold">(402) 522-6131</div>
+                                <div class="text-gray-400 text-sm">Call anytime</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4">
+                            <div class="bg-bjork-beige p-3 rounded-lg">
+                                <i class="fas fa-envelope text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold">michael@bjorkhomes.com</div>
+                                <div class="text-gray-400 text-sm">Email us</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4">
+                            <div class="bg-bjork-beige p-3 rounded-lg">
+                                <i class="fas fa-map-marker-alt text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold">331 Village Pointe Plaza</div>
+                                <div class="text-gray-400 text-sm">Omaha, NE 68130</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg p-8">
+                    <h3 class="text-2xl font-semibold text-bjork-black mb-6">Send us a message</h3>
+                    <form class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                                <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-bjork-blue focus:border-transparent text-gray-900">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                                <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-bjork-blue focus:border-transparent text-gray-900">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input type="email" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-bjork-blue focus:border-transparent text-gray-900">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                            <input type="tel" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-bjork-blue focus:border-transparent text-gray-900">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Message</label>
+                            <textarea rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-bjork-blue focus:border-transparent text-gray-900" placeholder="Tell us about your real estate needs..."></textarea>
+                        </div>
+                        
+                        <button type="submit" class="w-full bg-bjork-black text-white py-3 px-6 rounded-md hover:bg-bjork-blue transition-colors font-medium">
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: Contact Section -->
+
+    <!-- @COMPONENT: Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="md:col-span-2">
+                    <div class="text-2xl font-bold font-dazzle tracking-wider mb-4">
+                        BJORK GROUP
+                    </div>
+                    <p class="text-gray-400 mb-6 max-w-md">
+                        Luxury as an experience. Serving Omaha, Lincoln, and surrounding Nebraska communities with unparalleled real estate service.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="bg-gray-800 hover:bg-bjork-beige p-2 rounded transition-colors">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="bg-gray-800 hover:bg-bjork-beige p-2 rounded transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="bg-gray-800 hover:bg-bjork-beige p-2 rounded transition-colors">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">Properties</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Communities</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">About</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Services</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">Luxury Homes</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Property Valuation</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Market Analysis</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Investment Properties</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Relocation Services</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <div class="text-gray-400 text-sm">
+                    © 2025 Bjork Group Real Estate. All rights reserved.
+                </div>
+                <div class="text-gray-400 text-sm mt-4 md:mt-0">
+                    Licensed in Nebraska | MLS Member
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- @END_COMPONENT: Footer -->
+
+    <script>
+        // TODO: Implement property search functionality with MLS integration
+        // TODO: Add interactive map functionality
+        // TODO: Implement property filtering and sorting
+        // TODO: Add mortgage calculator logic
+        // TODO: Implement contact form submission with lead tracking
+        // TODO: Add property favorites/wishlist functionality
+        // TODO: Implement admin panel for code injection and pixel management
+        
+        (function() {
+            // Mobile menu toggle
+            const mobileMenuButton = document.querySelector('.lg\\:hidden button');
+            if (mobileMenuButton) {
+                mobileMenuButton.addEventListener('click', function() {
+                    // TODO: Implement mobile menu toggle
+                    console.log('Mobile menu toggle clicked');
+                });
+            }
+            
+            // Property card interactions
+            const propertyCards = document.querySelectorAll('.property-card-hover');
+            propertyCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    // TODO: Add property preview functionality
+                });
+            });
+            
+            // Heart/favorite button interactions
+            const favoriteButtons = document.querySelectorAll('.fa-heart');
+            favoriteButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    // TODO: Implement favorite/unfavorite functionality
+                    this.classList.toggle('fas');
+                    this.classList.toggle('far');
+                });
+            });
+        })();
+    </script>
+</body>
+</html>

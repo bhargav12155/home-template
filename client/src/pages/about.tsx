@@ -269,7 +269,7 @@ export default function About() {
               </Button>
             </Link>
             <Link href="/search">
-              <Button variant="outline" className="border-white text-white hover:bg-white hover:text-bjork-blue transition-colors duration-300 px-8">
+              <Button variant="outline" className="border-white text-white hover:bg-white hover:text-bjork-blue transition-colors duration-300 px-8 bg-transparent">
                 Browse Properties
               </Button>
             </Link>

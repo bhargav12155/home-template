@@ -87,7 +87,7 @@ export default function Footer() {
             </div>
             <div className="text-center md:text-right text-gray-600">
               <p className="text-sm">
-                MLS data courtesy of Great Plains REALTORS® Multiple Listing Service, Inc.
+                Property data feed for demonstration purposes only.
               </p>
             </div>
           </div>

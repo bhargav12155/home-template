@@ -1,17 +1,22 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { analyzePropertyStyle, batchAnalyzeStyles, getStyleKeywords, SUPPORTED_STYLES } from "./ai-style-analyzer";
+import {
+  analyzePropertyStyle,
+  batchAnalyzeStyles,
+  getStyleKeywords,
+  SUPPORTED_STYLES,
+} from "./ai-style-analyzer";
 import IdxSyncService from "./idx-sync-service";
 import { emailService } from "./email-service";
-import { 
-  insertPropertySchema, 
-  insertCommunitySchema, 
-  insertBlogPostSchema, 
-  insertLeadSchema, 
+import {
+  insertPropertySchema,
+  insertCommunitySchema,
+  insertBlogPostSchema,
+  insertLeadSchema,
   contactFormSchema,
   propertySearchSchema,
-  insertTrackingCodeSchema
+  insertTrackingCodeSchema,
 } from "@shared/schema";
 
 // Function to generate market insight blog posts from property data
@@ -20,16 +25,22 @@ function generateMarketInsightPosts(properties: any[]) {
 
   const posts = [];
   const currentDate = new Date();
-  const formattedDate = currentDate.toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+  const formattedDate = currentDate.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 
   // Calculate market statistics
   const totalProperties = properties.length;
-  const averagePrice = properties.reduce((sum, prop) => sum + (prop.listPrice || prop.soldPrice || 0), 0) / totalProperties;
-  const averageSqft = properties.reduce((sum, prop) => sum + (prop.sqft || 0), 0) / totalProperties;
+  const averagePrice =
+    properties.reduce(
+      (sum, prop) => sum + (prop.listPrice || prop.soldPrice || 0),
+      0
+    ) / totalProperties;
+  const averageSqft =
+    properties.reduce((sum, prop) => sum + (prop.sqft || 0), 0) /
+    totalProperties;
   const pricePerSqft = averagePrice / averageSqft;
 
   // Group by neighborhoods
@@ -44,8 +55,10 @@ function generateMarketInsightPosts(properties: any[]) {
   posts.push({
     id: 1,
     title: `Omaha Real Estate Market Report - ${formattedDate}`,
-    slug: 'omaha-market-report-' + currentDate.toISOString().split('T')[0],
-    excerpt: `Current market analysis of ${totalProperties} properties showing average price of $${Math.round(averagePrice).toLocaleString()}`,
+    slug: "omaha-market-report-" + currentDate.toISOString().split("T")[0],
+    excerpt: `Current market analysis of ${totalProperties} properties showing average price of $${Math.round(
+      averagePrice
+    ).toLocaleString()}`,
     content: `# Omaha Real Estate Market Analysis
 
 **Market Overview for ${formattedDate}**
@@ -59,86 +72,129 @@ Our latest analysis of ${totalProperties} properties in the Omaha area reveals i
 - **Properties Analyzed**: ${totalProperties}
 
 ## Market Insights
-The Omaha real estate market continues to show strong fundamentals with properties ranging from $${Math.min(...properties.map(p => p.listPrice || p.soldPrice || 0)).toLocaleString()} to $${Math.max(...properties.map(p => p.listPrice || p.soldPrice || 0)).toLocaleString()}.
+The Omaha real estate market continues to show strong fundamentals with properties ranging from $${Math.min(
+      ...properties.map((p) => p.listPrice || p.soldPrice || 0)
+    ).toLocaleString()} to $${Math.max(
+      ...properties.map((p) => p.listPrice || p.soldPrice || 0)
+    ).toLocaleString()}.
 
-${Object.keys(neighborhoods).length > 1 ? `## Neighborhood Highlights
-${Object.entries(neighborhoods).slice(0, 5).map(([name, props]) => 
-  `- **${name}**: ${(props as any[]).length} properties, avg $${Math.round((props as any[]).reduce((sum, p) => sum + (p.listPrice || p.soldPrice || 0), 0) / (props as any[]).length).toLocaleString()}`
-).join('\n')}` : ''}
+${
+  Object.keys(neighborhoods).length > 1
+    ? `## Neighborhood Highlights
+${Object.entries(neighborhoods)
+  .slice(0, 5)
+  .map(
+    ([name, props]) =>
+      `- **${name}**: ${(props as any[]).length} properties, avg $${Math.round(
+        (props as any[]).reduce(
+          (sum, p) => sum + (p.listPrice || p.soldPrice || 0),
+          0
+        ) / (props as any[]).length
+      ).toLocaleString()}`
+  )
+  .join("\n")}`
+    : ""
+}
 
 *Data sourced from current MLS listings and recent sales.*`,
-    category: 'Market Analysis',
-    image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    category: "Market Analysis",
+    image:
+      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     published: true,
     featured: true,
     createdAt: currentDate,
-    updatedAt: currentDate
+    updatedAt: currentDate,
   });
 
   // Price Range Analysis Post
   const priceRanges = {
-    'Under $200k': properties.filter(p => (p.listPrice || p.soldPrice || 0) < 200000).length,
-    '$200k-$300k': properties.filter(p => {
+    "Under $200k": properties.filter(
+      (p) => (p.listPrice || p.soldPrice || 0) < 200000
+    ).length,
+    "$200k-$300k": properties.filter((p) => {
       const price = p.listPrice || p.soldPrice || 0;
       return price >= 200000 && price < 300000;
     }).length,
-    '$300k-$400k': properties.filter(p => {
+    "$300k-$400k": properties.filter((p) => {
       const price = p.listPrice || p.soldPrice || 0;
       return price >= 300000 && price < 400000;
     }).length,
-    'Over $400k': properties.filter(p => (p.listPrice || p.soldPrice || 0) >= 400000).length
+    "Over $400k": properties.filter(
+      (p) => (p.listPrice || p.soldPrice || 0) >= 400000
+    ).length,
   };
 
   posts.push({
     id: 2,
-    title: 'Understanding Omaha Home Price Ranges: Where to Find Value',
-    slug: 'omaha-price-ranges-analysis',
-    excerpt: 'Comprehensive breakdown of property availability across different price segments in the Omaha market.',
+    title: "Understanding Omaha Home Price Ranges: Where to Find Value",
+    slug: "omaha-price-ranges-analysis",
+    excerpt:
+      "Comprehensive breakdown of property availability across different price segments in the Omaha market.",
     content: `# Understanding Omaha Home Price Ranges
 
 Finding the right home at the right price requires understanding the current market distribution. Here's what our latest data shows:
 
 ## Price Distribution Analysis
-${Object.entries(priceRanges).map(([range, count]) => 
-  `- **${range}**: ${count} properties (${Math.round((count / totalProperties) * 100)}% of market)`
-).join('\n')}
+${Object.entries(priceRanges)
+  .map(
+    ([range, count]) =>
+      `- **${range}**: ${count} properties (${Math.round(
+        (count / totalProperties) * 100
+      )}% of market)`
+  )
+  .join("\n")}
 
 ## What This Means for Buyers
-- **First-time buyers**: ${priceRanges['Under $200k']} homes available under $200k
-- **Move-up buyers**: Strong selection in the $200k-$400k range with ${priceRanges['$200k-$300k'] + priceRanges['$300k-$400k']} properties
-- **Luxury buyers**: ${priceRanges['Over $400k']} premium properties available
+- **First-time buyers**: ${
+      priceRanges["Under $200k"]
+    } homes available under $200k
+- **Move-up buyers**: Strong selection in the $200k-$400k range with ${
+      priceRanges["$200k-$300k"] + priceRanges["$300k-$400k"]
+    } properties
+- **Luxury buyers**: ${priceRanges["Over $400k"]} premium properties available
 
 The current market offers opportunities across all price points, with particularly strong inventory in the middle price ranges.
 
 *Contact our team to explore properties in your preferred price range.*`,
-    category: 'Buyer Guide',
-    image: 'https://images.unsplash.com/photo-1582407947304-fd86f028f716?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    category: "Buyer Guide",
+    image:
+      "https://images.unsplash.com/photo-1582407947304-fd86f028f716?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     published: true,
     featured: false,
     createdAt: new Date(currentDate.getTime() - 86400000), // 1 day ago
-    updatedAt: new Date(currentDate.getTime() - 86400000)
+    updatedAt: new Date(currentDate.getTime() - 86400000),
   });
 
   // Investment Opportunities Post
-  const investmentProperties = properties.filter(p => (p.listPrice || p.soldPrice || 0) < averagePrice);
-  
+  const investmentProperties = properties.filter(
+    (p) => (p.listPrice || p.soldPrice || 0) < averagePrice
+  );
+
   posts.push({
     id: 3,
-    title: 'Investment Opportunities in Omaha Real Estate',
-    slug: 'omaha-investment-opportunities',
+    title: "Investment Opportunities in Omaha Real Estate",
+    slug: "omaha-investment-opportunities",
     excerpt: `Discover ${investmentProperties.length} potential investment properties below market average pricing.`,
     content: `# Investment Opportunities in Omaha
 
 The Omaha real estate market presents compelling investment opportunities for both new and experienced investors.
 
 ## Current Investment Landscape
-- **Below-Average Pricing**: ${investmentProperties.length} properties priced below the market average of $${Math.round(averagePrice).toLocaleString()}
-- **Average Price Per Square Foot**: $${Math.round(pricePerSqft)} provides good value compared to national averages
+- **Below-Average Pricing**: ${
+      investmentProperties.length
+    } properties priced below the market average of $${Math.round(
+      averagePrice
+    ).toLocaleString()}
+- **Average Price Per Square Foot**: $${Math.round(
+      pricePerSqft
+    )} provides good value compared to national averages
 - **Diverse Property Types**: Options ranging from single-family homes to multi-unit properties
 
 ## Key Investment Metrics
 - **Market Average Price**: $${Math.round(averagePrice).toLocaleString()}
-- **Value Properties**: Properties starting at $${Math.min(...investmentProperties.map(p => p.listPrice || p.soldPrice || 0)).toLocaleString()}
+- **Value Properties**: Properties starting at $${Math.min(
+      ...investmentProperties.map((p) => p.listPrice || p.soldPrice || 0)
+    ).toLocaleString()}
 - **Potential ROI**: Favorable cap rates in emerging neighborhoods
 
 ## Why Invest in Omaha?
@@ -148,12 +204,13 @@ The Omaha real estate market presents compelling investment opportunities for bo
 - Affordable compared to coastal markets
 
 *Ready to explore investment opportunities? Contact us for a personalized market analysis.*`,
-    category: 'Investment',
-    image: 'https://images.unsplash.com/photo-1494526585095-c41746248156?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    category: "Investment",
+    image:
+      "https://images.unsplash.com/photo-1494526585095-c41746248156?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     published: true,
     featured: false,
     createdAt: new Date(currentDate.getTime() - 172800000), // 2 days ago
-    updatedAt: new Date(currentDate.getTime() - 172800000)
+    updatedAt: new Date(currentDate.getTime() - 172800000),
   });
 
   return posts;
@@ -161,6 +218,235 @@ The Omaha real estate market presents compelling investment opportunities for bo
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize IDX sync service
+  const paragonCache = new Map<string, { ts: number; data: any }>();
+  const PARAGON_TTL_MS = 60_000; // 1 minute cache
+
+  app.get("/api/paragon/properties", async (req, res) => {
+    try {
+      const {
+        minPrice = "150000",
+        maxPrice = "40000000", // default expanded to 40M
+        city = "omaha",
+        status = "Active", // Active | Closed | Both
+        days = "30", // recent days for closed
+        limit = "50",
+        noCache = "0",
+        includeImages = "0", // when 1, attempt to pull media (best-effort)
+      } = req.query as Record<string, string>;
+
+      const sinceDate = (() => {
+        const d = new Date();
+        d.setDate(d.getDate() - (parseInt(days, 10) || 30));
+        return d.toISOString().split("T")[0];
+      })();
+
+      const normalizedCity = city.toLowerCase();
+      const priceClause = `((ListPrice ge ${minPrice} and ListPrice le ${maxPrice}) or (ClosePrice ge ${minPrice} and ClosePrice le ${maxPrice}))`;
+      const cityClause = `tolower(City) eq '${normalizedCity}'`;
+
+      let statusClause = "";
+      if (status.toLowerCase() === "active") {
+        statusClause = `StandardStatus eq 'Active'`;
+      } else if (status.toLowerCase() === "closed") {
+        statusClause = `(StandardStatus eq 'Closed' and CloseDate ge ${sinceDate})`;
+      } else if (status.toLowerCase() === "both") {
+        statusClause = `((StandardStatus eq 'Active') or (StandardStatus eq 'Closed' and CloseDate ge ${sinceDate}))`;
+      }
+
+      const filterParts = [cityClause, priceClause];
+      if (statusClause) filterParts.push(statusClause);
+      const filter = encodeURIComponent(filterParts.join(" and "));
+
+      const select = encodeURIComponent(
+        [
+          "ListingKey",
+          "City",
+          "UnparsedAddress",
+          "ListPrice",
+          "ClosePrice",
+          "CloseDate",
+          "PostalCode",
+          "StateOrProvince",
+          "BedroomsTotal",
+          "BathroomsTotalInteger",
+          "AboveGradeFinishedArea",
+          "YearBuilt",
+          "SubdivisionName",
+          "Latitude",
+          "Longitude",
+          "StandardStatus",
+        ].join(",")
+      );
+
+      const accessToken =
+        process.env.PARAGON_ACCESS_TOKEN || "429b18690390adfa776f0b727dfc78cc";
+      const top = Math.min(100, Math.max(1, parseInt(limit, 10) || 50));
+      const url = `https://api.paragonapi.com/api/v2/OData/bk9/Properties?access_token=${accessToken}&$filter=${filter}&$select=${select}&$orderby=ListPrice%20desc&$top=${top}`;
+
+      const cacheKey = url;
+      const now = Date.now();
+      // Normalize helper for matching ids reliably
+      const normalizeId = (v: string | null | undefined) =>
+        (v || "").trim().toLowerCase();
+      const excludedMlsIdsRaw = ["655d2b69f2d8ddd5f56afd5312a543ca"]; // extendable
+      const excludedMlsIds = new Set<string>(
+        excludedMlsIdsRaw.map((id) => normalizeId(id))
+      );
+      const cached = paragonCache.get(cacheKey);
+      if (noCache !== "1" && cached && now - cached.ts < PARAGON_TTL_MS) {
+        // sanitize cached data for exclusions
+        const cleanedData = cached.data.data.filter(
+          (p: any) => !excludedMlsIds.has(normalizeId(p.mlsId))
+        );
+        let finalPayload = cached.data;
+        if (cleanedData.length !== cached.data.data.length) {
+          finalPayload = { ...cached.data, data: cleanedData };
+          paragonCache.set(cacheKey, { ts: now, data: finalPayload });
+        }
+        return res.json({ ...finalPayload, cached: true });
+      }
+
+      const r = await fetch(url, { headers: { Accept: "application/json" } });
+      if (!r.ok) {
+        const body = await r.text();
+        return res.status(500).json({
+          message: "Failed to fetch Paragon properties",
+          error: `Paragon API ${r.status}: ${body}`,
+          request: { url, filter: decodeURIComponent(filter) },
+        });
+      }
+      const data = await r.json();
+      const rawItems = data.value || data.data || [];
+      if (!Array.isArray(rawItems)) {
+        console.warn("Unexpected Paragon response shape", Object.keys(data));
+      }
+      const mapped = rawItems.map((p: any) => {
+        // Attempt to surface first media URLs if present (only if Paragon included them implicitly)
+        const media: any[] = Array.isArray(p.Media) ? p.Media : [];
+        const imageUrls = media
+          .sort((a, b) => (a?.Order || 0) - (b?.Order || 0))
+          .slice(0, 5)
+          .map((m) => m?.MediaURL)
+          .filter(Boolean);
+        return {
+          id: p.ListingKey || Math.random().toString(36).slice(2),
+          mlsId: p.ListingKey,
+          listingKey: p.ListingKey,
+          title: `${p.BedroomsTotal || "?"} Bed ${
+            p.BathroomsTotalInteger || "?"
+          } Bath in ${p.City}`,
+          description: null,
+          price: String(p.ListPrice || p.ClosePrice || 0),
+          address: p.UnparsedAddress,
+          city: p.City,
+          state: p.StateOrProvince,
+          zipCode: p.PostalCode,
+          beds: p.BedroomsTotal || 0,
+          baths: String(p.BathroomsTotalInteger || 0),
+          sqft: p.AboveGradeFinishedArea || 0,
+          yearBuilt: p.YearBuilt || null,
+          propertyType: p.PropertySubType || "Residential",
+          status: (p.StandardStatus || "").toLowerCase(),
+          standardStatus: p.StandardStatus,
+          featured: (p.ListPrice || p.ClosePrice || 0) >= 150000,
+          luxury: (p.ListPrice || p.ClosePrice || 0) >= 400000,
+          images: imageUrls,
+          neighborhood: p.SubdivisionName || null,
+          schoolDistrict: null,
+          style: null,
+          coordinates: { lat: p.Latitude, lng: p.Longitude },
+          features: [],
+          architecturalStyle: null,
+          secondaryStyle: null,
+          styleConfidence: null,
+          styleFeatures: [],
+          styleAnalyzed: false,
+          listingAgentKey: null,
+          listingOfficeName: null,
+          listingContractDate: null,
+          daysOnMarket: null,
+          originalListPrice: p.ListPrice || null,
+          mlsStatus: p.StandardStatus,
+          modificationTimestamp: p.CloseDate || null,
+          photoCount: media.length || 0,
+          virtualTourUrl: null,
+          isIdxListing: true,
+          idxSyncedAt: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+      });
+
+      // Exclude specific MLS ids (user provided) - can be expanded (same set as cache sanitization)
+      const cleaned = mapped.filter(
+        (p: any) => !excludedMlsIds.has(normalizeId(p.mlsId))
+      );
+      if (mapped.length !== cleaned.length) {
+        console.log(
+          `Excluded ${
+            mapped.length - cleaned.length
+          } listing(s) by MLS id filter.`
+        );
+      }
+
+      // Optionally enrich images via per-listing fetch (only if includeImages=1 and we still have empties)
+      if (includeImages === "1") {
+        const needImages = cleaned.filter((p: any) => !p.images.length);
+        const MAX_ENRICH = 20; // safety cap
+        const subset = needImages.slice(0, MAX_ENRICH);
+        if (subset.length) {
+          const detailPromises = subset.map(async (prop: any) => {
+            try {
+              const detailUrl = `https://api.paragonapi.com/api/v2/OData/bk9/Property('${prop.mlsId}')?access_token=${accessToken}`;
+              const dr = await fetch(detailUrl, {
+                headers: { Accept: "application/json" },
+              });
+              if (!dr.ok) return;
+              const dj = await dr.json();
+              const media: any[] = Array.isArray(dj.Media) ? dj.Media : [];
+              const imgs = media
+                .sort((a, b) => (a?.Order || 0) - (b?.Order || 0))
+                .slice(0, 5)
+                .map((m) => m?.MediaURL)
+                .filter(Boolean);
+              if (imgs.length) {
+                prop.images = imgs;
+                prop.photoCount = media.length || imgs.length;
+              }
+            } catch (e) {
+              // swallow individual errors
+            }
+          });
+          await Promise.all(detailPromises);
+        }
+      }
+
+      const payload = {
+        data: cleaned,
+        source: "paragon",
+        query: {
+          city: normalizedCity,
+          minPrice,
+          maxPrice,
+          status,
+          sinceDate:
+            status.toLowerCase() === "closed" || status.toLowerCase() === "both"
+              ? sinceDate
+              : null,
+          limit: top,
+          includeImages: includeImages === "1",
+        },
+        cached: false,
+      };
+      paragonCache.set(cacheKey, { ts: now, data: payload });
+      res.json(payload);
+    } catch (error) {
+      res.status(500).json({
+        message: "Failed to fetch Paragon properties",
+        error: (error as any)?.message || String(error),
+      });
+    }
+  });
   const idxSyncService = new IdxSyncService(storage);
   // Properties endpoints
   app.get("/api/properties", async (req, res) => {
@@ -178,7 +464,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const properties = await storage.getFeaturedProperties();
       res.json(properties);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch featured properties", error });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch featured properties", error });
     }
   });
 
@@ -187,7 +475,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const properties = await storage.getLuxuryProperties();
       res.json(properties);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch luxury properties", error });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch luxury properties", error });
     }
   });
 
@@ -217,93 +507,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // External API proxy endpoint for featured luxury listings
   app.get("/api/properties/external/featured", async (req, res) => {
     try {
-      const response = await fetch("http://gbcma.us-east-2.elasticbeanstalk.com/api/cma-comparables?city=Omaha&min_price=200000&max_price=400000");
+      const response = await fetch(
+        "http://gbcma.us-east-2.elasticbeanstalk.com/api/cma-comparables?city=Omaha&min_price=200000&max_price=400000"
+      );
       if (!response.ok) {
-        throw new Error(`External API returned ${response.status}: ${response.statusText}`);
+        throw new Error(
+          `External API returned ${response.status}: ${response.statusText}`
+        );
       }
       const data = await response.json();
       res.json(data);
     } catch (error) {
       console.error("Failed to fetch external properties:", error);
-      res.status(500).json({ message: "Failed to fetch external properties", error: error.message });
+      res.status(500).json({
+        message: "Failed to fetch external properties",
+        error: (error as any)?.message || String(error),
+      });
     }
   });
 
-  // AI Style Analysis endpoints
-  app.post("/api/properties/:id/analyze-style", async (req, res) => {
+  // CMA API proxy endpoint for home search and general listings
+  app.get("/api/cma-comparables", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
-      const property = await storage.getProperty(id);
-      if (!property) {
-        return res.status(404).json({ message: "Property not found" });
-      }
-      
-      if (!property.images || property.images.length === 0) {
-        return res.status(400).json({ message: "Property has no images to analyze" });
-      }
+      const {
+        city = "Omaha",
+        min_price = "150000",
+        max_price = "350000",
+        ...otherParams
+      } = req.query;
 
-      const primaryImage = property.images[0];
-      const styleAnalysis = await analyzePropertyStyle(primaryImage);
-      
-      // Update property with style data
-      await storage.updatePropertyStyle(id, {
-        architecturalStyle: styleAnalysis.primary,
-        secondaryStyle: styleAnalysis.secondary,
-        styleConfidence: styleAnalysis.confidence,
-        styleFeatures: styleAnalysis.features,
-        styleAnalyzed: true
+      // Build the query string for the external API
+      const queryParams = new URLSearchParams({
+        city: city as string,
+        min_price: min_price as string,
+        max_price: max_price as string,
+        ...Object.fromEntries(
+          Object.entries(otherParams).map(([key, value]) => [
+            key,
+            String(value),
+          ])
+        ),
       });
 
-      res.json(styleAnalysis);
-    } catch (error) {
-      res.status(500).json({ message: "Style analysis failed", error });
-    }
-  });
+      const externalUrl = `http://gbcma.us-east-2.elasticbeanstalk.com/api/cma-comparables?${queryParams}`;
+      const response = await fetch(externalUrl);
 
-  app.get("/api/architectural-styles", async (req, res) => {
-    try {
-      res.json({ 
-        styles: SUPPORTED_STYLES,
-        keywords: SUPPORTED_STYLES.reduce((acc, style) => {
-          acc[style] = getStyleKeywords(style);
-          return acc;
-        }, {} as Record<string, string[]>)
+      if (!response.ok) {
+        throw new Error(
+          `External API returned ${response.status}: ${response.statusText}`
+        );
+      }
+
+      const raw = await response.json();
+      const normalized = Array.isArray(raw?.data)
+        ? raw
+        : { data: Array.isArray(raw) ? raw : [], raw }; // ensure consistent shape
+      res.json(normalized);
+    } catch (error) {
+      console.error("Failed to fetch CMA data:", error);
+      res.status(500).json({
+        message: "Failed to fetch CMA data",
+        error: (error as any)?.message || String(error),
       });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch styles", error });
     }
   });
 
-  app.post("/api/properties/batch-analyze-styles", async (req, res) => {
-    try {
-      const properties = await storage.getProperties({});
-      const imagesToAnalyze = properties
-        .filter(p => !p.styleAnalyzed && p.images && p.images.length > 0)
-        .map(p => ({ id: p.id.toString(), imageUrl: p.images![0] }));
-
-      if (imagesToAnalyze.length === 0) {
-        return res.json({ message: "No properties need style analysis", analyzed: 0 });
-      }
-
-      const styleResults = await batchAnalyzeStyles(imagesToAnalyze);
-      
-      let updated = 0;
-      for (const [propertyId, style] of Array.from(styleResults.entries())) {
-        await storage.updatePropertyStyle(parseInt(propertyId), {
-          architecturalStyle: style.primary,
-          secondaryStyle: style.secondary,
-          styleConfidence: style.confidence,
-          styleFeatures: style.features,
-          styleAnalyzed: true
-        });
-        updated++;
-      }
-
-      res.json({ message: `Analyzed ${updated} properties`, analyzed: updated });
-    } catch (error) {
-      res.status(500).json({ message: "Batch analysis failed", error });
-    }
-  });
+  // (Removed duplicate simplified Paragon route below in favor of unified implementation defined earlier.)
 
   // Communities endpoints
   app.get("/api/communities", async (req, res) => {
@@ -332,19 +601,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // First try to get external property data to generate market insights
       try {
-        const response = await fetch("http://gbcma.us-east-2.elasticbeanstalk.com/api/cma-comparables?city=Omaha&min_price=150000&max_price=350000");
+        const response = await fetch(
+          "http://gbcma.us-east-2.elasticbeanstalk.com/api/cma-comparables?city=Omaha&min_price=150000&max_price=350000"
+        );
         if (response.ok) {
           const externalData = await response.json();
           const properties = externalData.data || [];
-          
+
           // Generate blog posts from property market data
           const marketInsightPosts = generateMarketInsightPosts(properties);
           return res.json(marketInsightPosts);
         }
       } catch (externalError) {
-        console.log("External data not available, falling back to local blog posts");
+        console.log(
+          "External data not available, falling back to local blog posts"
+        );
       }
-      
+
       // Fallback to local database
       const published = req.query.published === "true";
       const posts = await storage.getBlogPosts(published);
@@ -378,7 +651,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         propertyAddress: contactData.propertyAddress,
         interest: contactData.interest,
         message: contactData.message,
-        source: "website"
+        source: "website",
       });
 
       // Send email notifications
@@ -386,18 +659,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           // Send notification to admin
           await emailService.sendLeadNotification(lead);
-          
+
           // Send confirmation to lead
           await emailService.sendLeadConfirmation(lead);
-          
+
           console.log(`Email notifications sent for lead ${lead.id}`);
         } catch (emailError) {
-          console.error('Failed to send email notifications:', emailError);
+          console.error("Failed to send email notifications:", emailError);
           // Don't fail the request if email fails
         }
       }
 
-      res.status(201).json({ message: "Contact form submitted successfully", leadId: lead.id });
+      res.status(201).json({
+        message: "Contact form submitted successfully",
+        leadId: lead.id,
+      });
     } catch (error) {
       res.status(400).json({ message: "Invalid contact form data", error });
     }
@@ -419,7 +695,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const codes = await storage.getTrackingCodes(active);
       res.json(codes);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch tracking codes", error });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch tracking codes", error });
     }
   });
 
@@ -448,13 +726,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Market stats endpoint
-  app.get("/api/market-stats", async (req, res) => {
+  app.get("/api/market-stats", async (_req, res) => {
     try {
-      const area = req.query.area as string;
-      const stats = await storage.getMarketStats(area);
+      const stats = await storage.getMarketStats();
       res.json(stats);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch market stats", error });
+      res.status(500).json({
+        message: "Failed to fetch market stats",
+        error: (error as any)?.message || String(error),
+      });
     }
   });
 
@@ -473,12 +753,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { type } = req.body;
       let result;
 
-      if (type === 'properties') {
+      if (type === "properties") {
         result = await idxSyncService.syncProperties();
-      } else if (type === 'full') {
+      } else if (type === "full") {
         result = await idxSyncService.fullSync();
       } else {
-        return res.status(400).json({ message: "Invalid sync type. Use 'properties' or 'full'" });
+        return res
+          .status(400)
+          .json({ message: "Invalid sync type. Use 'properties' or 'full'" });
       }
 
       res.json(result);
@@ -503,15 +785,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/template", async (req, res) => {
     try {
       const template = await storage.getTemplate();
-      res.json(template || {
-        companyName: "Your Real Estate Company",
-        agentName: "Your Name",
-        agentTitle: "Principal Broker",
-        companyDescription: "We believe that luxury is not a price point but an experience.",
-        homesSold: 500,
-        totalSalesVolume: "$200M+",
-        serviceAreas: ["Your Primary City", "Your Secondary City"]
-      });
+      res.json(
+        template || {
+          companyName: "Your Real Estate Company",
+          agentName: "Your Name",
+          agentTitle: "Principal Broker",
+          companyDescription:
+            "We believe that luxury is not a price point but an experience.",
+          homesSold: 500,
+          totalSalesVolume: "$200M+",
+          serviceAreas: ["Your Primary City", "Your Secondary City"],
+        }
+      );
     } catch (error) {
       console.error("Error fetching template:", error);
       res.status(500).json({ message: "Failed to fetch template" });

@@ -1,18 +1,23 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import PropertySearchComponent from "@/components/property/property-search";
 import PropertyCard from "@/components/property/property-card";
+import GoogleMap from "@/components/google-map";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Grid, List, Map } from "lucide-react";
-import type { Property, PropertySearch } from "@shared/schema";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Grid, List, Map, Heart, Search as SearchIcon, Filter, ChevronDown } from "lucide-react";
+import type { PropertySearch } from "@shared/schema";
+import { usePropertySearch } from "@/hooks/usePropertySearch";
 
 export default function Search() {
   const [location] = useLocation();
-  const [viewMode, setViewMode] = useState<"grid" | "list" | "map">("grid");
+    const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useState<PropertySearch>({});
+  const [showFilters, setShowFilters] = useState(false);
 
   // Parse URL parameters on mount
   useEffect(() => {
@@ -32,10 +37,7 @@ export default function Search() {
     setSearchParams(params);
   }, [location]);
 
-  const { data: properties, isLoading, error } = useQuery<Property[]>({
-    queryKey: ["/api/properties", searchParams],
-    enabled: true,
-  });
+  const { data: properties, isLoading, error, isExternal } = usePropertySearch(searchParams);
 
   const handleSearch = (params: PropertySearch) => {
     setSearchParams(params);
@@ -53,118 +55,239 @@ export default function Search() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8">
-          <h1 className="text-4xl font-display font-light text-bjork-black mb-4">
-            Property <span className="text-bjork-beige">Search</span>
-          </h1>
-          <p className="text-lg text-gray-600">
-            Find your perfect home in Nebraska's premier communities
-          </p>
-        </div>
-
-        <PropertySearchComponent onSearch={handleSearch} initialParams={searchParams} />
-
-        {/* Results Header */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-          <div className="flex items-center space-x-4">
-            {properties && (
-              <Badge variant="outline" className="bg-white">
-                {properties.length} {properties.length === 1 ? 'Property' : 'Properties'} Found
-              </Badge>
-            )}
-            {searchParams.query && (
-              <Badge className="bg-bjork-beige text-white">
-                Search: "{searchParams.query}"
-              </Badge>
-            )}
-            {searchParams.luxury && (
-              <Badge className="bg-bjork-blue text-white">Luxury</Badge>
-            )}
-            {searchParams.featured && (
-              <Badge className="bg-green-500 text-white">Featured</Badge>
-            )}
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Button
-              variant={viewMode === "grid" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setViewMode("grid")}
-              className={viewMode === "grid" ? "bg-bjork-black text-white" : ""}
-            >
-              <Grid className="w-4 h-4" />
-            </Button>
-            <Button
-              variant={viewMode === "list" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setViewMode("list")}
-              className={viewMode === "list" ? "bg-bjork-black text-white" : ""}
-            >
-              <List className="w-4 h-4" />
-            </Button>
-            <Button
-              variant={viewMode === "map" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setViewMode("map")}
-              className={viewMode === "map" ? "bg-bjork-black text-white" : ""}
-            >
-              <Map className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Results */}
-        {error ? (
-          <div className="text-center py-12">
-            <p className="text-red-600 mb-4">Failed to load properties</p>
-            <Button onClick={() => window.location.reload()} variant="outline">
-              Retry
-            </Button>
-          </div>
-        ) : isLoading ? (
-          <div className={`grid gap-8 ${viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"}`}>
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="space-y-4">
-                <Skeleton className="h-64 w-full rounded-lg" />
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-                <Skeleton className="h-10 w-full" />
-              </div>
-            ))}
-          </div>
-        ) : properties && properties.length > 0 ? (
-          viewMode === "map" ? (
-            <div className="bg-white rounded-lg shadow p-8 text-center">
-              <h3 className="text-xl font-display mb-4">Interactive Map View</h3>
-              <p className="text-gray-600 mb-4">
-                Map integration will be implemented with Leaflet to show property locations
-              </p>
-              <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
-                <p className="text-gray-500">Map component placeholder</p>
+    <div className="min-h-screen bg-white pt-20">
+      {/* Header with Search and Filters */}
+      <div className="bg-white border-b border-gray-200 sticky top-20 z-40">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          {/* Top Row - Main Search */}
+          <div className="flex items-center gap-4 mb-4">
+            <h1 className="text-2xl font-display font-bold text-bjork-black">
+              Lincoln, NE Homes for Sale
+            </h1>
+            <div className="flex-1 max-w-2xl">
+              <div className="relative">
+                <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Address, City, or Zip Code"
+                  className="pl-10 pr-4 py-2 border-gray-300"
+                  value={searchParams.query || ""}
+                  onChange={(e) => setSearchParams(prev => ({ ...prev, query: e.target.value }))}
+                />
               </div>
             </div>
-          ) : (
-            <div className={`grid gap-8 ${viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"}`}>
-              {properties.map((property) => (
-                <PropertyCard key={property.id} property={property} />
+            <Button 
+              className="bg-red-600 hover:bg-red-700 text-white px-6"
+              onClick={() => handleSearch(searchParams)}
+            >
+              <Heart className="h-4 w-4 mr-2" />
+              Save Search
+            </Button>
+          </div>
+
+          {/* Filter Row */}
+          <div className="flex items-center gap-4 flex-wrap">
+            <Select value={searchParams.minPrice?.toString() || ""} onValueChange={(value) => setSearchParams(prev => ({ ...prev, minPrice: value ? parseInt(value) : undefined }))}>
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="PRICE" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="100000">$100K+</SelectItem>
+                <SelectItem value="200000">$200K+</SelectItem>
+                <SelectItem value="300000">$300K+</SelectItem>
+                <SelectItem value="400000">$400K+</SelectItem>
+                <SelectItem value="500000">$500K+</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={searchParams.beds?.toString() || ""} onValueChange={(value) => setSearchParams(prev => ({ ...prev, beds: value ? parseInt(value) : undefined }))}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="BED & BATH" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">1+ Bed</SelectItem>
+                <SelectItem value="2">2+ Beds</SelectItem>
+                <SelectItem value="3">3+ Beds</SelectItem>
+                <SelectItem value="4">4+ Beds</SelectItem>
+                <SelectItem value="5">5+ Beds</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={searchParams.propertyType || ""} onValueChange={(value) => setSearchParams(prev => ({ ...prev, propertyType: value || undefined }))}>
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="TYPE" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Single Family">House</SelectItem>
+                <SelectItem value="Condo">Condo</SelectItem>
+                <SelectItem value="Townhouse">Townhouse</SelectItem>
+                <SelectItem value="Multi-Family">Multi-Family</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select>
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="STATUS" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">For Sale</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="sold">Sold</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button variant="outline" className="border-gray-300">
+              <Filter className="h-4 w-4 mr-2" />
+              ALL FILTERS
+            </Button>
+
+            {/* View Toggle */}
+            <div className="ml-auto flex items-center gap-2">
+              <Button
+                variant={viewMode === "grid" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("grid")}
+                className={viewMode === "grid" ? "bg-bjork-black text-white" : ""}
+              >
+                <Grid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("list")}
+                className={viewMode === "list" ? "bg-bjork-black text-white" : ""}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Results count */}
+          <div className="flex items-center justify-between mt-4">
+            <div className="text-sm text-gray-600">
+              <span className="font-bold text-bjork-black">{properties?.length || 0}</span> of{" "}
+              <span className="font-bold text-bjork-black">1084</span> listings
+              <span className="ml-4">Sort: <Button variant="link" className="p-0 h-auto text-blue-600">Newest <ChevronDown className="h-3 w-3 ml-1" /></Button></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex h-[calc(100vh-200px)]">
+        {/* Map Section */}
+        <div className="w-1/2 relative">
+          <GoogleMap
+            properties={properties || []}
+            center={{ lat: 40.8136, lng: -96.7026 }} // Lincoln, NE
+            zoom={12}
+            onPropertySelect={(property) => {
+              setSelectedProperty(property.id);
+              // Scroll to property in the list
+              const element = document.getElementById(`property-${property.id}`);
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            }}
+          />
+        </div>
+
+        {/* Properties List Section */}
+        <div className="w-1/2 overflow-y-auto bg-white">
+          {isLoading ? (
+            <div className="p-6 space-y-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="border rounded-lg p-4">
+                  <Skeleton className="h-48 w-full mb-4" />
+                  <Skeleton className="h-6 w-3/4 mb-2" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
               ))}
             </div>
-          )
-        ) : (
-          <div className="text-center py-16">
-            <h3 className="text-2xl font-display text-gray-600 mb-4">No Properties Found</h3>
-            <p className="text-gray-500 mb-8">Try adjusting your search criteria to see more results.</p>
-            <Button 
-              onClick={() => handleSearch({})}
-              className="bg-bjork-black text-white hover:bg-bjork-blue"
-            >
-              Clear All Filters
-            </Button>
-          </div>
-        )}
+          ) : error ? (
+            <div className="p-6 text-center">
+              <p className="text-red-600">Error loading properties: {error.message}</p>
+            </div>
+          ) : viewMode === "grid" ? (
+            <div className="p-6 grid grid-cols-1 gap-6">
+              {properties?.map((property) => (
+                <div
+                  key={property.id}
+                  id={`property-${property.id}`}
+                  className={`transition-all duration-300 ${
+                    selectedProperty === property.id 
+                      ? 'ring-2 ring-bjork-black ring-offset-2' 
+                      : ''
+                  }`}
+                >
+                  <PropertyCard
+                    property={property}
+                    className="hover:shadow-lg transition-shadow"
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-200">
+              {properties?.map((property) => (
+                <div
+                  key={property.id}
+                  id={`property-${property.id}`}
+                  className={`transition-all duration-300 ${
+                    selectedProperty === property.id 
+                      ? 'bg-bjork-beige/10 border-l-4 border-bjork-black' 
+                      : 'hover:bg-gray-50'
+                  }`}
+                >
+                  <PropertyCard
+                    property={property}
+                    variant="horizontal"
+                    className="p-6 transition-colors"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {properties && properties.length === 0 && !isLoading && (
+            <div className="p-12 text-center">
+              <p className="text-gray-600 mb-4">No properties found matching your criteria.</p>
+              <Button 
+                variant="outline"
+                onClick={() => setSearchParams({})}
+                className="border-bjork-black text-bjork-black hover:bg-bjork-black hover:text-white"
+              >
+                Clear Filters
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Bottom CTA Section */}
+      <section className="bg-bjork-black text-white py-12">
+        <div className="max-w-6xl mx-auto px-6 text-center">
+          <h2 className="text-3xl md:text-4xl font-display font-light mb-4">
+            Search & Save Your Favorite <span className="font-bold text-bjork-beige">Homes For Sale</span> In Lincoln, NE & Surrounding Areas
+          </h2>
+          <p className="text-lg mb-8 max-w-4xl mx-auto leading-relaxed">
+            Search hundreds of homes for sale in Lincoln, NE & surrounding areas. Save your searches and get notified of new listings "before" they hit the 
+            MLS! When you save a search, any new homes matching your wish list criteria will be delivered straight to your inbox the moment they go up for sale.
+          </p>
+          
+          <div className="bg-white/10 rounded-lg p-8 max-w-2xl mx-auto">
+            <h3 className="text-2xl font-bold mb-6 text-bjork-beige">Get in Touch</h3>
+            <p className="mb-6">If you are ready to narrow your search and learn more about homes for sale in Lincoln, NE — Get in touch now!</p>
+            <div className="space-y-4">
+              <Button 
+                size="lg"
+                className="bg-bjork-beige hover:bg-bjork-beige/90 text-bjork-black w-full"
+              >
+                Contact Our Team
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

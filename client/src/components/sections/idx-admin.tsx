@@ -124,7 +124,7 @@ export default function IdxAdmin() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">IDX Integration</h2>
-          <p className="text-gray-600">Manage MLS data synchronization</p>
+          <p className="text-gray-600">Manage live property data synchronization</p>
         </div>
         <Button 
           onClick={() => refetchStatus()} 
@@ -165,8 +165,8 @@ export default function IdxAdmin() {
           {!idxStatus?.connectionStatus.isConnected && (
             <Alert className="mt-4">
               <AlertDescription>
-                IDX is not connected to the MLS. Using mock data for development. 
-                To connect to real MLS data, configure your Great Plains Regional MLS credentials.
+                IDX is not connected to a live feed. Using mock data for development. 
+                To connect to production data, configure your data feed credentials.
               </AlertDescription>
             </Alert>
           )}
@@ -228,7 +228,7 @@ export default function IdxAdmin() {
             <CardHeader>
               <CardTitle>Start New Sync</CardTitle>
               <CardDescription>
-                Synchronize property and agent data from the MLS
+                Synchronize property and agent data from the data feed
               </CardDescription>
             </CardHeader>
             <CardContent>

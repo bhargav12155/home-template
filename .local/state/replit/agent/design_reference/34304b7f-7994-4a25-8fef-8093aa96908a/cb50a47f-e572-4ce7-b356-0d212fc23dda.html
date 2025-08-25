@@ -1,0 +1,683 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebraska Premier Real Estate | Luxury Homes in Omaha & Lincoln</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'navy': '#1a2332',
+                        'gold': '#c9a961',
+                        'soft-blue': '#4a90e2'
+                    },
+                    fontFamily: {
+                        'playfair': ['Playfair Display', 'serif'],
+                        'inter': ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="font-inter text-gray-800 bg-white">
+    
+    <!-- @COMPONENT: Navigation -->
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm shadow-sm z-50 border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="text-2xl font-playfair font-bold text-navy">
+                        Nebraska Premier<span class="text-gold">.</span>
+                    </div>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#" class="text-gray-700 hover:text-navy transition-colors font-medium">Buy</a>
+                    <a href="#" class="text-gray-700 hover:text-navy transition-colors font-medium">Sell</a>
+                    <a href="#" class="text-gray-700 hover:text-navy transition-colors font-medium">Properties</a>
+                    <a href="#" class="text-gray-700 hover:text-navy transition-colors font-medium">Neighborhoods</a>
+                    <a href="#" class="text-gray-700 hover:text-navy transition-colors font-medium">About</a>
+                    <button class="bg-navy text-white px-6 py-2 rounded-md hover:bg-navy/90 transition-colors font-medium">
+                        Contact Us
+                    </button>
+                </div>
+                
+                <div class="md:hidden">
+                    <button class="text-gray-700 hover:text-navy">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- @END_COMPONENT: Navigation -->
+
+    <!-- @COMPONENT: Hero Section -->
+    <!-- Hero Section -->
+    <section class="relative h-screen overflow-hidden">
+        <!-- Luxury home exterior with landscaping in Omaha, Nebraska -->
+        <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: linear-gradient(rgba(26, 35, 50, 0.4), rgba(26, 35, 50, 0.4)), url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&h=1380')"></div>
+        
+        <div class="relative z-10 h-full flex items-center justify-center">
+            <div class="text-center text-white max-w-4xl mx-auto px-4">
+                <h1 class="font-playfair text-5xl md:text-7xl font-bold mb-6 leading-tight">
+                    Discover Your Dream Home in <span class="text-gold">Nebraska</span>
+                </h1>
+                <p class="text-xl md:text-2xl mb-8 text-gray-200 font-light">
+                    Luxury residential properties in Omaha and Lincoln's most sought-after neighborhoods
+                </p>
+                
+                <!-- Property Search -->
+                <div class="bg-white/95 backdrop-blur-sm rounded-lg p-6 max-w-4xl mx-auto">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                            <select class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-navy focus:border-transparent">
+                                <option>Omaha</option>
+                                <option>Lincoln</option>
+                                <option>Bellevue</option>
+                                <option>Papillion</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
+                            <select class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-navy focus:border-transparent">
+                                <option>Single Family</option>
+                                <option>Condo</option>
+                                <option>Townhouse</option>
+                                <option>Luxury Estate</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
+                            <select class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-navy focus:border-transparent">
+                                <option>$200K - $400K</option>
+                                <option>$400K - $600K</option>
+                                <option>$600K - $1M</option>
+                                <option>$1M+</option>
+                            </select>
+                        </div>
+                        <button class="bg-navy text-white px-8 py-3 rounded-md hover:bg-navy/90 transition-colors font-medium">
+                            <i class="fas fa-search mr-2"></i>Search Properties
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white animate-bounce">
+            <i class="fas fa-chevron-down text-2xl"></i>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: Hero Section -->
+
+    <!-- @COMPONENT: Featured Properties -->
+    <!-- Featured Properties -->
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="font-playfair text-4xl md:text-5xl font-bold text-navy mb-4">Featured Properties</h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Discover exceptional homes in Nebraska's premier communities</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Property Card 1 -->
+                <div class="bg-white rounded-lg shadow-sm hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+                    <!-- Modern luxury home exterior in Omaha with manicured lawn -->
+                    <img src="https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" alt="Luxury home in West Omaha" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="font-playfair text-2xl font-semibold text-navy">$875,000</h3>
+                            <span class="bg-gold text-white px-3 py-1 rounded-full text-sm font-medium">Featured</span>
+                        </div>
+                        <p class="text-gray-600 mb-2">West Omaha</p>
+                        <p class="text-gray-800 mb-4">Stunning contemporary home with panoramic city views</p>
+                        <div class="flex justify-between items-center text-sm text-gray-600 mb-4">
+                            <span><i class="fas fa-bed mr-1"></i>4 Beds</span>
+                            <span><i class="fas fa-bath mr-1"></i>3.5 Baths</span>
+                            <span><i class="fas fa-ruler-combined mr-1"></i>3,200 sq ft</span>
+                        </div>
+                        <button class="w-full bg-navy text-white py-3 rounded-md hover:bg-navy/90 transition-colors font-medium">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Property Card 2 -->
+                <div class="bg-white rounded-lg shadow-sm hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+                    <!-- Elegant colonial style home in Lincoln Nebraska -->
+                    <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" alt="Colonial home in Lincoln" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="font-playfair text-2xl font-semibold text-navy">$625,000</h3>
+                            <span class="bg-soft-blue text-white px-3 py-1 rounded-full text-sm font-medium">New</span>
+                        </div>
+                        <p class="text-gray-600 mb-2">Lincoln Historic District</p>
+                        <p class="text-gray-800 mb-4">Restored Victorian with modern amenities</p>
+                        <div class="flex justify-between items-center text-sm text-gray-600 mb-4">
+                            <span><i class="fas fa-bed mr-1"></i>5 Beds</span>
+                            <span><i class="fas fa-bath mr-1"></i>4 Baths</span>
+                            <span><i class="fas fa-ruler-combined mr-1"></i>4,100 sq ft</span>
+                        </div>
+                        <button class="w-full bg-navy text-white py-3 rounded-md hover:bg-navy/90 transition-colors font-medium">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Property Card 3 -->
+                <div class="bg-white rounded-lg shadow-sm hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+                    <!-- Contemporary ranch style home with large windows -->
+                    <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" alt="Ranch home in Papillion" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="font-playfair text-2xl font-semibold text-navy">$450,000</h3>
+                        </div>
+                        <p class="text-gray-600 mb-2">Papillion</p>
+                        <p class="text-gray-800 mb-4">Modern ranch in family-friendly neighborhood</p>
+                        <div class="flex justify-between items-center text-sm text-gray-600 mb-4">
+                            <span><i class="fas fa-bed mr-1"></i>3 Beds</span>
+                            <span><i class="fas fa-bath mr-1"></i>2.5 Baths</span>
+                            <span><i class="fas fa-ruler-combined mr-1"></i>2,400 sq ft</span>
+                        </div>
+                        <button class="w-full bg-navy text-white py-3 rounded-md hover:bg-navy/90 transition-colors font-medium">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <button class="bg-transparent border-2 border-navy text-navy px-8 py-3 rounded-md hover:bg-navy hover:text-white transition-colors font-medium">
+                    View All Properties
+                </button>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: Featured Properties -->
+
+    <!-- @COMPONENT: About Section -->
+    <!-- About Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <h2 class="font-playfair text-4xl md:text-5xl font-bold text-navy mb-6">
+                        Nebraska's Premier Real Estate Experts
+                    </h2>
+                    <p class="text-xl text-gray-600 mb-6">
+                        With over 15 years of experience in the Nebraska real estate market, we specialize in luxury residential properties across Omaha and Lincoln.
+                    </p>
+                    <p class="text-gray-600 mb-8">
+                        Our team combines deep local knowledge with cutting-edge marketing strategies to deliver exceptional results for our clients. Whether you're buying your first home or selling a luxury estate, we provide personalized service and expert guidance throughout the entire process.
+                    </p>
+                    
+                    <div class="grid grid-cols-2 gap-8 mb-8">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-navy mb-2">500+</div>
+                            <div class="text-gray-600">Homes Sold</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-navy mb-2">$250M+</div>
+                            <div class="text-gray-600">Total Sales Volume</div>
+                        </div>
+                    </div>
+                    
+                    <button class="bg-gold text-white px-8 py-3 rounded-md hover:bg-gold/90 transition-colors font-medium">
+                        Learn More About Us
+                    </button>
+                </div>
+                
+                <div class="relative">
+                    <!-- Professional real estate office interior with modern design -->
+                    <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=1000" alt="Modern real estate office" class="rounded-lg shadow-lg w-full">
+                    <div class="absolute -bottom-6 -left-6 bg-white rounded-lg shadow-xl p-6 max-w-xs">
+                        <div class="flex items-center mb-3">
+                            <div class="w-12 h-12 bg-gold rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-award text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-navy">Top 1% Agent</div>
+                                <div class="text-sm text-gray-600">Nebraska Realtors</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: About Section -->
+
+    <!-- @COMPONENT: Neighborhoods -->
+    <!-- Neighborhoods -->
+    <section class="py-20 bg-navy text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="font-playfair text-4xl md:text-5xl font-bold mb-4">Explore Nebraska Communities</h2>
+                <p class="text-xl text-gray-300 max-w-2xl mx-auto">Discover the unique character and charm of Omaha and Lincoln's finest neighborhoods</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Neighborhood 1 -->
+                <div class="group cursor-pointer">
+                    <div class="relative overflow-hidden rounded-lg mb-4">
+                        <!-- Omaha downtown skyline at sunset -->
+                        <img src="https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" alt="Downtown Omaha" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300"></div>
+                    </div>
+                    <h3 class="font-playfair text-xl font-semibold mb-2">Downtown Omaha</h3>
+                    <p class="text-gray-300 text-sm mb-3">Urban living with historic charm and modern amenities</p>
+                    <div class="text-gold font-medium">Avg. Price: $425K</div>
+                </div>
+                
+                <!-- Neighborhood 2 -->
+                <div class="group cursor-pointer">
+                    <div class="relative overflow-hidden rounded-lg mb-4">
+                        <!-- Lincoln Nebraska residential street with tree-lined sidewalks -->
+                        <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" alt="Lincoln Neighborhoods" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300"></div>
+                    </div>
+                    <h3 class="font-playfair text-xl font-semibold mb-2">West Omaha</h3>
+                    <p class="text-gray-300 text-sm mb-3">Family-friendly suburbs with top-rated schools</p>
+                    <div class="text-gold font-medium">Avg. Price: $650K</div>
+                </div>
+                
+                <!-- Neighborhood 3 -->
+                <div class="group cursor-pointer">
+                    <div class="relative overflow-hidden rounded-lg mb-4">
+                        <!-- Historic neighborhood with mature trees and traditional homes -->
+                        <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" alt="Lincoln Historic District" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300"></div>
+                    </div>
+                    <h3 class="font-playfair text-xl font-semibold mb-2">Lincoln Historic</h3>
+                    <p class="text-gray-300 text-sm mb-3">Historic charm near the University of Nebraska</p>
+                    <div class="text-gold font-medium">Avg. Price: $385K</div>
+                </div>
+                
+                <!-- Neighborhood 4 -->
+                <div class="group cursor-pointer">
+                    <div class="relative overflow-hidden rounded-lg mb-4">
+                        <!-- Suburban neighborhood with modern homes and green spaces -->
+                        <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" alt="Papillion Neighborhoods" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300"></div>
+                    </div>
+                    <h3 class="font-playfair text-xl font-semibold mb-2">Papillion</h3>
+                    <p class="text-gray-300 text-sm mb-3">Growing community with new construction</p>
+                    <div class="text-gold font-medium">Avg. Price: $475K</div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <button class="bg-gold text-white px-8 py-3 rounded-md hover:bg-gold/90 transition-colors font-medium">
+                    Explore All Neighborhoods
+                </button>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: Neighborhoods -->
+
+    <!-- @COMPONENT: Services -->
+    <!-- Services -->
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="font-playfair text-4xl md:text-5xl font-bold text-navy mb-4">Our Services</h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Comprehensive real estate solutions tailored to your needs</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Service 1 -->
+                <div class="bg-white rounded-lg p-8 shadow-sm hover:shadow-lg transition-shadow duration-300 text-center">
+                    <div class="w-16 h-16 bg-navy rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-home text-white text-2xl"></i>
+                    </div>
+                    <h3 class="font-playfair text-2xl font-semibold text-navy mb-4">Home Buying</h3>
+                    <p class="text-gray-600 mb-6">Expert guidance through every step of the home buying process, from pre-approval to closing.</p>
+                    <button class="text-navy font-medium hover:text-gold transition-colors">Learn More <i class="fas fa-arrow-right ml-2"></i></button>
+                </div>
+                
+                <!-- Service 2 -->
+                <div class="bg-white rounded-lg p-8 shadow-sm hover:shadow-lg transition-shadow duration-300 text-center">
+                    <div class="w-16 h-16 bg-gold rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-dollar-sign text-white text-2xl"></i>
+                    </div>
+                    <h3 class="font-playfair text-2xl font-semibold text-navy mb-4">Home Selling</h3>
+                    <p class="text-gray-600 mb-6">Strategic marketing and pricing to maximize your home's value and minimize time on market.</p>
+                    <button class="text-navy font-medium hover:text-gold transition-colors">Learn More <i class="fas fa-arrow-right ml-2"></i></button>
+                </div>
+                
+                <!-- Service 3 -->
+                <div class="bg-white rounded-lg p-8 shadow-sm hover:shadow-lg transition-shadow duration-300 text-center">
+                    <div class="w-16 h-16 bg-soft-blue rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-chart-line text-white text-2xl"></i>
+                    </div>
+                    <h3 class="font-playfair text-2xl font-semibold text-navy mb-4">Market Analysis</h3>
+                    <p class="text-gray-600 mb-6">Comprehensive market reports and property valuations based on current Nebraska market data.</p>
+                    <button class="text-navy font-medium hover:text-gold transition-colors">Learn More <i class="fas fa-arrow-right ml-2"></i></button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: Services -->
+
+    <!-- @COMPONENT: Testimonials -->
+    <!-- Testimonials -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="font-playfair text-4xl md:text-5xl font-bold text-navy mb-4">Client Testimonials</h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Hear from our satisfied clients across Nebraska</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="bg-gray-50 rounded-lg p-8">
+                    <div class="flex mb-4">
+                        <i class="fas fa-star text-gold"></i>
+                        <i class="fas fa-star text-gold"></i>
+                        <i class="fas fa-star text-gold"></i>
+                        <i class="fas fa-star text-gold"></i>
+                        <i class="fas fa-star text-gold"></i>
+                    </div>
+                    <p class="text-gray-600 mb-6 italic">"The team at Nebraska Premier made our home buying experience seamless. Their knowledge of the Omaha market was invaluable, and they found us the perfect home in our dream neighborhood."</p>
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-navy rounded-full flex items-center justify-center mr-4">
+                            <span class="text-white font-semibold">MJ</span>
+                        </div>
+                        <div>
+                            <div class="font-semibold text-navy">Michael & Jennifer Thompson</div>
+                            <div class="text-sm text-gray-600">West Omaha</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 2 -->
+                <div class="bg-gray-50 rounded-lg p-8">
+                    <div class="flex mb-4">
+                        <i class="fas fa-star text-gold"></i>
+                        <i class="fas fa-star text-gold"></i>
+                        <i class="fas fa-star text-gold"></i>
+                        <i class="fas fa-star text-gold"></i>
+                        <i class="fas fa-star text-gold"></i>
+                    </div>
+                    <p class="text-gray-600 mb-6 italic">"Selling our family home was emotional, but the Nebraska Premier team handled everything with such care and professionalism. We got above asking price and closed in just 3 weeks!"</p>
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-gold rounded-full flex items-center justify-center mr-4">
+                            <span class="text-white font-semibold">RC</span>
+                        </div>
+                        <div>
+                            <div class="font-semibold text-navy">Robert Chen</div>
+                            <div class="text-sm text-gray-600">Lincoln</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 3 -->
+                <div class="bg-gray-50 rounded-lg p-8">
+                    <div class="flex mb-4">
+                        <i class="fas fa-star text-gold"></i>
+                        <i class="fas fa-star text-gold"></i>
+                        <i class="fas fa-star text-gold"></i>
+                        <i class="fas fa-star text-gold"></i>
+                        <i class="fas fa-star text-gold"></i>
+                    </div>
+                    <p class="text-gray-600 mb-6 italic">"As first-time home buyers, we were nervous about the process. The team educated us every step of the way and helped us find an amazing starter home in Papillion."</p>
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-soft-blue rounded-full flex items-center justify-center mr-4">
+                            <span class="text-white font-semibold">SM</span>
+                        </div>
+                        <div>
+                            <div class="font-semibold text-navy">Sarah Martinez</div>
+                            <div class="text-sm text-gray-600">Papillion</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: Testimonials -->
+
+    <!-- @COMPONENT: Contact Section -->
+    <!-- Contact Section -->
+    <section class="py-20 bg-navy text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                <div>
+                    <h2 class="font-playfair text-4xl md:text-5xl font-bold mb-6">
+                        Ready to Find Your Dream Home?
+                    </h2>
+                    <p class="text-xl text-gray-300 mb-8">
+                        Contact our expert team today for personalized real estate guidance in Omaha and Lincoln.
+                    </p>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gold rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-phone text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold">Call Us</div>
+                                <div class="text-gray-300">(402) 555-0123</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gold rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-envelope text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold">Email Us</div>
+                                <div class="text-gray-300">info@nebraskpremier.com</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gold rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-map-marker-alt text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold">Visit Our Office</div>
+                                <div class="text-gray-300">1234 Dodge Street, Omaha, NE 68102</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg p-8">
+                    <h3 class="font-playfair text-2xl font-semibold text-navy mb-6">Get Started Today</h3>
+                    <form class="space-y-6">
+                        <!-- TODO: Implement form submission logic -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                                <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-navy focus:border-transparent text-gray-900">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                                <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-navy focus:border-transparent text-gray-900">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input type="email" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-navy focus:border-transparent text-gray-900">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                            <input type="tel" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-navy focus:border-transparent text-gray-900">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">I'm interested in</label>
+                            <select class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-navy focus:border-transparent text-gray-900">
+                                <option>Buying a home</option>
+                                <option>Selling a home</option>
+                                <option>Market analysis</option>
+                                <option>General inquiry</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Message</label>
+                            <textarea rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-navy focus:border-transparent text-gray-900"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="w-full bg-gold text-white py-3 rounded-md hover:bg-gold/90 transition-colors font-medium">
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: Contact Section -->
+
+    <!-- @COMPONENT: Footer -->
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div>
+                    <div class="text-2xl font-playfair font-bold mb-6">
+                        Nebraska Premier<span class="text-gold">.</span>
+                    </div>
+                    <p class="text-gray-400 mb-6">
+                        Your trusted partner for luxury residential real estate in Omaha and Lincoln, Nebraska.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gold transition-colors">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gold transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gold transition-colors">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gold transition-colors">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold text-lg mb-6">Services</h4>
+                    <ul class="space-y-3 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">Home Buying</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Home Selling</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Market Analysis</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Property Valuation</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Investment Properties</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold text-lg mb-6">Areas We Serve</h4>
+                    <ul class="space-y-3 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">Omaha</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Lincoln</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Bellevue</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Papillion</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Fremont</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold text-lg mb-6">Contact Info</h4>
+                    <div class="space-y-3 text-gray-400">
+                        <div class="flex items-center">
+                            <i class="fas fa-phone mr-3 text-gold"></i>
+                            <span>(402) 555-0123</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-envelope mr-3 text-gold"></i>
+                            <span>info@nebraskpremier.com</span>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-map-marker-alt mr-3 text-gold mt-1"></i>
+                            <span>1234 Dodge Street<br>Omaha, NE 68102</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <div class="text-gray-400 mb-4 md:mb-0">
+                    © 2024 Nebraska Premier Real Estate. All rights reserved.
+                </div>
+                <div class="flex space-x-6 text-gray-400">
+                    <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
+                    <a href="#" class="hover:text-white transition-colors">Equal Housing</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- @END_COMPONENT: Footer -->
+
+    <script>
+        // Smooth scrolling for anchor links
+        (function() {
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // Mobile menu toggle
+            const mobileMenuButton = document.querySelector('[data-mobile-menu-button]');
+            const mobileMenu = document.querySelector('[data-mobile-menu]');
+            
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+
+            // Simple fade-in animation on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // Observe elements for animation
+            document.querySelectorAll('section').forEach(section => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(20px)';
+                section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(section);
+            });
+
+            // Initialize first section as visible
+            const firstSection = document.querySelector('section');
+            if (firstSection) {
+                firstSection.style.opacity = '1';
+                firstSection.style.transform = 'translateY(0)';
+            }
+        })();
+    </script>
+</body>
+</html>

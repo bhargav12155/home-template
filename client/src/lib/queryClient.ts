@@ -10,7 +10,7 @@ async function throwIfResNotOk(res: Response) {
 export async function apiRequest(
   method: string,
   url: string,
-  data?: unknown | undefined,
+  data?: unknown | undefined
 ): Promise<Response> {
   const res = await fetch(url, {
     method,
@@ -30,24 +30,35 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     // Only use the first element of queryKey as the URL
-    let url = typeof queryKey[0] === 'string' ? queryKey[0] : String(queryKey[0]);
-    
-    // Handle search parameters for /api/properties endpoint
-    if (url === "/api/properties" && queryKey[1] && typeof queryKey[1] === 'object') {
+    let url =
+      typeof queryKey[0] === "string" ? queryKey[0] : String(queryKey[0]);
+
+    // Handle search parameters for property related endpoints (internal or Paragon)
+    if (
+      (url.startsWith("/api/properties") ||
+        url.startsWith("/api/paragon/properties")) &&
+      queryKey[1] &&
+      typeof queryKey[1] === "object"
+    ) {
       const params = new URLSearchParams();
       const searchParams = queryKey[1] as Record<string, any>;
-      
+
       Object.entries(searchParams).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== "") {
+        if (value === undefined || value === null || value === "") return;
+        // Only include recognized primitive types
+        if (
+          typeof value === "string" ||
+          typeof value === "number" ||
+          typeof value === "boolean"
+        ) {
           params.set(key, value.toString());
         }
       });
-      
-      if (params.toString()) {
-        url += `?${params.toString()}`;
-      }
+
+      const qs = params.toString();
+      if (qs) url += `?${qs}`;
     }
-    
+
     const res = await fetch(url, {
       credentials: "include",
     });

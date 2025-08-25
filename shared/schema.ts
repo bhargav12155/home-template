@@ -1,4 +1,14 @@
-import { pgTable, text, serial, integer, boolean, timestamp, decimal, jsonb, varchar } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  serial,
+  integer,
+  boolean,
+  timestamp,
+  decimal,
+  jsonb,
+  varchar,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { relations, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -45,7 +55,10 @@ export const properties = pgTable("properties", {
   listingOfficeName: text("listing_office_name"),
   listingContractDate: timestamp("listing_contract_date"),
   daysOnMarket: integer("days_on_market"),
-  originalListPrice: decimal("original_list_price", { precision: 12, scale: 2 }),
+  originalListPrice: decimal("original_list_price", {
+    precision: 12,
+    scale: 2,
+  }),
   mlsStatus: text("mls_status"), // MLS-specific status
   modificationTimestamp: timestamp("modification_timestamp"),
   photoCount: integer("photo_count"),
@@ -238,6 +251,10 @@ export const propertySearchSchema = z.object({
   luxury: z.boolean().optional(),
   featured: z.boolean().optional(),
   architecturalStyle: z.string().optional(),
+  // Extended for Paragon external queries
+  status: z.enum(["Active", "Closed", "Both"]).optional(),
+  days: z.number().optional(), // recent closed window in days
+  limit: z.number().optional(), // max records to fetch
 });
 
 // Types
@@ -275,70 +292,81 @@ export type ContactForm = z.infer<typeof contactFormSchema>;
 
 // Template system for multi-tenant customization
 export const templates = pgTable("templates", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   // Company Information
-  companyName: text("company_name").notNull().default("Your Real Estate Company"),
+  companyName: text("company_name")
+    .notNull()
+    .default("Your Real Estate Company"),
   agentName: text("agent_name").notNull().default("Your Name"),
   agentTitle: text("agent_title").default("Principal Broker"),
   agentEmail: text("agent_email"),
-  
+
   // Contact Information
   phone: text("phone"),
   address: jsonb("address").default({
     street: "123 Main Street",
     city: "Your City",
     state: "Your State",
-    zip: "12345"
+    zip: "12345",
   }),
-  
+
   // Company Description & Bio
-  companyDescription: text("company_description").default("We believe that luxury is not a price point but an experience."),
-  agentBio: text("agent_bio").default("Professional real estate agent with years of experience."),
-  
+  companyDescription: text("company_description").default(
+    "We believe that luxury is not a price point but an experience."
+  ),
+  agentBio: text("agent_bio").default(
+    "Professional real estate agent with years of experience."
+  ),
+
   // Statistics
   homesSold: integer("homes_sold").default(500),
   totalSalesVolume: text("total_sales_volume").default("$200M+"),
   yearsExperience: integer("years_experience").default(15),
   clientSatisfaction: text("client_satisfaction").default("98%"),
-  
+
   // Service Areas
-  serviceAreas: text("service_areas").array().default([
-    "Your Primary City",
-    "Your Secondary City"
-  ]),
-  
+  serviceAreas: text("service_areas")
+    .array()
+    .default(["Your Primary City", "Your Secondary City"]),
+
   // Brand Colors (HSL format)
   primaryColor: text("primary_color").default("hsl(20, 14.3%, 4.1%)"), // bjork-black
   accentColor: text("accent_color").default("hsl(213, 100%, 45%)"), // bjork-blue
   beigeColor: text("beige_color").default("hsl(25, 35%, 75%)"), // bjork-beige
-  
+
   // Media URLs (stored as file paths)
   logoUrl: text("logo_url"),
   heroImageUrl: text("hero_image_url"),
   agentImageUrl: text("agent_image_url"),
   heroVideoUrl: text("hero_video_url"),
-  
+
   // MLS Integration
   mlsId: text("mls_id"),
   mlsApiKey: text("mls_api_key"),
   mlsRegion: text("mls_region"),
-  
+
   // Domain/Subdomain
   subdomain: text("subdomain").unique(),
   customDomain: text("custom_domain"),
-  
+
   // Status
   isActive: boolean("is_active").default(true),
-  
+
   // Metadata
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`)
+  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
 // Template media files
 export const templateMedia = pgTable("template_media", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  templateId: varchar("template_id").references(() => templates.id, { onDelete: "cascade" }),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  templateId: varchar("template_id").references(() => templates.id, {
+    onDelete: "cascade",
+  }),
   fileName: text("file_name").notNull(),
   originalName: text("original_name").notNull(),
   fileType: text("file_type").notNull(), // image, video, document
@@ -346,8 +374,8 @@ export const templateMedia = pgTable("template_media", {
   fileSize: integer("file_size"),
   mimeType: text("mime_type"),
   category: text("category"), // logo, hero, agent, property, testimonial
-  
-  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`)
+
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
 // Template relations

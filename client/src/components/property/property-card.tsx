@@ -56,7 +56,9 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           <h3 className="text-2xl font-display font-medium text-bjork-black">
             {formatPrice(property.price)}
           </h3>
-          <span className="text-sm text-gray-500">MLS #{property.mlsId}</span>
+          {property.mlsId && (
+            <span className="text-sm text-gray-500 opacity-50"># {property.mlsId}</span>
+          )}
         </div>
         
         <p className="text-gray-600 mb-4">

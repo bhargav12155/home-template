@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, SlidersHorizontal } from "lucide-react";
+import { Search, Filter, SlidersHorizontal, Clock } from "lucide-react";
 import { PRICE_RANGES, PROPERTY_TYPES, COMMUNITIES, ARCHITECTURAL_STYLES } from "@/lib/constants";
 import type { PropertySearch } from "@shared/schema";
 
@@ -34,7 +34,9 @@ export default function PropertySearchComponent({ onSearch, initialParams }: Pro
     onSearch({});
   };
 
-  const activeFiltersCount = Object.values(searchParams).filter(Boolean).length;
+  const activeFiltersCount = Object.entries(searchParams)
+    .filter(([_, v]) => v !== undefined && v !== null && v !== "")
+    .length;
 
   return (
     <Card className="mb-8">
@@ -45,7 +47,7 @@ export default function PropertySearchComponent({ onSearch, initialParams }: Pro
             <div className="flex-1">
               <Input
                 type="text"
-                placeholder="Enter Location, Zip, Address or MLS #"
+                placeholder="Enter City, Zip or Address"
                 value={searchParams.query || ""}
                 onChange={(e) => updateParam("query", e.target.value)}
                 className="border-gray-200 focus:ring-bjork-blue"
@@ -205,6 +207,44 @@ export default function PropertySearchComponent({ onSearch, initialParams }: Pro
                     <SelectItem value="2 Story">2 Story</SelectItem>
                     <SelectItem value="Multi-level">Multi-level</SelectItem>
                     <SelectItem value="Split Entry">Split Entry</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* Status Filter (Paragon) */}
+                <Select value={searchParams.status || "Active"} onValueChange={(value) => updateParam("status", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Active">Active</SelectItem>
+                    <SelectItem value="Closed">Closed (Recent)</SelectItem>
+                    <SelectItem value="Both">Active + Recent Closed</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* Days window for closed listings */}
+                {(searchParams.status === 'Closed' || searchParams.status === 'Both') && (
+                  <Select value={searchParams.days?.toString() || "30"} onValueChange={(value) => updateParam("days", parseInt(value))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Days Back" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[7, 14, 30, 60, 90].map(d => (
+                        <SelectItem key={d} value={d.toString()}>{d} Days</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+
+                {/* Limit */}
+                <Select value={searchParams.limit?.toString() || "50"} onValueChange={(value) => updateParam("limit", parseInt(value))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Max Results" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[25,50,75,100].map(n => (
+                      <SelectItem key={n} value={n.toString()}>{n} Results</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
