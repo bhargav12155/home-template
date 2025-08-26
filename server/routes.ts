@@ -9,6 +9,7 @@ import {
 } from "./ai-style-analyzer";
 import IdxSyncService from "./idx-sync-service";
 import { emailService } from "./email-service";
+import { externalPropertyAPI } from "./external-api";
 import {
   insertPropertySchema,
   insertCommunitySchema,
@@ -224,8 +225,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/paragon/properties", async (req, res) => {
     try {
       const {
-        minPrice = "150000",
-        maxPrice = "40000000", // default expanded to 40M
+        minPrice,
+        maxPrice,
         city = "omaha",
         status = "Active", // Active | Closed | Both
         days = "30", // recent days for closed
@@ -241,7 +242,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       })();
 
       const normalizedCity = city.toLowerCase();
-      const priceClause = `((ListPrice ge ${minPrice} and ListPrice le ${maxPrice}) or (ClosePrice ge ${minPrice} and ClosePrice le ${maxPrice}))`;
+
+      // Build price clause only if min/max price are provided
+      let priceClause = "";
+      if (minPrice && maxPrice) {
+        priceClause = `((ListPrice ge ${minPrice} and ListPrice le ${maxPrice}) or (ClosePrice ge ${minPrice} and ClosePrice le ${maxPrice}))`;
+      } else if (minPrice) {
+        priceClause = `(ListPrice ge ${minPrice} or ClosePrice ge ${minPrice})`;
+      } else if (maxPrice) {
+        priceClause = `(ListPrice le ${maxPrice} or ClosePrice le ${maxPrice})`;
+      }
+
       const cityClause = `tolower(City) eq '${normalizedCity}'`;
 
       let statusClause = "";
@@ -253,7 +264,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         statusClause = `((StandardStatus eq 'Active') or (StandardStatus eq 'Closed' and CloseDate ge ${sinceDate}))`;
       }
 
-      const filterParts = [cityClause, priceClause];
+      const filterParts = [cityClause];
+      if (priceClause) filterParts.push(priceClause);
       if (statusClause) filterParts.push(statusClause);
       const filter = encodeURIComponent(filterParts.join(" and "));
 
@@ -452,9 +464,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/properties", async (req, res) => {
     try {
       const searchParams = propertySearchSchema.parse(req.query);
+
+      // In development mode, use Paragon API instead of database
+      if (process.env.NODE_ENV === "development") {
+        // For featured listings, get highest priced properties without price constraints
+        if (searchParams.featured) {
+          const paragonParams = new URLSearchParams({
+            city: searchParams.city || "omaha",
+            status: "Active",
+            limit: (searchParams.limit || 8).toString(),
+            includeImages: "1",
+            // No minPrice/maxPrice for featured - we want all listings sorted by highest price
+          });
+
+          const paragonUrl = `http://localhost:5080/api/paragon/properties?${paragonParams}`;
+          try {
+            const response = await fetch(paragonUrl);
+            if (response.ok) {
+              const data = await response.json();
+              res.json(data);
+              return;
+            }
+          } catch (error) {
+            console.error(
+              "Error calling Paragon API for featured listings:",
+              error
+            );
+          }
+        } else {
+          // For regular searches, include price filters if specified
+          const paragonParams = new URLSearchParams({
+            city: searchParams.city || "omaha",
+            status: "Active",
+            limit: (searchParams.limit || 8).toString(),
+            includeImages: "1",
+          });
+
+          // Only add price filters if they're specified
+          if (searchParams.minPrice) {
+            paragonParams.set("minPrice", searchParams.minPrice.toString());
+          }
+          if (searchParams.maxPrice) {
+            paragonParams.set("maxPrice", searchParams.maxPrice.toString());
+          }
+
+          const paragonUrl = `http://localhost:5080/api/paragon/properties?${paragonParams}`;
+          try {
+            const response = await fetch(paragonUrl);
+            if (response.ok) {
+              const data = await response.json();
+              res.json(data);
+              return;
+            }
+          } catch (error) {
+            console.error("Error calling Paragon API:", error);
+          }
+        }
+
+        // Fallback to external API if Paragon fails
+        if (searchParams.featured || searchParams.luxury) {
+          const luxuryProperties =
+            await externalPropertyAPI.getLuxuryProperties();
+          const transformedProperties = luxuryProperties.map((p: any) =>
+            externalPropertyAPI.transformToProperty(p)
+          );
+          const limitedProperties = searchParams.limit
+            ? transformedProperties.slice(0, searchParams.limit)
+            : transformedProperties;
+          res.json(limitedProperties);
+          return;
+        }
+
+        // For other searches, get properties from Omaha/Lincoln
+        const city = searchParams.city || "Omaha";
+        const externalProperties =
+          await externalPropertyAPI.getPropertiesForCity(city, {
+            minPrice: searchParams.minPrice,
+            maxPrice: searchParams.maxPrice,
+            limit: searchParams.limit || 20,
+          });
+        const transformedProperties = externalProperties.map((p: any) =>
+          externalPropertyAPI.transformToProperty(p)
+        );
+        res.json(transformedProperties);
+        return;
+      }
+
+      // Production mode uses database
       const properties = await storage.getProperties(searchParams);
       res.json(properties);
     } catch (error) {
+      console.error("Properties endpoint error:", error);
       res.status(400).json({ message: "Invalid search parameters", error });
     }
   });
@@ -577,6 +677,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Communities endpoints
   app.get("/api/communities", async (req, res) => {
     try {
+      // In development mode, return static Nebraska community data
+      if (process.env.NODE_ENV === "development") {
+        const staticCommunities = [
+          {
+            id: 1,
+            name: "Benson",
+            slug: "benson",
+            city: "Omaha",
+            state: "NE",
+            description:
+              "Historic neighborhood with vibrant arts scene and walkable streets.",
+            averagePrice: 185000,
+            medianPrice: 175000,
+            pricePerSqft: 95,
+            averageDaysOnMarket: 35,
+            inventoryCount: 85,
+            schoolDistrict: "Omaha Public Schools",
+            walkScore: 78,
+            transitScore: 45,
+            bikeScore: 65,
+            demographics: { medianAge: 34, medianIncome: 52000 },
+            amenities: [
+              "Historic Architecture",
+              "Art Galleries",
+              "Local Restaurants",
+              "Parks",
+            ],
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          {
+            id: 2,
+            name: "Dundee",
+            slug: "dundee",
+            city: "Omaha",
+            state: "NE",
+            description:
+              "Upscale neighborhood known for historic homes and tree-lined streets.",
+            averagePrice: 425000,
+            medianPrice: 395000,
+            pricePerSqft: 180,
+            averageDaysOnMarket: 28,
+            inventoryCount: 42,
+            schoolDistrict: "Omaha Public Schools",
+            walkScore: 82,
+            transitScore: 38,
+            bikeScore: 72,
+            demographics: { medianAge: 42, medianIncome: 85000 },
+            amenities: [
+              "Historic Homes",
+              "Elmwood Park",
+              "Happy Hollow Country Club",
+              "Memorial Park",
+            ],
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          {
+            id: 3,
+            name: "Blackstone",
+            slug: "blackstone",
+            city: "Omaha",
+            state: "NE",
+            description:
+              "Trendy district with excellent dining and entertainment options.",
+            averagePrice: 275000,
+            medianPrice: 255000,
+            pricePerSqft: 125,
+            averageDaysOnMarket: 31,
+            inventoryCount: 58,
+            schoolDistrict: "Omaha Public Schools",
+            walkScore: 88,
+            transitScore: 52,
+            bikeScore: 78,
+            demographics: { medianAge: 29, medianIncome: 62000 },
+            amenities: [
+              "Restaurants",
+              "Entertainment",
+              "Walkable",
+              "Historic Character",
+            ],
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ];
+        res.json(staticCommunities);
+        return;
+      }
+
+      // Production mode uses database
       const communities = await storage.getCommunities();
       res.json(communities);
     } catch (error) {
@@ -784,6 +974,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // **TEMPLATE ROUTES** - Multi-tenant customization
   app.get("/api/template", async (req, res) => {
     try {
+      // In development mode, return static template data
+      if (process.env.NODE_ENV === "development") {
+        const staticTemplate = {
+          companyName: "Bjork Group",
+          agentName: "Mandy Visty",
+          agentTitle: "Principal Broker",
+          companyDescription:
+            "We believe that luxury is not a price point but an experience.",
+          homesSold: 500,
+          totalSalesVolume: "$200M+",
+          serviceAreas: ["Omaha", "Lincoln", "Greater Nebraska Area"],
+          email: "mandy@bjorkgroup.com",
+          phone: "(402) 555-0123",
+          address: "Omaha, Nebraska",
+          licenseNumber: "NE12345678",
+        };
+        res.json(staticTemplate);
+        return;
+      }
+
+      // Production mode uses database
       const template = await storage.getTemplate();
       res.json(
         template || {

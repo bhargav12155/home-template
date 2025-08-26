@@ -61,7 +61,7 @@ export default function Search() {
         <div className="max-w-7xl mx-auto px-4 py-4">
           {/* Top Row - Main Search */}
           <div className="flex items-center gap-4 mb-4">
-            <h1 className="text-2xl font-display font-bold text-bjork-black">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-light leading-tight text-bjork-black">
               Lincoln, NE Homes for Sale
             </h1>
             <div className="flex-1 max-w-2xl">
@@ -266,7 +266,7 @@ export default function Search() {
       {/* Bottom CTA Section */}
       <section className="bg-bjork-black text-white py-12">
         <div className="max-w-6xl mx-auto px-6 text-center">
-          <h2 className="text-3xl md:text-4xl font-display font-light mb-4">
+          <h2 className="text-4xl md:text-5xl font-display font-light leading-tight mb-4">
             Search & Save Your Favorite <span className="font-bold text-bjork-beige">Homes For Sale</span> In Lincoln, NE & Surrounding Areas
           </h2>
           <p className="text-lg mb-8 max-w-4xl mx-auto leading-relaxed">
@@ -275,7 +275,7 @@ export default function Search() {
           </p>
           
           <div className="bg-white/10 rounded-lg p-8 max-w-2xl mx-auto">
-            <h3 className="text-2xl font-bold mb-6 text-bjork-beige">Get in Touch</h3>
+            <h3 className="text-3xl md:text-4xl font-display font-light leading-tight mb-6 text-bjork-beige">Get in Touch</h3>
             <p className="mb-6">If you are ready to narrow your search and learn more about homes for sale in Lincoln, NE — Get in touch now!</p>
             <div className="space-y-4">
               <Button 

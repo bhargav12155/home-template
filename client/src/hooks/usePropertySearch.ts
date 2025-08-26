@@ -90,10 +90,8 @@ function transformExternalProperty(external: ExternalProperty): Property {
 }
 
 export function usePropertySearch(searchParams: PropertySearch) {
-  // Determine if external Paragon API should be used
-  const useExternalApi =
-    !!(searchParams.city && searchParams.city.toLowerCase() === "omaha") ||
-    !!(searchParams.minPrice && searchParams.maxPrice);
+  // For development, always use external API since we're routing through /api/properties to Paragon
+  const useExternalApi = false; // Use internal API which routes to Paragon in development
 
   // Build external params (include Paragon specific ones)
   const paragonParams: Record<string, any> = { ...searchParams };
@@ -157,7 +155,7 @@ export function usePropertySearch(searchParams: PropertySearch) {
   }
 
   return {
-    data: internalQuery.data || [],
+    data: internalQuery.data?.data || internalQuery.data || [],
     isLoading: internalQuery.isLoading,
     error: internalQuery.error,
     isExternal: false,

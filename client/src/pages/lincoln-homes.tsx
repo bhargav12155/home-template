@@ -36,32 +36,32 @@ export default function LincolnHomes() {
       name: "Ben Bleicher",
       title: "Realtor® / Team Lead",
       phone: "(402) 419-6309",
-      email: "ben.bleicher@prg-ne.com",
-      website: "ben.prg-ne.com",
+      email: "ben.bleicher@bjorkgroup.com",
+      website: "ben.bjorkgroup.com",
       image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
     },
     {
       name: "Nate Rangel", 
       title: "Real Estate Agent",
       phone: "(402) 440-9314",
-      email: "nate.rangel@prg-ne.com",
-      website: "nate.prg-ne.com",
+      email: "nate.rangel@bjorkgroup.com",
+      website: "nate.bjorkgroup.com",
       image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
     },
     {
       name: "Elizabeth Haney",
       title: "Real Estate Agent", 
       phone: "(402) 617-2279",
-      email: "elizabeth.haney@prg-ne.com",
-      website: "elizabeth.prg-ne.com",
+      email: "elizabeth.haney@bjorkgroup.com",
+      website: "elizabeth.bjorkgroup.com",
       image: "https://images.unsplash.com/photo-1494790108755-2616b612b586?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
     },
     {
       name: "Dillon Critel",
       title: "Real Estate Agent",
       phone: "(308) 214-1715", 
-      email: "dillon.critel@prg-ne.com",
-      website: "dillon.prg-ne.com",
+      email: "dillon.critel@bjorkgroup.com",
+      website: "dillon.bjorkgroup.com",
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
     }
   ];
@@ -81,11 +81,11 @@ export default function LincolnHomes() {
     },
     {
       question: "How do I find new construction homes in Lincoln, NE?",
-      answer: "New builds are most commonly found in South Lincoln, but development is happening across the city. Professional Realty Group can connect you with the latest new construction listings through our IDX feed."
+      answer: "New builds are most commonly found in South Lincoln, but development is happening across the city. Bjork Group can connect you with the latest new construction listings through our IDX feed."
     },
     {
       question: "Why should I work with a local Realtor in Lincoln?",
-      answer: "A local Realtor provides insight on schools, neighborhoods, and the local market that national search sites can't. Professional Realty Group has deep Lincoln expertise and can help buyers confidently navigate offers, negotiations, and closings."
+      answer: "A local Realtor provides insight on schools, neighborhoods, and the local market that national search sites can't. Bjork Group has deep Lincoln expertise and can help buyers confidently navigate offers, negotiations, and closings."
     }
   ];
 
@@ -104,7 +104,7 @@ export default function LincolnHomes() {
 
         <div className="relative z-10 flex items-center justify-center h-full">
           <div className="text-center text-white max-w-4xl mx-auto px-6">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-light mb-6 leading-tight">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-light leading-tight mb-6">
               Houses for Sale in <span className="text-bjork-beige">Lincoln, NE</span>
             </h1>
             <p className="text-xl md:text-2xl mb-8 font-light max-w-2xl mx-auto leading-relaxed">
@@ -131,12 +131,12 @@ export default function LincolnHomes() {
       <section className="h-screen flex items-center bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center">
-            <h2 className="text-4xl md:text-5xl font-display font-light text-bjork-black mb-8">
+            <h2 className="text-4xl md:text-5xl font-display font-light leading-tight text-bjork-black mb-8">
               Looking for houses for sale in Lincoln, NE?
             </h2>
             <div className="max-w-4xl mx-auto">
               <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
-                Professional Realty Group is your trusted local partner for buying homes across the city. 
+                Bjork Group is your trusted local partner for buying homes across the city. 
                 From South Lincoln's new neighborhoods to established communities in North Lincoln, our team 
                 of Realtors is here to guide you with expertise, local knowledge, and proven results.
               </p>
@@ -149,7 +149,7 @@ export default function LincolnHomes() {
       <section className="h-screen flex items-center bg-gradient-to-br from-amber-50 to-orange-100">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-display font-light text-bjork-black mb-8">
+            <h2 className="text-4xl md:text-5xl font-display font-light leading-tight text-bjork-black mb-8">
               Useful Real Estate Tools to Get You Started
             </h2>
           </div>
@@ -214,7 +214,7 @@ export default function LincolnHomes() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-4xl md:text-5xl font-display font-light text-bjork-black mb-8">
+              <h2 className="text-4xl md:text-5xl font-display font-light leading-tight text-bjork-black mb-8">
                 Browse Homes for Sale in Lincoln, NE
               </h2>
               <p className="text-lg text-gray-700 leading-relaxed mb-8">
@@ -234,7 +234,7 @@ export default function LincolnHomes() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 bg-bjork-beige rounded-full"></div>
-                  <span className="text-gray-700">Schedule a showing with a PRG Realtor directly from the listing</span>
+                  <span className="text-gray-700">Schedule a showing with a Bjork Group Realtor directly from the listing</span>
                 </div>
               </div>
 
@@ -274,10 +274,10 @@ export default function LincolnHomes() {
             </div>
             
             <div>
-              <h2 className="text-4xl md:text-5xl font-display font-light text-bjork-black mb-6">
+              <h2 className="text-4xl md:text-5xl font-display font-light leading-tight text-bjork-black mb-6">
                 Why Buy a House in Lincoln, Nebraska?
               </h2>
-              <h3 className="text-2xl font-semibold text-bjork-beige mb-6">
+              <h3 className="text-3xl md:text-4xl font-display font-light leading-tight text-bjork-beige mb-6">
                 Buying a House in Lincoln is a Good Investment
               </h3>
               <p className="text-lg text-gray-700 leading-relaxed mb-8">
@@ -313,7 +313,7 @@ export default function LincolnHomes() {
       <section className="h-screen flex items-center bg-bjork-black text-white">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-display font-light mb-12">
+            <h2 className="text-4xl md:text-5xl font-display font-light leading-tight mb-12">
               Lincoln Market Statistics
             </h2>
           </div>
@@ -349,7 +349,7 @@ export default function LincolnHomes() {
                 <div className="w-16 h-16 bg-bjork-beige rounded-full flex items-center justify-center">
                   <GraduationCap className="w-8 h-8 text-bjork-black" />
                 </div>
-                <h2 className="text-4xl md:text-5xl font-display font-light text-bjork-black">
+                <h2 className="text-4xl md:text-5xl font-display font-light leading-tight text-bjork-black">
                   Lincoln School Districts
                 </h2>
               </div>
@@ -401,7 +401,7 @@ export default function LincolnHomes() {
             </h2>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto">
               Lincoln offers diverse neighborhoods, each with unique benefits. Whether you're seeking a quiet family 
-              community, a downtown condo, or wide-open space, PRG helps buyers find the right fit.
+              community, a downtown condo, or wide-open space, Bjork Group helps buyers find the right fit.
             </p>
           </div>
           
@@ -464,8 +464,8 @@ export default function LincolnHomes() {
       {/* Testimonials Section */}
       <section className="h-screen flex items-center bg-bjork-black text-white">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-4xl md:text-5xl font-display font-light mb-16">
-            Why Work With Professional Realty Group?
+            <h2 className="text-4xl md:text-5xl font-display font-light leading-tight mb-16">
+            Why Work With Bjork Group?
           </h2>
           
           <div className="relative">
@@ -508,11 +508,11 @@ export default function LincolnHomes() {
       <section className="min-h-screen flex items-center bg-gradient-to-br from-slate-50 to-zinc-100 py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-display font-light text-bjork-black mb-8">
+            <h2 className="text-4xl md:text-5xl font-display font-light leading-tight text-bjork-black mb-8">
               Meet Our Top Performing Realtors & Agents
             </h2>
             <p className="text-lg text-gray-700">
-              Ready to find your next home? Professional Realty Group is here to help you search, tour, 
+              Ready to find your next home? Bjork Group is here to help you search, tour, 
               and purchase with confidence. From South Lincoln to every corner of the city, we know the market — and we're ready to work for you.
             </p>
           </div>

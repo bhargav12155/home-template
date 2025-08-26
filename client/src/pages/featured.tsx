@@ -130,7 +130,7 @@ export default function FeaturedListingsPage() {
       <section className="py-16 bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-display font-light text-bjork-black mb-4">
+            <h2 className="text-4xl md:text-5xl font-display font-light leading-tight text-bjork-black mb-4">
               Refine Your Search
             </h2>
             <p className="text-lg text-gray-700">
@@ -276,7 +276,7 @@ export default function FeaturedListingsPage() {
                 <div className="w-16 h-16 bg-bjork-beige rounded-full flex items-center justify-center mx-auto mb-6">
                   <MapPin className="w-8 h-8 text-bjork-black" />
                 </div>
-                <h3 className="text-xl font-semibold mb-4">Prime Locations</h3>
+                <h3 className="text-3xl md:text-4xl font-display font-light leading-tight mb-4">Prime Locations</h3>
                 <p className="text-gray-600">
                   Situated in Nebraska's most desirable neighborhoods with excellent schools, 
                   convenient amenities, and strong investment potential.
@@ -289,7 +289,7 @@ export default function FeaturedListingsPage() {
                 <div className="w-16 h-16 bg-bjork-beige rounded-full flex items-center justify-center mx-auto mb-6">
                   <Square className="w-8 h-8 text-bjork-black" />
                 </div>
-                <h3 className="text-xl font-semibold mb-4">Exceptional Quality</h3>
+                <h3 className="text-3xl md:text-4xl font-display font-light leading-tight mb-4">Exceptional Quality</h3>
                 <p className="text-gray-600">
                   Each property meets our strict criteria for construction quality, design, 
                   and overall condition to ensure lasting value.
@@ -302,7 +302,7 @@ export default function FeaturedListingsPage() {
                 <div className="w-16 h-16 bg-bjork-beige rounded-full flex items-center justify-center mx-auto mb-6">
                   <Bath className="w-8 h-8 text-bjork-black" />
                 </div>
-                <h3 className="text-xl font-semibold mb-4">Unique Features</h3>
+                <h3 className="text-3xl md:text-4xl font-display font-light leading-tight mb-4">Unique Features</h3>
                 <p className="text-gray-600">
                   Properties with distinctive architectural details, premium finishes, 
                   or special amenities that set them apart from the market.

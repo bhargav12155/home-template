@@ -58,8 +58,8 @@ export default function Blog() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-6xl font-display font-light text-bjork-black mb-6">
-            Market <span className="text-bjork-beige">Insights</span>
+                    <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-light leading-tight text-bjork-black mb-6">
+            Nebraska Real Estate <span className="text-bjork-beige">Insights</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             Stay informed with the latest Nebraska real estate trends, market analysis, and expert insights from the Bjork Group team.
@@ -177,7 +177,7 @@ export default function Blog() {
                       <Badge className="bg-bjork-beige text-white mb-4">
                         {featuredPost.category}
                       </Badge>
-                      <h2 className="text-3xl font-display font-medium text-bjork-black mb-4 leading-tight">
+                      <h2 className="text-4xl md:text-5xl font-display font-light leading-tight text-bjork-black mb-4">
                         {featuredPost.title}
                       </h2>
                       <p className="text-gray-600 mb-6 leading-relaxed line-clamp-3">

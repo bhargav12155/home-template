@@ -96,7 +96,7 @@ export default function Contact() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-6xl font-display font-light text-bjork-black mb-6">
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-light leading-tight text-bjork-black mb-6">
             Contact <span className="text-bjork-beige">Us</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
@@ -108,8 +108,8 @@ export default function Contact() {
           {/* Contact Information */}
           <div className="lg:col-span-1 space-y-8">
             <div>
-              <h2 className="text-2xl font-display font-medium text-bjork-black mb-6">
-                Get in Touch
+                            <h2 className="text-4xl md:text-5xl font-display font-light leading-tight text-bjork-black mb-6">
+                Contact Information
               </h2>
               <div className="space-y-6">
                 {contactMethods.map((method, index) => (

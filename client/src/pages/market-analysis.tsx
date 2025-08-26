@@ -68,7 +68,7 @@ export default function MarketAnalysis() {
       <section className="min-h-screen flex flex-col justify-center items-center py-20 bg-white">
         <div className="w-full max-w-6xl px-6 flex flex-col justify-center items-center">
           <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-display font-light text-bjork-black mb-8">
+            <h2 className="text-4xl md:text-5xl font-display font-light leading-tight text-bjork-black mb-8">
               Lincoln Market <span className="font-bold text-bjork-beige">Insights</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -154,7 +154,7 @@ export default function MarketAnalysis() {
         
         <div className="w-full max-w-4xl px-6 flex flex-col justify-center items-center relative z-10">
           <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-display font-light text-white mb-8">
+            <h2 className="text-4xl md:text-5xl font-display font-light leading-tight text-white mb-8">
               Free <span className="font-bold text-bjork-beige">Mortgage Calculator</span>
             </h2>
             <p className="text-xl text-white/80 max-w-3xl mx-auto">
@@ -242,7 +242,7 @@ export default function MarketAnalysis() {
       <section className="min-h-screen flex flex-col justify-center items-center py-20 bg-white">
         <div className="w-full max-w-6xl px-6 flex flex-col justify-center items-center">
           <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-display font-light text-bjork-black mb-4">
+            <h2 className="text-4xl md:text-5xl font-display font-light leading-tight text-bjork-black mb-4">
               Ready to Get Started? <span className="font-bold text-bjork-beige">Let's Connect!</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-4xl mx-auto">
@@ -313,7 +313,7 @@ export default function MarketAnalysis() {
             {/* Contact Information */}
             <div className="space-y-8">
               <div>
-                <h3 className="text-2xl font-display font-bold text-bjork-black mb-6">Professional Realty Group</h3>
+                <h3 className="text-2xl font-display font-bold text-bjork-black mb-6">Bjork Group</h3>
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
                     <MapPin className="h-5 w-5 text-bjork-beige" />
@@ -328,7 +328,7 @@ export default function MarketAnalysis() {
                   </div>
                   <div className="flex items-center space-x-3">
                     <Mail className="h-5 w-5 text-bjork-beige" />
-                    <p className="text-bjork-black font-medium">info@prglincoln.com</p>
+                    <p className="text-bjork-black font-medium">info@bjorkgroup.com</p>
                   </div>
                 </div>
               </div>
@@ -352,7 +352,7 @@ export default function MarketAnalysis() {
       {/* CTA Section */}
       <section className="bg-bjork-black text-white py-12">
         <div className="max-w-6xl mx-auto px-6 text-center">
-          <h2 className="text-3xl md:text-4xl font-display font-light mb-4">
+          <h2 className="text-4xl md:text-5xl font-display font-light leading-tight mb-4">
             Start Your Real Estate Journey With <span className="font-bold text-bjork-beige">Data-Driven Decisions</span>
           </h2>
           <p className="text-lg mb-8 max-w-4xl mx-auto leading-relaxed">

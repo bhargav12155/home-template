@@ -69,8 +69,8 @@ export default function Agents() {
       <section className="bg-gradient-to-br from-bjork-black via-bjork-blue to-bjork-beige text-white py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-5xl md:text-6xl font-display font-light mb-6">
-              Meet Our Expert Agents
+                        <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-light leading-tight mb-6">
+              Meet Our <span className="text-bjork-beige">Nebraska</span> Real Estate Agents
             </h1>
             <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-8">
               Experienced professionals dedicated to delivering exceptional results in luxury real estate
@@ -114,7 +114,7 @@ export default function Agents() {
                 
                 <CardContent className="p-6">
                   <div className="mb-4">
-                    <h3 className="text-2xl font-display font-medium text-bjork-black mb-1">
+                    <h3 className="text-3xl md:text-4xl font-display font-light leading-tight text-bjork-black mb-1">
                       {agent.name}
                     </h3>
                     <p className="text-bjork-beige font-medium">{agent.title}</p>
@@ -189,7 +189,7 @@ export default function Agents() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-display font-light text-bjork-black mb-6">
+            <h2 className="text-4xl md:text-5xl font-display font-light leading-tight text-bjork-black mb-6">
               The Bjork Group Advantage
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">

@@ -239,22 +239,26 @@ export const contactFormSchema = z.object({
 // Property search schema
 export const propertySearchSchema = z.object({
   query: z.string().optional(),
-  minPrice: z.number().optional(),
-  maxPrice: z.number().optional(),
-  beds: z.number().optional(),
-  baths: z.number().optional(),
+  minPrice: z.coerce.number().optional(),
+  maxPrice: z.coerce.number().optional(),
+  beds: z.coerce.number().optional(),
+  baths: z.coerce.number().optional(),
   propertyType: z.string().optional(),
   city: z.string().optional(),
   neighborhood: z.string().optional(),
   schoolDistrict: z.string().optional(),
   style: z.string().optional(),
-  luxury: z.boolean().optional(),
-  featured: z.boolean().optional(),
+  luxury: z
+    .union([z.boolean(), z.string().transform((s) => s === "true")])
+    .optional(),
+  featured: z
+    .union([z.boolean(), z.string().transform((s) => s === "true")])
+    .optional(),
   architecturalStyle: z.string().optional(),
   // Extended for Paragon external queries
   status: z.enum(["Active", "Closed", "Both"]).optional(),
-  days: z.number().optional(), // recent closed window in days
-  limit: z.number().optional(), // max records to fetch
+  days: z.coerce.number().optional(), // recent closed window in days
+  limit: z.coerce.number().optional(), // max records to fetch
 });
 
 // Types

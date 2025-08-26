@@ -425,7 +425,7 @@ export default function HomeValuation() {
             {/* Contact Information */}
             <div className="space-y-8">
               <div>
-                <h3 className="text-2xl font-display font-bold text-bjork-black mb-6">Professional Realty Group</h3>
+                <h3 className="text-2xl font-display font-bold text-bjork-black mb-6">Bjork Group</h3>
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
                     <MapPin className="h-5 w-5 text-bjork-beige" />
@@ -440,7 +440,7 @@ export default function HomeValuation() {
                   </div>
                   <div className="flex items-center space-x-3">
                     <Mail className="h-5 w-5 text-bjork-beige" />
-                    <p className="text-bjork-black font-medium">info@prglincoln.com</p>
+                    <p className="text-bjork-black font-medium">info@bjorkgroup.com</p>
                   </div>
                 </div>
               </div>

@@ -23,6 +23,15 @@ export default function FeaturedListings() {
     limit: 8
   });
 
+  // Debug logging
+  console.log('Featured Properties Debug:', {
+    properties,
+    isLoading,
+    error,
+    propertiesLength: properties?.length,
+    firstProperty: properties?.[0]
+  });
+
   const formatPrice = (price: string | number) => {
     const numPrice = typeof price === 'string' ? parseFloat(price) : price;
     return new Intl.NumberFormat('en-US', {
@@ -138,12 +147,12 @@ export default function FeaturedListings() {
     <div className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-6">
         {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-display font-bold text-bjork-black mb-4">
-            <span className="font-normal">PRG</span> Featured Property Listings
+                <div className="text-center mb-12">
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-display font-light text-bjork-black mb-6 leading-tight">
+            Featured Property Listings
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Discover our hand-picked selection of premium properties in Lincoln and surrounding areas.
+            Discover exceptional properties in Nebraska's most desirable neighborhoods
           </p>
         </div>
 

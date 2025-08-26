@@ -45,6 +45,12 @@ export default function Hero() {
           loop
           playsInline
           className="w-full h-full object-cover"
+          style={{ filter: 'none' }}
+          ref={(video) => {
+            if (video) {
+              video.playbackRate = 0.5; // Slow down to 50% speed
+            }
+          }}
         >
           <source src={heroVideo} type="video/mp4" />
         </video>

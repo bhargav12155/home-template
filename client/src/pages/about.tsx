@@ -66,7 +66,7 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
-              <h1 className="text-4xl md:text-6xl font-display font-light text-bjork-black mb-6">
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-light leading-tight text-bjork-black mb-6">
                 About <span className="text-bjork-beige">Bjork Group</span>
               </h1>
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
@@ -102,7 +102,7 @@ export default function About() {
       <section className="py-20 bg-bjork-black text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-display font-light mb-6">
+            <h2 className="text-4xl md:text-5xl font-display font-light leading-tight mb-6">
               Our <span className="text-bjork-beige">Track Record</span>
             </h2>
             <p className="text-xl opacity-90 max-w-2xl mx-auto">
@@ -127,8 +127,8 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
             <div className="lg:col-span-2">
-              <h2 className="text-4xl font-display font-light text-bjork-black mb-6">
-                Meet <span className="text-bjork-beige">Michael Bjork</span>
+                            <h2 className="text-4xl md:text-5xl font-display font-light leading-tight text-bjork-black mb-6">
+                Meet Michael Bjork
               </h2>
               <div className="space-y-6 text-lg text-gray-600 leading-relaxed">
                 <p>
@@ -146,7 +146,7 @@ export default function About() {
               </div>
               
               <div className="mt-8">
-                <h3 className="text-xl font-display font-medium text-bjork-black mb-4">Credentials & Affiliations</h3>
+                <h3 className="text-3xl md:text-4xl font-display font-light leading-tight text-bjork-black mb-4">Credentials & Affiliations</h3>
                 <div className="flex flex-wrap gap-2">
                   <Badge className="bg-bjork-beige text-white">Licensed Broker</Badge>
                   <Badge className="bg-bjork-blue text-white">Luxury Home Specialist</Badge>
@@ -159,7 +159,7 @@ export default function About() {
             <div className="space-y-6">
               <Card>
                 <CardContent className="p-6">
-                  <h3 className="text-lg font-display font-medium text-bjork-black mb-4">Contact Michael</h3>
+                  <h3 className="text-3xl md:text-4xl font-display font-light leading-tight text-bjork-black mb-4">Contact Michael</h3>
                   <div className="space-y-4 text-sm">
                     <div className="flex items-center">
                       <Phone className="w-4 h-4 text-bjork-beige mr-3" />

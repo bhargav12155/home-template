@@ -48,7 +48,7 @@ export default function Selling() {
         <div className="w-full max-w-6xl px-6 flex flex-col justify-center items-center">
           <div className="text-center mb-12">
             <h2 className="text-4xl md:text-5xl font-display font-light text-bjork-black mb-8">
-              Why Sell With <span className="font-bold">PRG</span>
+              Why Sell With <span className="font-bold">Bjork Group</span>
             </h2>
             <div className="max-w-5xl mx-auto space-y-6 text-left">
               <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
@@ -92,7 +92,7 @@ export default function Selling() {
                   Today's home buyers are armed with more information than ever. They tell their agents which homes they want to see—and they've already rejected listings with too few, or poor quality photos. It is absolutely vital that your online listing has high-impact photos to make a lasting first impression and create a desire to see more.
                 </p>
                 <p className="text-lg text-white/90 leading-relaxed">
-                  <span className="font-bold">PRG</span> takes this even further with <span className="text-red-500 font-bold">Showcase® Listings</span> on Zillow. Only available to select realtors, these listings increase online exposure even more with advanced user features like scrolling images and interactive floor plans that connect photography to the rooms.
+                  <span className="font-bold">Bjork Group</span> takes this even further with <span className="text-red-500 font-bold">Showcase® Listings</span> on Zillow. Only available to select realtors, these listings increase online exposure even more with advanced user features like scrolling images and interactive floor plans that connect photography to the rooms.
                 </p>
               </div>
             </div>

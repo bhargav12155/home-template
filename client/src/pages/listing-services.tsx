@@ -554,7 +554,7 @@ export default function ListingServices() {
             {/* Team Information */}
             <div className="space-y-8">
               <div>
-                <h3 className="text-2xl font-display font-bold text-bjork-black mb-6">Professional Realty Group</h3>
+                <h3 className="text-2xl font-display font-bold text-bjork-black mb-6">Bjork Group</h3>
                 <div className="space-y-6">
                   <div className="flex items-start space-x-4">
                     <div className="w-12 h-12 bg-bjork-beige rounded-full flex items-center justify-center">
@@ -604,7 +604,7 @@ export default function ListingServices() {
                   </div>
                   <div className="flex items-center space-x-3">
                     <Mail className="h-5 w-5 text-bjork-beige" />
-                    <p className="text-bjork-black font-medium">listings@prglincoln.com</p>
+                    <p className="text-bjork-black font-medium">listings@bjorkgroup.com</p>
                   </div>
                 </div>
               </div>
