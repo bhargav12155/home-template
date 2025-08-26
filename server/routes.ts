@@ -467,58 +467,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // In development mode, use Paragon API instead of database
       if (process.env.NODE_ENV === "development") {
-        // For featured listings, get highest priced properties without price constraints
+        // Build Paragon API parameters based on search criteria
+        const paragonParams = new URLSearchParams({
+          city: searchParams.city || "lincoln", // Default to Lincoln, NE as per header
+          status: "Active",
+          limit: (searchParams.limit || 20).toString(),
+          includeImages: "1",
+        });
+
+        // Add price filters if specified
+        if (searchParams.minPrice) {
+          paragonParams.set("minPrice", searchParams.minPrice.toString());
+        }
+        if (searchParams.maxPrice) {
+          paragonParams.set("maxPrice", searchParams.maxPrice.toString());
+        }
+
+        // For featured listings, remove any price constraints and get higher-end properties
         if (searchParams.featured) {
-          const paragonParams = new URLSearchParams({
-            city: searchParams.city || "omaha",
-            status: "Active",
-            limit: (searchParams.limit || 8).toString(),
-            includeImages: "1",
-            // No minPrice/maxPrice for featured - we want all listings sorted by highest price
-          });
+          paragonParams.delete("minPrice");
+          paragonParams.delete("maxPrice");
+          paragonParams.set("minPrice", "150000"); // Set a minimum for featured
+        }
 
-          const paragonUrl = `http://localhost:5080/api/paragon/properties?${paragonParams}`;
-          try {
-            const response = await fetch(paragonUrl);
-            if (response.ok) {
-              const data = await response.json();
-              res.json(data);
+        // For luxury listings, set high minimum price
+        if (searchParams.luxury) {
+          paragonParams.delete("minPrice");
+          paragonParams.delete("maxPrice");
+          paragonParams.set("minPrice", "400000"); // Luxury threshold
+        }
+
+        const paragonUrl = `http://localhost:5080/api/paragon/properties?${paragonParams}`;
+        try {
+          const response = await fetch(paragonUrl);
+          if (response.ok) {
+            const data = await response.json();
+
+            // If we have data, filter it further based on search criteria
+            if (data.data && Array.isArray(data.data)) {
+              let filteredData = data.data;
+
+              // Filter by beds if specified
+              if (searchParams.beds) {
+                filteredData = filteredData.filter(
+                  (prop: any) => prop.beds >= searchParams.beds!
+                );
+              }
+
+              // Filter by baths if specified
+              if (searchParams.baths) {
+                filteredData = filteredData.filter(
+                  (prop: any) => parseFloat(prop.baths) >= searchParams.baths!
+                );
+              }
+
+              // Filter by property type if specified
+              if (searchParams.propertyType) {
+                filteredData = filteredData.filter(
+                  (prop: any) =>
+                    prop.propertyType
+                      ?.toLowerCase()
+                      .includes(searchParams.propertyType!.toLowerCase()) ||
+                    (searchParams.propertyType === "Single Family" &&
+                      (prop.propertyType
+                        ?.toLowerCase()
+                        .includes("residential") ||
+                        prop.propertyType?.toLowerCase().includes("single")))
+                );
+              }
+
+              // Text search in address, city, or neighborhood
+              if (searchParams.query) {
+                const query = searchParams.query.toLowerCase();
+                filteredData = filteredData.filter(
+                  (prop: any) =>
+                    prop.address?.toLowerCase().includes(query) ||
+                    prop.city?.toLowerCase().includes(query) ||
+                    prop.neighborhood?.toLowerCase().includes(query) ||
+                    prop.zipCode?.includes(query)
+                );
+              }
+
+              // Apply limit after filtering
+              const finalLimit = searchParams.limit || 20;
+              filteredData = filteredData.slice(0, finalLimit);
+
+              res.json({
+                data: filteredData,
+                total: filteredData.length,
+                hasMore: false,
+                page: 1,
+              });
               return;
             }
-          } catch (error) {
-            console.error(
-              "Error calling Paragon API for featured listings:",
-              error
-            );
-          }
-        } else {
-          // For regular searches, include price filters if specified
-          const paragonParams = new URLSearchParams({
-            city: searchParams.city || "omaha",
-            status: "Active",
-            limit: (searchParams.limit || 8).toString(),
-            includeImages: "1",
-          });
 
-          // Only add price filters if they're specified
-          if (searchParams.minPrice) {
-            paragonParams.set("minPrice", searchParams.minPrice.toString());
+            res.json(data);
+            return;
           }
-          if (searchParams.maxPrice) {
-            paragonParams.set("maxPrice", searchParams.maxPrice.toString());
-          }
-
-          const paragonUrl = `http://localhost:5080/api/paragon/properties?${paragonParams}`;
-          try {
-            const response = await fetch(paragonUrl);
-            if (response.ok) {
-              const data = await response.json();
-              res.json(data);
-              return;
-            }
-          } catch (error) {
-            console.error("Error calling Paragon API:", error);
-          }
+        } catch (error) {
+          console.error("Error calling Paragon API:", error);
         }
 
         // Fallback to external API if Paragon fails
@@ -535,8 +582,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return;
         }
 
-        // For other searches, get properties from Omaha/Lincoln
-        const city = searchParams.city || "Omaha";
+        // For other searches, get properties from Lincoln (default) or specified city
+        const city = searchParams.city || "Lincoln";
         const externalProperties =
           await externalPropertyAPI.getPropertiesForCity(city, {
             minPrice: searchParams.minPrice,
@@ -581,16 +628,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/properties/:id", async (req, res) => {
+  app.get("/api/property/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
-      const property = await storage.getProperty(id);
-      if (!property) {
-        return res.status(404).json({ message: "Property not found" });
+      const id = req.params.id;
+
+      // In development mode, try to fetch from Paragon API first
+      if (process.env.NODE_ENV === "development") {
+        try {
+          // Use the ID as ListingKey for Paragon API
+          const paragonUrl = `https://api.paragonapi.com/api/v2/OData/bk9/Property('${id}')?access_token=429b18690390adfa776f0b727dfc78cc&$expand=Media`;
+
+          const response = await fetch(paragonUrl);
+          if (response.ok) {
+            const paragonData = await response.json();
+
+            // Transform Paragon data to our Property schema
+            const property = {
+              id: parseInt(id) || Math.floor(Math.random() * 1000000),
+              mlsId: paragonData.ListingKey,
+              listingKey: paragonData.ListingKey,
+              title: `${paragonData.BedroomsTotal || "N/A"} Bed, ${
+                paragonData.BathroomsTotalInteger || "N/A"
+              } Bath ${paragonData.PropertySubType || "Home"} in ${
+                paragonData.City
+              }`,
+              description:
+                paragonData.PublicRemarks ||
+                `Beautiful ${(
+                  paragonData.PropertySubType || "home"
+                ).toLowerCase()} in ${paragonData.City}`,
+              price: (paragonData.ListPrice || 0).toString(),
+              address: paragonData.UnparsedAddress || "",
+              city: paragonData.City || "",
+              state: paragonData.StateOrProvince || "NE",
+              zipCode: paragonData.PostalCode || "",
+              beds: paragonData.BedroomsTotal || 0,
+              baths: (paragonData.BathroomsTotalInteger || 0).toString(),
+              sqft:
+                paragonData.LivingArea ||
+                paragonData.AboveGradeFinishedArea ||
+                0,
+              yearBuilt: paragonData.YearBuilt || null,
+              propertyType: paragonData.PropertyType || "Residential",
+              status: (paragonData.StandardStatus || "Active").toLowerCase(),
+              standardStatus: paragonData.StandardStatus || "Active",
+              featured: (paragonData.ListPrice || 0) >= 250000,
+              luxury: (paragonData.ListPrice || 0) >= 400000,
+              images:
+                paragonData.Media && Array.isArray(paragonData.Media)
+                  ? paragonData.Media.sort(
+                      (a: any, b: any) => (a.Order || 0) - (b.Order || 0)
+                    )
+                      .map((m: any) => m.MediaURL)
+                      .filter(Boolean)
+                  : [],
+              neighborhood: paragonData.SubdivisionName || null,
+              schoolDistrict: paragonData.ElementarySchool || null,
+              style: paragonData.PropertySubType || null,
+              coordinates:
+                paragonData.Latitude && paragonData.Longitude
+                  ? {
+                      lat: parseFloat(paragonData.Latitude),
+                      lng: parseFloat(paragonData.Longitude),
+                    }
+                  : null,
+              features: [],
+              architecturalStyle: paragonData.PropertySubType || null,
+              secondaryStyle: null,
+              styleConfidence: null,
+              styleFeatures: [],
+              styleAnalyzed: false,
+              listingAgentKey: paragonData.ListAgentKey || null,
+              listingOfficeName: paragonData.ListOfficeName || null,
+              listingContractDate: paragonData.ContractStatusChangeDate || null,
+              daysOnMarket: paragonData.DaysOnMarket || null,
+              originalListPrice:
+                paragonData.OriginalListPrice?.toString() || null,
+              mlsStatus: paragonData.MlsStatus || paragonData.StandardStatus,
+              modificationTimestamp: paragonData.ModificationTimestamp || null,
+              photoCount:
+                paragonData.PhotosCount ||
+                (paragonData.Media ? paragonData.Media.length : 0),
+              virtualTourUrl: paragonData.VirtualTourURLUnbranded || null,
+              isIdxListing: true,
+              idxSyncedAt: new Date(),
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            };
+
+            res.json({ property, success: true });
+            return;
+          }
+        } catch (error) {
+          console.error("Error fetching from Paragon API:", error);
+        }
       }
-      res.json(property);
+
+      // Fallback: In development mode, return error to avoid database connection issues
+      if (process.env.NODE_ENV === "development") {
+        return res.status(404).json({
+          message: "Property not found",
+          success: false,
+          note: "Development mode: Paragon API lookup failed",
+        });
+      }
+
+      // Production fallback to database
+      const numericId = parseInt(id);
+      if (isNaN(numericId)) {
+        return res
+          .status(400)
+          .json({ message: "Invalid property ID", success: false });
+      }
+
+      const property = await storage.getProperty(numericId);
+      if (!property) {
+        return res
+          .status(404)
+          .json({ message: "Property not found", success: false });
+      }
+
+      res.json({ property, success: true });
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch property", error });
+      console.error("Property details endpoint error:", error);
+      res
+        .status(500)
+        .json({ message: "Failed to fetch property", error, success: false });
     }
   });
 

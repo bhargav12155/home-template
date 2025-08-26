@@ -1,23 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-
-interface Property {
-  id: string;
-  address: string;
-  price: number;
-  lat?: number;
-  lng?: number;
-  images?: string[];
-  beds?: number;
-  baths?: number;
-  sqft?: number;
-}
+import type { Property } from '@shared/schema';
 
 interface GoogleMapProps {
   properties: Property[];
   center?: { lat: number; lng: number };
   zoom?: number;
   onPropertySelect?: (property: Property) => void;
+  selectedPropertyId?: number | null;
 }
 
 declare global {
@@ -30,7 +20,8 @@ export default function GoogleMap({
   properties, 
   center = { lat: 40.8136, lng: -96.7026 }, // Lincoln, NE
   zoom = 12,
-  onPropertySelect 
+  onPropertySelect,
+  selectedPropertyId 
 }: GoogleMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
@@ -115,33 +106,87 @@ export default function GoogleMap({
     markersRef.current.forEach(marker => marker.setMap(null));
     markersRef.current = [];
 
+    if (properties.length === 0) return;
+
+    const bounds = new window.google.maps.LatLngBounds();
+    let markersAdded = 0;
+
     // Add new markers
     properties.forEach((property) => {
       // Use property coordinates if available, otherwise geocode address
-      const position = property.lat && property.lng 
-        ? { lat: property.lat, lng: property.lng }
+      const coordinates = property.coordinates as { lat: number; lng: number } | null;
+      const position = coordinates 
+        ? coordinates
         : null;
 
       if (position) {
         addMarker(property, position);
+        bounds.extend(position);
+        markersAdded++;
       } else {
         // Geocode the address
         const geocoder = new window.google.maps.Geocoder();
+        const fullAddress = `${property.address}, ${property.city}, ${property.state} ${property.zipCode}`;
         geocoder.geocode(
-          { address: `${property.address}, Lincoln, NE` },
+          { address: fullAddress },
           (results: any, status: any) => {
             if (status === 'OK' && results[0]) {
-              const position = results[0].geometry.location;
-              addMarker(property, { lat: position.lat(), lng: position.lng() });
+              const location = results[0].geometry.location;
+              const pos = { lat: location.lat(), lng: location.lng() };
+              addMarker(property, pos);
+              bounds.extend(pos);
+              markersAdded++;
+              
+              // Fit bounds after adding markers
+              if (markersAdded === properties.length) {
+                mapInstanceRef.current?.fitBounds(bounds, { padding: 50 });
+              }
             }
           }
         );
       }
     });
+
+    // Fit bounds if we have coordinates already
+    if (markersAdded > 0) {
+      mapInstanceRef.current.fitBounds(bounds, { padding: 50 });
+    }
   }, [properties, isLoaded]);
+
+  // Update marker styles when selectedPropertyId changes
+  useEffect(() => {
+    markersRef.current.forEach(marker => {
+      const propertyId = (marker as any).propertyId;
+      if (propertyId !== undefined) {
+        const property = properties.find(p => p.id === propertyId);
+        if (property) {
+          const priceNumber = parseFloat(property.price);
+          const priceK = Math.round(priceNumber / 1000);
+          const isSelected = selectedPropertyId === propertyId;
+
+          marker.setIcon({
+            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+              <svg width="40" height="48" viewBox="0 0 40 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 0C8.954 0 0 8.954 0 20C0 31.046 20 48 20 48S40 31.046 40 20C40 8.954 31.046 0 20 0Z" fill="${isSelected ? '#D4A574' : '#1f2937'}"/>
+                <circle cx="20" cy="20" r="12" fill="white"/>
+                <text x="20" y="24" text-anchor="middle" fill="${isSelected ? '#D4A574' : '#1f2937'}" font-size="11" font-weight="bold">${priceK > 999 ? `$${(priceK/1000).toFixed(1)}M` : `$${priceK}K`}</text>
+              </svg>
+            `),
+            scaledSize: new window.google.maps.Size(40, 48),
+            anchor: new window.google.maps.Point(20, 48),
+          });
+          marker.setZIndex(isSelected ? 1000 : 1);
+        }
+      }
+    });
+  }, [selectedPropertyId, properties]);
 
   const addMarker = (property: Property, position: { lat: number; lng: number }) => {
     if (!mapInstanceRef.current) return;
+
+    const priceNumber = parseFloat(property.price);
+    const priceK = Math.round(priceNumber / 1000);
+    const isSelected = selectedPropertyId === property.id;
 
     const marker = new window.google.maps.Marker({
       position,
@@ -149,36 +194,61 @@ export default function GoogleMap({
       title: property.address,
       icon: {
         url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-          <svg width="32" height="40" viewBox="0 0 32 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M16 0C7.163 0 0 7.163 0 16C0 24.837 16 40 16 40S32 24.837 32 16C32 7.163 24.837 0 16 0Z" fill="#1f2937"/>
-            <circle cx="16" cy="16" r="8" fill="white"/>
-            <text x="16" y="20" text-anchor="middle" fill="#1f2937" font-size="10" font-weight="bold">$${Math.round(property.price / 1000)}K</text>
+          <svg width="40" height="48" viewBox="0 0 40 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 0C8.954 0 0 8.954 0 20C0 31.046 20 48 20 48S40 31.046 40 20C40 8.954 31.046 0 20 0Z" fill="${isSelected ? '#D4A574' : '#1f2937'}"/>
+            <circle cx="20" cy="20" r="12" fill="white"/>
+            <text x="20" y="24" text-anchor="middle" fill="${isSelected ? '#D4A574' : '#1f2937'}" font-size="11" font-weight="bold">${priceK > 999 ? `$${(priceK/1000).toFixed(1)}M` : `$${priceK}K`}</text>
           </svg>
         `),
-        scaledSize: new window.google.maps.Size(32, 40),
-        anchor: new window.google.maps.Point(16, 40)
+        scaledSize: new window.google.maps.Size(40, 48),
+        anchor: new window.google.maps.Point(20, 48),
+        zIndex: isSelected ? 1000 : 1
       }
     });
+
+    // Store property info on marker
+    (marker as any).propertyId = property.id;
+
+    // Format price for display
+    const formattedPrice = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(priceNumber);
 
     // Info window
     const infoWindow = new window.google.maps.InfoWindow({
       content: `
-        <div style="padding: 10px; max-width: 250px;">
-          <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold;">${property.address}</h3>
-          <p style="margin: 0 0 8px 0; font-size: 18px; font-weight: bold; color: #1f2937;">$${property.price.toLocaleString()}</p>
+        <div style="padding: 12px; max-width: 280px; font-family: system-ui, -apple-system, sans-serif;">
+          <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold; color: #1f2937;">${property.address}</h3>
+          <p style="margin: 0 0 8px 0; font-size: 18px; font-weight: bold; color: #1f2937;">${formattedPrice}</p>
+          <p style="margin: 0 0 8px 0; font-size: 14px; color: #666;">${property.city}, ${property.state} ${property.zipCode}</p>
           ${property.beds || property.baths || property.sqft ? `
-            <p style="margin: 0; font-size: 14px; color: #666;">
-              ${property.beds ? `${property.beds} beds` : ''} 
-              ${property.baths ? `• ${property.baths} baths` : ''} 
-              ${property.sqft ? `• ${property.sqft} sqft` : ''}
-            </p>
+            <div style="display: flex; gap: 12px; margin: 8px 0; font-size: 14px; color: #666;">
+              ${property.beds ? `<span><strong>${property.beds}</strong> beds</span>` : ''} 
+              ${property.baths ? `<span><strong>${parseFloat(property.baths)}</strong> baths</span>` : ''} 
+              ${property.sqft ? `<span><strong>${property.sqft.toLocaleString()}</strong> sqft</span>` : ''}
+            </div>
+          ` : ''}
+          ${property.images && property.images.length > 0 ? `
+            <img src="${property.images[0]}" alt="Property" style="width: 100%; height: 120px; object-fit: cover; border-radius: 4px; margin-top: 8px;" />
           ` : ''}
         </div>
       `
     });
 
     marker.addListener('click', () => {
+      // Close any open info windows
+      markersRef.current.forEach(m => {
+        if ((m as any).infoWindow) {
+          (m as any).infoWindow.close();
+        }
+      });
+      
       infoWindow.open(mapInstanceRef.current, marker);
+      (marker as any).infoWindow = infoWindow;
+      
       if (onPropertySelect) {
         onPropertySelect(property);
       }
