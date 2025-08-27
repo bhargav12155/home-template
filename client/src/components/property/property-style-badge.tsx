@@ -55,7 +55,9 @@ export default function PropertyStyleBadge({
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          {badgeContent}
+          <div>
+            {badgeContent}
+          </div>
         </TooltipTrigger>
         <TooltipContent side="top" className="max-w-xs">
           <div className="text-xs space-y-1">

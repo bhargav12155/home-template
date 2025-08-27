@@ -155,8 +155,8 @@ export default function Search() {
 
           {/* Filter Row */}
           <div className="flex items-center gap-4 flex-wrap">
-            <Select value={searchParams.minPrice?.toString() || ""} onValueChange={(value) => {
-              const newParams = { ...searchParams, minPrice: value ? parseInt(value) : undefined };
+            <Select value={searchParams.minPrice?.toString() || "any"} onValueChange={(value) => {
+              const newParams = { ...searchParams, minPrice: value !== "any" ? parseInt(value) : undefined };
               setSearchParams(newParams);
               handleSearch(newParams);
             }}>
@@ -164,7 +164,7 @@ export default function Search() {
                 <SelectValue placeholder="PRICE" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any Price</SelectItem>
+                <SelectItem value="any">Any Price</SelectItem>
                 <SelectItem value="100000">$100K+</SelectItem>
                 <SelectItem value="200000">$200K+</SelectItem>
                 <SelectItem value="300000">$300K+</SelectItem>
@@ -173,8 +173,8 @@ export default function Search() {
               </SelectContent>
             </Select>
 
-            <Select value={searchParams.beds?.toString() || ""} onValueChange={(value) => {
-              const newParams = { ...searchParams, beds: value ? parseInt(value) : undefined };
+            <Select value={searchParams.beds?.toString() || "any"} onValueChange={(value) => {
+              const newParams = { ...searchParams, beds: value !== "any" ? parseInt(value) : undefined };
               setSearchParams(newParams);
               handleSearch(newParams);
             }}>
@@ -182,7 +182,7 @@ export default function Search() {
                 <SelectValue placeholder="BED & BATH" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any Beds</SelectItem>
+                <SelectItem value="any">Any Beds</SelectItem>
                 <SelectItem value="1">1+ Bed</SelectItem>
                 <SelectItem value="2">2+ Beds</SelectItem>
                 <SelectItem value="3">3+ Beds</SelectItem>
@@ -191,8 +191,8 @@ export default function Search() {
               </SelectContent>
             </Select>
 
-            <Select value={searchParams.propertyType || ""} onValueChange={(value) => {
-              const newParams = { ...searchParams, propertyType: value || undefined };
+            <Select value={searchParams.propertyType || "any"} onValueChange={(value) => {
+              const newParams = { ...searchParams, propertyType: value !== "any" ? value : undefined };
               setSearchParams(newParams);
               handleSearch(newParams);
             }}>
@@ -200,7 +200,7 @@ export default function Search() {
                 <SelectValue placeholder="TYPE" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any Type</SelectItem>
+                <SelectItem value="any">Any Type</SelectItem>
                 <SelectItem value="Single Family">House</SelectItem>
                 <SelectItem value="Condo">Condo</SelectItem>
                 <SelectItem value="Townhouse">Townhouse</SelectItem>

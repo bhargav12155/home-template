@@ -635,13 +635,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // In development mode, try to fetch from Paragon API first
       if (process.env.NODE_ENV === "development") {
         try {
-          // Use the ID as ListingKey for Paragon API
-          const paragonUrl = `https://api.paragonapi.com/api/v2/OData/bk9/Property('${id}')?access_token=429b18690390adfa776f0b727dfc78cc&$expand=Media`;
+          // First, try direct lookup by ListingKey
+          let paragonUrl = `https://api.paragonapi.com/api/v2/OData/bk9/Property('${id}')?access_token=429b18690390adfa776f0b727dfc78cc&$expand=Media`;
 
-          const response = await fetch(paragonUrl);
+          let response = await fetch(paragonUrl);
+          let paragonData = null;
+
           if (response.ok) {
-            const paragonData = await response.json();
+            paragonData = await response.json();
+          } else {
+            // If direct lookup fails, try searching by different criteria
+            console.log(`Direct lookup failed for ID: ${id}, trying search...`);
 
+            // Try searching in the properties list to find a match
+            const searchUrl = `http://localhost:5080/api/paragon/properties?city=lincoln&limit=100&includeImages=1`;
+            const searchResponse = await fetch(searchUrl);
+
+            if (searchResponse.ok) {
+              const searchData = await searchResponse.json();
+              const matchingProperty = searchData.data?.find(
+                (prop: any) =>
+                  prop.id === id || prop.mlsId === id || prop.listingKey === id
+              );
+
+              if (matchingProperty) {
+                // Convert the search result to the expected format
+                paragonData = {
+                  ListingKey: matchingProperty.mlsId || matchingProperty.id,
+                  BedroomsTotal: matchingProperty.beds,
+                  BathroomsTotalInteger: parseInt(matchingProperty.baths) || 0,
+                  PropertySubType: matchingProperty.propertyType,
+                  City: matchingProperty.city,
+                  PublicRemarks: matchingProperty.description,
+                  ListPrice: parseInt(matchingProperty.price) || 0,
+                  UnparsedAddress: matchingProperty.address,
+                  StateOrProvince: matchingProperty.state,
+                  PostalCode: matchingProperty.zipCode,
+                  LivingArea: matchingProperty.sqft,
+                  AboveGradeFinishedArea: matchingProperty.sqft,
+                  YearBuilt: matchingProperty.yearBuilt,
+                  PropertyType: matchingProperty.propertyType,
+                  StandardStatus: matchingProperty.standardStatus || "Active",
+                  SubdivisionName: matchingProperty.neighborhood,
+                  Latitude: matchingProperty.coordinates?.lat,
+                  Longitude: matchingProperty.coordinates?.lng,
+                  Media:
+                    matchingProperty.images?.map(
+                      (url: string, index: number) => ({
+                        MediaURL: url,
+                        Order: index,
+                      })
+                    ) || [],
+                };
+              }
+            }
+          }
+
+          if (paragonData) {
             // Transform Paragon data to our Property schema
             const property = {
               id: parseInt(id) || Math.floor(Math.random() * 1000000),
