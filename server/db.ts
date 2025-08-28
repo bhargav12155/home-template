@@ -1,21 +1,63 @@
-import { Pool, neonConfig } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-serverless";
+import { Pool as NeonPool, neonConfig } from "@neondatabase/serverless";
+import { drizzle as neonDrizzle } from "drizzle-orm/neon-serverless";
+import { drizzle as pgDrizzle } from "drizzle-orm/node-postgres";
+// 'pg' is CommonJS; use default import then extract Pool for ESM compatibility
+import pg from "pg";
+const { Pool: PgPool } = pg;
 import ws from "ws";
 import * as schema from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
 
-// Embedded AWS RDS database URL (requested to keep local). Uses env override if provided.
-const DATABASE_URL =
-  process.env.DATABASE_URL ||
-  process.env.DB_URL ||
-  "postgresql://bjorkrealestate:Mcbkfg161@awseb-e-jxhud2jxqy-stack-awsebrdsdatabase-gzzxhy7mtvj8.ct6g8giomnqf.us-east-2.rds.amazonaws.com:5432/ebdb";
+// Require explicit DATABASE_URL (no more hard-coded production fallback)
+const DATABASE_URL = process.env.DATABASE_URL || process.env.DB_URL || null;
 
-if (!DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?"
-  );
+let pool: any = null;
+let db: any = null;
+
+if (DATABASE_URL) {
+  try {
+    if (/neon\./i.test(DATABASE_URL) || /neon.tech/i.test(DATABASE_URL)) {
+      // Neon serverless connection
+      pool = new NeonPool({ connectionString: DATABASE_URL });
+      db = neonDrizzle({ client: pool, schema });
+      console.log("DB: connected using Neon serverless driver");
+    } else {
+      // Standard Postgres (e.g., AWS RDS) via pg
+      // Configure SSL for RDS connections
+      const isRDS = DATABASE_URL.includes("rds.amazonaws.com");
+      const poolConfig: any = {
+        connectionString: DATABASE_URL,
+        max: 10,
+      };
+
+      if (isRDS) {
+        poolConfig.ssl = {
+          rejectUnauthorized: false,
+        };
+      }
+
+      pool = new PgPool(poolConfig);
+      db = pgDrizzle(pool, { schema });
+      console.log("DB: connected using pg (RDS/Postgres) driver");
+    }
+  } catch (err) {
+    console.error(
+      `DB: initialization failure: ${
+        (err as Error).message
+      }. Continuing without DB.`
+    );
+  }
+} else {
+  if (process.env.NODE_ENV === "production") {
+    console.error(
+      "DB: FATAL - DATABASE_URL not set in production. The app will run without persistent storage."
+    );
+  } else {
+    console.log(
+      "Development mode: DATABASE_URL not set, falling back to in-memory storage (MemStorage)."
+    );
+  }
 }
 
-export const pool = new Pool({ connectionString: DATABASE_URL });
-export const db = drizzle({ client: pool, schema });
+export { pool, db };

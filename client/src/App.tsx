@@ -15,6 +15,7 @@ import Buying from "@/pages/buying";
 import Selling from "@/pages/selling";
 import LincolnHomes from "@/pages/lincoln-homes";
 import Featured from "@/pages/featured";
+import FeaturedListings from "@/pages/featured-listings";
 import HomeBuilders from "@/pages/home-builders";
 import Admin from "@/pages/admin";
 import Agents from "@/pages/agents";
@@ -39,6 +40,7 @@ function Router() {
           <Route path="/selling" component={Selling} />
           <Route path="/lincoln-homes" component={LincolnHomes} />
           <Route path="/featured" component={Featured} />
+          <Route path="/featured-listings" component={FeaturedListings} />
           <Route path="/home-builders" component={HomeBuilders} />
           <Route path="/communities" component={Communities} />
           <Route path="/about" component={About} />

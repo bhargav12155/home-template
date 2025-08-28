@@ -16,3 +16,7 @@ attached_assets/
 *.bak
 package-lock.json
 replit.md
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml

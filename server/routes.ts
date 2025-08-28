@@ -608,12 +608,192 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/properties/featured", async (req, res) => {
     try {
+      // Parse query parameters for filtering
+      const {
+        propertyType,
+        minPrice,
+        maxPrice,
+        beds,
+        baths,
+        location,
+        features,
+        sortBy,
+        limit = 20,
+      } = req.query;
+
+      // In development mode, use Paragon API with filters
+      if (process.env.NODE_ENV === "development") {
+        const paragonParams = new URLSearchParams({
+          city: (location as string) || "lincoln",
+          status: "Active",
+          limit: limit.toString(),
+          includeImages: "1",
+          minPrice: minPrice ? minPrice.toString() : "150000", // Featured minimum
+        });
+
+        if (maxPrice) paragonParams.set("maxPrice", maxPrice.toString());
+        if (beds) paragonParams.set("beds", beds.toString());
+        if (baths) paragonParams.set("baths", baths.toString());
+
+        const paragonUrl = `http://localhost:5080/api/paragon/properties?${paragonParams}`;
+
+        try {
+          const response = await fetch(paragonUrl);
+          if (response.ok) {
+            let data = await response.json();
+
+            // Apply additional filtering
+            if (data.properties) {
+              let filteredProperties = data.properties;
+
+              // Filter by property type if specified
+              if (propertyType && propertyType !== "any") {
+                filteredProperties = filteredProperties.filter((prop: any) => {
+                  const propType = prop.PropertyType?.toLowerCase() || "";
+                  switch (propertyType) {
+                    case "single-family":
+                      return (
+                        propType.includes("residential") ||
+                        propType.includes("single")
+                      );
+                    case "condo":
+                      return (
+                        propType.includes("condo") ||
+                        propType.includes("condominium")
+                      );
+                    case "townhouse":
+                      return (
+                        propType.includes("townhouse") ||
+                        propType.includes("town")
+                      );
+                    case "luxury":
+                      return (prop.ListPrice || 0) >= 500000;
+                    default:
+                      return true;
+                  }
+                });
+              }
+
+              // Filter by features if specified
+              if (features && typeof features === "string") {
+                const requestedFeatures = features.split(",");
+                filteredProperties = filteredProperties.filter((prop: any) => {
+                  const propFeatures = [
+                    prop.PublicRemarks || "",
+                    prop.PrivateRemarks || "",
+                    prop.InteriorFeatures || "",
+                    prop.ExteriorFeatures || "",
+                  ]
+                    .join(" ")
+                    .toLowerCase();
+
+                  return requestedFeatures.some((feature: string) => {
+                    const featureLower = feature.toLowerCase();
+                    return (
+                      propFeatures.includes(featureLower) ||
+                      propFeatures.includes(featureLower.replace(/\s+/g, "")) ||
+                      propFeatures.includes(featureLower.replace("-", " "))
+                    );
+                  });
+                });
+              }
+
+              // Sort the results
+              if (sortBy) {
+                filteredProperties = filteredProperties.sort(
+                  (a: any, b: any) => {
+                    switch (sortBy) {
+                      case "price-low":
+                        return (a.ListPrice || 0) - (b.ListPrice || 0);
+                      case "price-high":
+                        return (b.ListPrice || 0) - (a.ListPrice || 0);
+                      case "beds":
+                        return (b.BedroomsTotal || 0) - (a.BedroomsTotal || 0);
+                      case "size":
+                        return (b.LivingArea || 0) - (a.LivingArea || 0);
+                      case "newest":
+                      default:
+                        return (
+                          new Date(b.ModificationTimestamp || 0).getTime() -
+                          new Date(a.ModificationTimestamp || 0).getTime()
+                        );
+                    }
+                  }
+                );
+              }
+
+              data.properties = filteredProperties;
+              data.total = filteredProperties.length;
+            }
+
+            res.json(data);
+            return;
+          }
+        } catch (paragonError) {
+          console.log("Paragon API error, falling back to database");
+        }
+      }
+
+      // Fallback to database
       const properties = await storage.getFeaturedProperties();
       res.json(properties);
     } catch (error) {
       res
         .status(500)
         .json({ message: "Failed to fetch featured properties", error });
+    }
+  });
+
+  // Add a new search endpoint for featured properties
+  app.get("/api/properties/search", async (req, res) => {
+    try {
+      const searchParams = propertySearchSchema.parse(req.query);
+
+      // In development mode, use Paragon API instead of database
+      if (process.env.NODE_ENV === "development") {
+        // Build Paragon API parameters based on search criteria
+        const paragonParams = new URLSearchParams({
+          city: searchParams.city || "lincoln",
+          status: "Active",
+          limit: (searchParams.limit || 20).toString(),
+          includeImages: "1",
+        });
+
+        // Add price filters if specified
+        if (searchParams.minPrice) {
+          paragonParams.set("minPrice", searchParams.minPrice.toString());
+        }
+        if (searchParams.maxPrice) {
+          paragonParams.set("maxPrice", searchParams.maxPrice.toString());
+        }
+
+        // For featured listings, set a minimum for quality
+        if (searchParams.featured) {
+          if (!searchParams.minPrice) {
+            paragonParams.set("minPrice", "150000");
+          }
+        }
+
+        const paragonUrl = `http://localhost:5080/api/paragon/properties?${paragonParams}`;
+
+        try {
+          const response = await fetch(paragonUrl);
+          if (response.ok) {
+            const data = await response.json();
+            res.json(data);
+            return;
+          }
+        } catch (paragonError) {
+          console.log("Paragon API error, falling back to database");
+        }
+      }
+
+      // Production mode uses database
+      const properties = await storage.getProperties(searchParams);
+      res.json(properties);
+    } catch (error) {
+      console.error("Properties search endpoint error:", error);
+      res.status(400).json({ message: "Invalid search parameters", error });
     }
   });
 
@@ -1185,25 +1365,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // **TEMPLATE ROUTES** - Multi-tenant customization
+  // In development we keep an in-memory template so you can test save/load locally
+  let devTemplateCache: any | null = null;
   app.get("/api/template", async (req, res) => {
     try {
-      // In development mode, return static template data
+      // In development mode, use the in-memory cache so POST updates are reflected
       if (process.env.NODE_ENV === "development") {
-        const staticTemplate = {
-          companyName: "Bjork Group",
-          agentName: "Mandy Visty",
-          agentTitle: "Principal Broker",
-          companyDescription:
-            "We believe that luxury is not a price point but an experience.",
-          homesSold: 500,
-          totalSalesVolume: "$200M+",
-          serviceAreas: ["Omaha", "Lincoln", "Greater Nebraska Area"],
-          email: "mandy@bjorkgroup.com",
-          phone: "(402) 555-0123",
-          address: "Omaha, Nebraska",
-          licenseNumber: "NE12345678",
-        };
-        res.json(staticTemplate);
+        if (!devTemplateCache) {
+          devTemplateCache = {
+            companyName: "Bjork Group",
+            agentName: "Mandy Visty",
+            agentTitle: "Principal Broker",
+            companyDescription:
+              "We believe that luxury is not a price point but an experience.",
+            homesSold: 500,
+            totalSalesVolume: "$200M+",
+            serviceAreas: ["Omaha", "Lincoln", "Greater Nebraska Area"],
+            email: "mandy@bjorkgroup.com",
+            phone: "(402) 555-0123",
+            address: "Omaha, Nebraska",
+            licenseNumber: "NE12345678",
+          };
+        }
+        res.json(devTemplateCache);
         return;
       }
 
@@ -1229,11 +1413,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/template", async (req, res) => {
     try {
-      const template = await storage.updateTemplate(req.body);
+      console.log(
+        "Template POST request received:",
+        JSON.stringify(req.body, null, 2)
+      );
+
+      // Validate required fields
+      const requiredFields = ["companyName", "agentName"];
+      for (const field of requiredFields) {
+        if (!req.body[field]) {
+          return res.status(400).json({
+            message: `Missing required field: ${field}`,
+            received: req.body,
+          });
+        }
+      }
+
+      // Clean the data - remove empty strings and convert them to null
+      const cleanedData = Object.entries(req.body).reduce(
+        (acc, [key, value]) => {
+          if (value === "") {
+            acc[key] = null;
+          } else {
+            acc[key] = value;
+          }
+          return acc;
+        },
+        {} as any
+      );
+
+      console.log(
+        "Cleaned template data:",
+        JSON.stringify(cleanedData, null, 2)
+      );
+
+      // Development: update in-memory cache only
+      if (process.env.NODE_ENV === "development") {
+        devTemplateCache = { ...devTemplateCache, ...cleanedData };
+        console.log("(dev) Template updated in memory:", devTemplateCache);
+        return res.json(devTemplateCache);
+      }
+
+      const template = await storage.updateTemplate(cleanedData);
+      console.log("Template updated successfully:", template);
       res.json(template);
     } catch (error) {
       console.error("Error updating template:", error);
-      res.status(500).json({ message: "Failed to update template" });
+      console.error(
+        "Error stack:",
+        error instanceof Error ? error.stack : "No stack trace"
+      );
+      res.status(500).json({
+        message: "Failed to update template",
+        error: error instanceof Error ? error.message : "Unknown error",
+        details: req.body,
+      });
     }
   });
 

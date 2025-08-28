@@ -1,6 +1,16 @@
 import express, { type Request, Response, NextFunction } from "express";
+import path from "path";
+import { fileURLToPath } from "url";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+// ...existing code...
+// Do NOT import setupVite or serveStatic here!
+import { db } from "./db";
+import { templates } from "@shared/schema";
+import { loadTemplate, TemplateRequest } from "./template-middleware";
+
+// __dirname is not available in native ESM; recreate it for our module.
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(express.json());
@@ -29,23 +39,33 @@ app.use((req, res, next) => {
         logLine = logLine.slice(0, 79) + "…";
       }
 
-      log(logLine);
+      console.log(logLine);
     }
   });
 
   next();
 });
 
+// Add template middleware
+app.use(loadTemplate);
+
 (async () => {
   const server = await registerRoutes(app);
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
+  // Only run Vite in non-production; this condition is build-time optimized by esbuild define
+  if (process.env.NODE_ENV !== "production") {
+    const { setupVite } = await import("./vite");
     await setupVite(app, server);
   } else {
-    serveStatic(app);
+    // In production, serve pre-built static files (NO vite dependency at runtime)
+    // dist/index.js lives in /var/app/current/dist on EB, and assets are in dist/public
+    const publicDir = path.join(__dirname, "public"); // dist/public
+    app.use(express.static(publicDir));
+    // SPA fallback to index.html for client-side routing (after API & static middleware)
+    app.get("*", (req, res, next) => {
+      if (req.path.startsWith("/api")) return next();
+      res.sendFile(path.join(publicDir, "index.html"));
+    });
   }
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -60,9 +80,51 @@ app.use((req, res, next) => {
   // Other ports are firewalled. Default to 5000 if not specified.
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
-  // Use PORT env var if provided, otherwise default to 5080 (avoid macOS AirPlay 5000 conflict)
-  const port = parseInt(process.env.PORT || "5080", 10);
-  server.listen(port, "127.0.0.1", () => {
-    log(`serving on port ${port}`);
+  // Use PORT env var if provided, otherwise default to 8081 for AWS, 5080 for local
+  const port = parseInt(
+    process.env.PORT ||
+      (process.env.NODE_ENV === "production" ? "8080" : "5080"),
+    10
+  );
+  server.listen(port, "0.0.0.0", () => {
+    console.log(`serving on port ${port}`);
+
+    // Quick async DB connectivity check (non-blocking)
+    (async () => {
+      if (!db) {
+        console.log(
+          "DB: no database object initialized (likely development / missing DATABASE_URL)"
+        );
+        return;
+      }
+      try {
+        // Perform lightweight query; drizzle select limit 1
+        const result: any = await db.execute(`SELECT NOW() as now`);
+        const now = Array.isArray(result) ? result[0]?.now : undefined;
+        const [tpl] = await db.select().from(templates).limit(1);
+        console.log(
+          `DB: connected. NOW()=${now}. templates.count=${tpl ? 1 : 0}`
+        );
+      } catch (err) {
+        console.log(`DB: connection/query failed: ${(err as Error).message}`);
+      }
+    })();
+  });
+
+  // Simple health probe for DB status
+  app.get("/api/db-health", async (_req: Request, res: Response) => {
+    if (!db) {
+      return res
+        .status(503)
+        .json({ ok: false, message: "No db instance (likely not configured)" });
+    }
+    try {
+      const result: any = await db.execute(`SELECT NOW() as now`);
+      const now = Array.isArray(result) ? result[0]?.now : undefined;
+      const [tpl] = await db.select().from(templates).limit(1);
+      res.json({ ok: true, now, hasTemplate: !!tpl });
+    } catch (err) {
+      res.status(500).json({ ok: false, error: (err as Error).message });
+    }
   });
 })();

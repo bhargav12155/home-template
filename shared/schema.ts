@@ -16,7 +16,13 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
+  email: text("email").notNull().unique(),
   password: text("password").notNull(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const properties = pgTable("properties", {
@@ -299,6 +305,11 @@ export const templates = pgTable("templates", {
   id: varchar("id")
     .primaryKey()
     .default(sql`gen_random_uuid()`),
+  // User ownership
+  userId: integer("user_id").references(() => users.id, {
+    onDelete: "cascade",
+  }).notNull(),
+  
   // Company Information
   companyName: text("company_name")
     .notNull()
