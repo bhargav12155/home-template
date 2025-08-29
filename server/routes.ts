@@ -1369,27 +1369,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get public template (no authentication required - for public display)
   app.get("/api/template/public", async (req, res) => {
     try {
-      // Return default template for public display
-      const defaultTemplate = {
-        companyName: "Bjork Group Real Estate",
-        agentName: "Real Estate Expert",
-        agentTitle: "Principal Broker",
-        agentEmail: "contact@bjorkgroup.com",
-        companyDescription:
-          "Discover exceptional homes with Nebraska's premier luxury real estate team",
-        homesSold: 500,
-        totalSalesVolume: "$250M+",
-        serviceAreas: ["Omaha", "Lincoln", "Elkhorn", "Papillion"],
-        phone: "(402) 555-0123",
-        address: {
-          street: "123 Main Street",
-          city: "Omaha",
-          state: "NE",
-          zip: "68102",
-        },
-      };
+      // Try to get saved template from database first
+      let template = await storage.getTemplate();
 
-      res.json(defaultTemplate);
+      // If no template exists in database, return default template for public display
+      if (!template) {
+        const defaultTemplate = {
+          companyName: "Bjork Group Real Estate",
+          agentName: "Real Estate Expert",
+          agentTitle: "Principal Broker",
+          agentEmail: "contact@bjorkgroup.com",
+          companyDescription:
+            "Discover exceptional homes with Nebraska's premier luxury real estate team",
+          heroTitle: "Ready to Find Your Dream Home?",
+          heroSubtitle:
+            "Let's start your luxury real estate journey today. Our team is here to make your Nebraska home buying or selling experience exceptional.",
+          contactPhone: "(402) 522-6131",
+          contactPhoneText: "Call or text anytime",
+          officeAddress: "331 Village Pointe Plaza",
+          officeCity: "Omaha",
+          officeState: "NE",
+          officeZip: "68130",
+          homesSold: 500,
+          totalSalesVolume: "$250M+",
+          serviceAreas: ["Omaha", "Lincoln", "Elkhorn", "Papillion"],
+          phone: "(402) 555-0123",
+          address: {
+            street: "123 Main Street",
+            city: "Omaha",
+            state: "NE",
+            zip: "68102",
+          },
+        };
+        template = defaultTemplate;
+      }
+
+      console.log("Public template endpoint returning:", template);
+      res.json(template);
     } catch (error) {
       console.error("Error fetching public template:", error);
       res.status(500).json({ message: "Failed to fetch template" });

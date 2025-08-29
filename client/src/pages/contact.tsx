@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,10 +14,18 @@ import { contactFormSchema, type ContactForm } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { CONTACT_INFO, SOCIAL_LINKS } from "@/lib/constants";
 import { Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
+import { Template } from "@/types/template";
 
 export default function Contact() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Fetch template data
+  const { data: template } = useQuery<Template>({
+    queryKey: ["/api/template/public", "v2"],
+    refetchOnMount: true,
+    staleTime: 0,
+  });
 
   const form = useForm<ContactForm>({
     resolver: zodResolver(contactFormSchema),
@@ -64,23 +72,23 @@ export default function Contact() {
     {
       icon: Phone,
       title: "Phone",
-      details: CONTACT_INFO.phone,
-      subtext: "Call or text anytime",
-      action: `tel:${CONTACT_INFO.phone.replace(/[^\d]/g, '')}`
+      details: template?.contactPhone || CONTACT_INFO.phone,
+      subtext: template?.contactPhoneText || "Call or text anytime",
+      action: `tel:${(template?.contactPhone || CONTACT_INFO.phone).replace(/[^\d]/g, '')}`
     },
     {
       icon: Mail,
       title: "Email", 
-      details: "mike.bjork@bhhsamb.com",
+      details: template?.agentEmail || "mike.bjork@bhhsamb.com",
       subtext: "We'll respond within 24 hours",
-      action: "mailto:mike.bjork@bhhsamb.com"
+      action: `mailto:${template?.agentEmail || "mike.bjork@bhhsamb.com"}`
     },
     {
       icon: MapPin,
       title: "Office",
-      details: CONTACT_INFO.address.street,
-      subtext: `${CONTACT_INFO.address.city}, ${CONTACT_INFO.address.state} ${CONTACT_INFO.address.zip}`,
-      action: `https://maps.google.com?q=${encodeURIComponent(`${CONTACT_INFO.address.street}, ${CONTACT_INFO.address.city}, ${CONTACT_INFO.address.state} ${CONTACT_INFO.address.zip}`)}`
+      details: template?.officeAddress || CONTACT_INFO.address.street,
+      subtext: `${template?.officeCity || CONTACT_INFO.address.city}, ${template?.officeState || CONTACT_INFO.address.state} ${template?.officeZip || CONTACT_INFO.address.zip}`,
+      action: `https://maps.google.com?q=${encodeURIComponent(`${template?.officeAddress || CONTACT_INFO.address.street}, ${template?.officeCity || CONTACT_INFO.address.city}, ${template?.officeState || CONTACT_INFO.address.state} ${template?.officeZip || CONTACT_INFO.address.zip}`)}`
     },
     {
       icon: Clock,

@@ -329,6 +329,20 @@ export const templates = pgTable("templates", {
     zip: "12345",
   }),
 
+  // Hero Section Content
+  heroTitle: text("hero_title").default("Ready to Find Your Dream Home?"),
+  heroSubtitle: text("hero_subtitle").default(
+    "Let's start your luxury real estate journey today. Our team is here to make your Nebraska home buying or selling experience exceptional."
+  ),
+
+  // Contact Information for Hero/Contact sections
+  contactPhone: text("contact_phone").default("(402) 522-6131"),
+  contactPhoneText: text("contact_phone_text").default("Call or text anytime"),
+  officeAddress: text("office_address").default("331 Village Pointe Plaza"),
+  officeCity: text("office_city").default("Omaha"),
+  officeState: text("office_state").default("NE"),
+  officeZip: text("office_zip").default("68130"),
+
   // Company Description & Bio
   companyDescription: text("company_description").default(
     "We believe that luxury is not a price point but an experience."

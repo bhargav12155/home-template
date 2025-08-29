@@ -3,7 +3,21 @@ export interface Template {
   companyName?: string;
   agentName?: string;
   agentTitle?: string;
+  agentEmail?: string;
   companyDescription?: string;
+
+  // Hero section fields
+  heroTitle?: string;
+  heroSubtitle?: string;
+
+  // Contact information fields
+  contactPhone?: string;
+  contactPhoneText?: string;
+  officeAddress?: string;
+  officeCity?: string;
+  officeState?: string;
+  officeZip?: string;
+
   homesSold?: number;
   totalSalesVolume?: string;
   serviceAreas?: string[];

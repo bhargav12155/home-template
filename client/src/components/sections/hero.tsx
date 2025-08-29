@@ -23,8 +23,12 @@ export default function Hero() {
 
   // Fetch template configuration
   const { data: template } = useQuery<Template>({
-    queryKey: ["/api/template/public"],
+    queryKey: ["/api/template/public", "v2"],
+    refetchOnMount: true,
+    staleTime: 0,
   });
+
+  console.log("Hero component template data:", template);
 
   const handleSearch = () => {
     const params = new URLSearchParams();
@@ -63,16 +67,15 @@ export default function Hero() {
           className="hero-title text-4xl md:text-6xl lg:text-7xl font-display font-light text-white text-center leading-tight animate-fade-in-up"
           style={{ marginTop: -400 }}
         >
-          Luxury is an <br />
-          <span className="text-bjork-beige">Experience</span>
+          {template?.heroTitle || "Ready to Find Your Dream Home?"}
         </h1>
       </div>
 
       {/* Bottom Content */}
       <div className="absolute bottom-0 left-0 right-0 z-10 text-center text-white max-w-4xl mx-auto px-4 pb-16 lg:pb-20 animate-fade-in-up">
         <p className="text-lg md:text-xl lg:text-2xl mb-6 lg:mb-8 font-light max-w-2xl mx-auto leading-relaxed">
-          {template?.companyDescription ||
-            "Discover exceptional homes with Nebraska's premier luxury real estate team"}
+          {template?.heroSubtitle ||
+            "Let's start your luxury real estate journey today. Our team is here to make your Nebraska home buying or selling experience exceptional."}
         </p>
 
         {/* Search Bar */}

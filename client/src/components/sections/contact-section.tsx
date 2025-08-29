@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,15 @@ import { CONTACT_INFO } from "@/lib/constants";
 export default function ContactSection() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Fetch template data
+  const { data: template } = useQuery({
+    queryKey: ["/api/template/public", "v2"],
+    refetchOnMount: true,
+    staleTime: 0,
+  });
+
+  console.log("Contact section template data:", template);
 
   const form = useForm<ContactForm>({
     resolver: zodResolver(contactFormSchema),
@@ -65,10 +74,10 @@ export default function ContactSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
           <div>
             <h2 className="text-4xl md:text-5xl font-display font-light mb-6">
-              Ready to Find Your <span className="text-bjork-beige">Dream Home?</span>
+              {template?.heroTitle || "Ready to Find Your Dream Home?"}
             </h2>
             <p className="text-xl mb-8 leading-relaxed opacity-90">
-              Let's start your luxury real estate journey today. Our team is here to make your Nebraska home buying or selling experience exceptional.
+              {template?.heroSubtitle || "Let's start your luxury real estate journey today. Our team is here to make your Nebraska home buying or selling experience exceptional."}
             </p>
             
             <div className="space-y-6">
@@ -77,8 +86,8 @@ export default function ContactSection() {
                   <Phone className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <div className="font-medium">{CONTACT_INFO.phone}</div>
-                  <div className="text-sm opacity-80">Call or text anytime</div>
+                  <div className="font-medium">{template?.contactPhone || CONTACT_INFO.phone}</div>
+                  <div className="text-sm opacity-80">{template?.contactPhoneText || "Call or text anytime"}</div>
                 </div>
               </div>
               
@@ -87,9 +96,9 @@ export default function ContactSection() {
                   <MapPin className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <div className="font-medium">{CONTACT_INFO.address.street}</div>
+                  <div className="font-medium">{template?.officeAddress || CONTACT_INFO.address.street}</div>
                   <div className="text-sm opacity-80">
-                    {CONTACT_INFO.address.city}, {CONTACT_INFO.address.state} {CONTACT_INFO.address.zip}
+                    {template?.officeCity || CONTACT_INFO.address.city}, {template?.officeState || CONTACT_INFO.address.state} {template?.officeZip || CONTACT_INFO.address.zip}
                   </div>
                 </div>
               </div>

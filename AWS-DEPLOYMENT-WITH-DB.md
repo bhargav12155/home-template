@@ -57,6 +57,6 @@ This package should solve all your database connection issues and make the templ
 
 - **Host:** awseb-e-jxhud2jxqy-stack-awsebrdsdatabase-gzzxhy7mtvj8.ct6g8giomnqf.us-east-2.rds.amazonaws.com
 - **Port:** 5432
-- **Database:** ebdb
+- **Database:** app_db
 - **Username:** bjorkrealestate
 - **Password:** Mcbkfg161

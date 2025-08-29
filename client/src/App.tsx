@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/context/auth";
+import ScrollToTop from "@/components/ScrollToTop";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Search from "@/pages/search";
@@ -34,6 +35,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 function Router() {
   return (
     <div className="min-h-screen bg-soft-white">
+      <ScrollToTop />
       <Header />
       <main>
         <Switch>

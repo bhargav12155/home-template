@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useForm } from "react-hook-form";
@@ -14,6 +14,7 @@ import { Upload, Save, Eye, Globe, Settings, Palette, User, FileText } from "luc
 import { templateSchema, type Template, type InsertTemplate } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/context/auth";
+import { useToast } from "@/hooks/use-toast";
 import ImageUpload from "@/components/ui/image-upload";
 
 export default function TemplateAdmin() {
@@ -24,6 +25,7 @@ export default function TemplateAdmin() {
     agent?: string;
   }>({});
   const { user } = useAuth();
+  const { toast } = useToast();
 
   // Query current user's template (now requires authentication)
   const { data: template, isLoading } = useQuery({
@@ -33,12 +35,21 @@ export default function TemplateAdmin() {
 
   const form = useForm<InsertTemplate>({
     resolver: zodResolver(templateSchema),
-    defaultValues: template || {
+    defaultValues: {
+      userId: user?.id, // Add the current user's ID
       companyName: "Your Real Estate Company",
       agentName: "Your Name",
       agentTitle: "Principal Broker",
       agentEmail: "",
       phone: "",
+      heroTitle: "Ready to Find Your Dream Home?",
+      heroSubtitle: "Let's start your luxury real estate journey today. Our team is here to make your Nebraska home buying or selling experience exceptional.",
+      contactPhone: "(402) 522-6131",
+      contactPhoneText: "Call or text anytime",
+      officeAddress: "331 Village Pointe Plaza",
+      officeCity: "Omaha",
+      officeState: "NE",
+      officeZip: "68130",
       companyDescription: "We believe that luxury is not a price point but an experience.",
       agentBio: "Professional real estate agent with years of experience.",
       homesSold: 500,
@@ -55,18 +66,66 @@ export default function TemplateAdmin() {
     },
   });
 
+  // Reset form when template data loads
+  React.useEffect(() => {
+    if (template && user) {
+      console.log("Loaded template data:", template);
+      // Ensure userId is included and remove timestamp fields that shouldn't be in the form
+      const { createdAt, updatedAt, ...templateWithoutTimestamps } = template;
+      
+      // Convert null values to empty strings for form inputs
+      const cleanedTemplate = Object.entries(templateWithoutTimestamps).reduce((acc, [key, value]) => {
+        acc[key] = value === null ? "" : value;
+        return acc;
+      }, {} as any);
+      
+      const templateWithUserId = {
+        ...cleanedTemplate,
+        userId: user.id
+      };
+      form.reset(templateWithUserId);
+    }
+  }, [template, user, form]);
+
   const updateTemplateMutation = useMutation({
     mutationFn: async (data: InsertTemplate) => {
+      console.log("Submitting template data:", data);
       const response = await apiRequest("POST", "/api/template", data);
       return response.json();
     },
     onSuccess: () => {
+      console.log("Template updated successfully");
+      // Invalidate both the authenticated and public template caches
       queryClient.invalidateQueries({ queryKey: ['/api/template'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/template/public'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/template/public', 'v2'] });
+      toast({
+        title: "Success",
+        description: "Template saved successfully!",
+      });
+    },
+    onError: (error: any) => {
+      console.error("Template update error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save template. Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
   const onSubmit = (data: InsertTemplate) => {
-    updateTemplateMutation.mutate(data);
+    console.log("Form submit triggered with data:", data);
+    
+    // Remove timestamp fields and ensure userId is present
+    const { createdAt, updatedAt, ...cleanData } = data as any;
+    const templateData = {
+      ...cleanData,
+      userId: user?.id
+    };
+    
+    console.log("Template data with userId:", templateData);
+    updateTemplateMutation.mutate(templateData);
   };
 
   if (isLoading) {
@@ -133,7 +192,20 @@ export default function TemplateAdmin() {
           {/* Main Form */}
           <div className="lg:col-span-3">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
+              <form onSubmit={(e) => {
+                console.log("Form onSubmit event triggered!", e);
+                console.log("Form errors:", form.formState.errors);
+                console.log("Form isValid:", form.formState.isValid);
+                form.handleSubmit(
+                  (data) => {
+                    console.log("Form validation PASSED - calling onSubmit with data:", data);
+                    onSubmit(data);
+                  },
+                  (errors) => {
+                    console.log("Form validation FAILED - errors:", errors);
+                  }
+                )(e);
+              }}>
                 <Tabs defaultValue="company" className="space-y-6">
                   <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="company" className="flex items-center gap-2">
@@ -247,6 +319,157 @@ export default function TemplateAdmin() {
                         <CardTitle>Content & Statistics</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
+                        {/* Hero Section */}
+                        <div className="space-y-4 border-b pb-6">
+                          <h3 className="text-lg font-semibold">Hero Section</h3>
+                          <FormField
+                            control={form.control}
+                            name="heroTitle"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Hero Title</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    placeholder="Ready to Find Your Dream Home?" 
+                                    {...field} 
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="heroSubtitle"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Hero Subtitle</FormLabel>
+                                <FormControl>
+                                  <Textarea 
+                                    rows={3}
+                                    placeholder="Let's start your luxury real estate journey today. Our team is here to make your Nebraska home buying or selling experience exceptional." 
+                                    {...field} 
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Contact Information */}
+                        <div className="space-y-4 border-b pb-6">
+                          <h3 className="text-lg font-semibold">Contact Information</h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name="contactPhone"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Contact Phone</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="(402) 522-6131" 
+                                      {...field} 
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="contactPhoneText"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Phone Text</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="Call or text anytime" 
+                                      {...field} 
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name="officeAddress"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Office Address</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="331 Village Pointe Plaza" 
+                                      {...field} 
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <div className="grid grid-cols-3 gap-2">
+                              <FormField
+                                control={form.control}
+                                name="officeCity"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>City</FormLabel>
+                                    <FormControl>
+                                      <Input 
+                                        placeholder="Omaha" 
+                                        {...field} 
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                name="officeState"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>State</FormLabel>
+                                    <FormControl>
+                                      <Input 
+                                        placeholder="NE" 
+                                        {...field} 
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                name="officeZip"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>ZIP</FormLabel>
+                                    <FormControl>
+                                      <Input 
+                                        placeholder="68130" 
+                                        {...field} 
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
                         <FormField
                           control={form.control}
                           name="companyDescription"
@@ -557,7 +780,15 @@ export default function TemplateAdmin() {
                 </Tabs>
 
                 <div className="flex justify-end space-x-4 mt-8">
-                  <Button type="submit" disabled={updateTemplateMutation.isPending || isUploading}>
+                  <Button 
+                    type="submit" 
+                    disabled={updateTemplateMutation.isPending || isUploading}
+                    onClick={() => {
+                      console.log("Save Template button clicked!");
+                      console.log("Form state:", form.formState);
+                      console.log("Form values:", form.getValues());
+                    }}
+                  >
                     <Save className="w-4 h-4 mr-2" />
                     {updateTemplateMutation.isPending ? "Saving..." : "Save Template"}
                   </Button>
