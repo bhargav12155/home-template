@@ -1,12 +1,17 @@
+import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import path from "path";
 import { fileURLToPath } from "url";
+import cookieParser from "cookie-parser";
 import { registerRoutes } from "./routes";
 // ...existing code...
 // Do NOT import setupVite or serveStatic here!
 import { db } from "./db";
 import { templates } from "@shared/schema";
 import { loadTemplate, TemplateRequest } from "./template-middleware";
+import { authRoutes } from "./auth-routes";
+import { uploadRoutes } from "./upload-routes";
+import { optionalAuth } from "./auth-middleware";
 
 // __dirname is not available in native ESM; recreate it for our module.
 const __filename = fileURLToPath(import.meta.url);
@@ -15,6 +20,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser()); // Parse cookies for authentication
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -46,8 +52,17 @@ app.use((req, res, next) => {
   next();
 });
 
+// Add optional authentication middleware (adds user if authenticated)
+app.use(optionalAuth);
+
 // Add template middleware
 app.use(loadTemplate);
+
+// Authentication routes
+app.use("/api/auth", authRoutes);
+
+// File upload routes
+app.use("/api/upload", uploadRoutes);
 
 (async () => {
   const server = await registerRoutes(app);

@@ -23,7 +23,7 @@ export default function Hero() {
 
   // Fetch template configuration
   const { data: template } = useQuery<Template>({
-    queryKey: ["/api/template"],
+    queryKey: ["/api/template/public"],
   });
 
   const handleSearch = () => {
@@ -76,14 +76,14 @@ export default function Hero() {
         </p>
 
         {/* Search Bar */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-lg p-6 max-w-2xl mx-auto">
+        <div className="bg-white/95 backdrop-blur-sm rounded-lg p-6 max-w-4xl mx-auto">
           <div className="flex flex-col md:flex-row gap-4">
             <Input
               type="text"
               placeholder="Enter Location, Zip, Address or MLS #"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 text-soft-black border-gray-200 focus:ring-bjork-blue"
+              className="flex-[2] md:min-w-[300px] text-soft-black border-gray-200 focus:ring-bjork-blue"
             />
             <Select
               value={minPrice || "any"}
@@ -91,7 +91,7 @@ export default function Hero() {
                 setMinPrice(value === "any" ? "" : value)
               }
             >
-              <SelectTrigger className="text-soft-black border-gray-200 focus:ring-bjork-blue">
+              <SelectTrigger className="w-full md:w-32 text-soft-black border-gray-200 focus:ring-bjork-blue">
                 <SelectValue placeholder="Min Price" />
               </SelectTrigger>
               <SelectContent>
@@ -109,7 +109,7 @@ export default function Hero() {
                 setMaxPrice(value === "any" ? "" : value)
               }
             >
-              <SelectTrigger className="text-soft-black border-gray-200 focus:ring-bjork-blue">
+              <SelectTrigger className="w-full md:w-32 text-soft-black border-gray-200 focus:ring-bjork-blue">
                 <SelectValue placeholder="Max Price" />
               </SelectTrigger>
               <SelectContent>

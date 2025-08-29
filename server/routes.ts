@@ -10,6 +10,7 @@ import {
 import IdxSyncService from "./idx-sync-service";
 import { emailService } from "./email-service";
 import { externalPropertyAPI } from "./external-api";
+import { AuthenticatedRequest, authenticateUser } from "./auth-middleware";
 import {
   insertPropertySchema,
   insertCommunitySchema,
@@ -1364,112 +1365,149 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // **TEMPLATE ROUTES** - Multi-tenant customization
-  // In development we keep an in-memory template so you can test save/load locally
-  let devTemplateCache: any | null = null;
-  app.get("/api/template", async (req, res) => {
+  // **TEMPLATE ROUTES** - Multi-tenant customization with user authentication
+  // Get public template (no authentication required - for public display)
+  app.get("/api/template/public", async (req, res) => {
     try {
-      // In development mode, use the in-memory cache so POST updates are reflected
-      if (process.env.NODE_ENV === "development") {
-        if (!devTemplateCache) {
-          devTemplateCache = {
-            companyName: "Bjork Group",
-            agentName: "Mandy Visty",
-            agentTitle: "Principal Broker",
-            companyDescription:
-              "We believe that luxury is not a price point but an experience.",
-            homesSold: 500,
-            totalSalesVolume: "$200M+",
-            serviceAreas: ["Omaha", "Lincoln", "Greater Nebraska Area"],
-            email: "mandy@bjorkgroup.com",
-            phone: "(402) 555-0123",
-            address: "Omaha, Nebraska",
-            licenseNumber: "NE12345678",
-          };
-        }
-        res.json(devTemplateCache);
-        return;
-      }
+      // Return default template for public display
+      const defaultTemplate = {
+        companyName: "Bjork Group Real Estate",
+        agentName: "Real Estate Expert",
+        agentTitle: "Principal Broker",
+        agentEmail: "contact@bjorkgroup.com",
+        companyDescription:
+          "Discover exceptional homes with Nebraska's premier luxury real estate team",
+        homesSold: 500,
+        totalSalesVolume: "$250M+",
+        serviceAreas: ["Omaha", "Lincoln", "Elkhorn", "Papillion"],
+        phone: "(402) 555-0123",
+        address: {
+          street: "123 Main Street",
+          city: "Omaha",
+          state: "NE",
+          zip: "68102",
+        },
+      };
 
-      // Production mode uses database
-      const template = await storage.getTemplate();
-      res.json(
-        template || {
-          companyName: "Your Real Estate Company",
-          agentName: "Your Name",
-          agentTitle: "Principal Broker",
-          companyDescription:
-            "We believe that luxury is not a price point but an experience.",
-          homesSold: 500,
-          totalSalesVolume: "$200M+",
-          serviceAreas: ["Your Primary City", "Your Secondary City"],
-        }
-      );
+      res.json(defaultTemplate);
     } catch (error) {
-      console.error("Error fetching template:", error);
+      console.error("Error fetching public template:", error);
       res.status(500).json({ message: "Failed to fetch template" });
     }
   });
 
-  app.post("/api/template", async (req, res) => {
-    try {
-      console.log(
-        "Template POST request received:",
-        JSON.stringify(req.body, null, 2)
-      );
+  // Get user's template (requires authentication)
+  app.get(
+    "/api/template",
+    authenticateUser,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        const userId = req.user!.id;
 
-      // Validate required fields
-      const requiredFields = ["companyName", "agentName"];
-      for (const field of requiredFields) {
-        if (!req.body[field]) {
-          return res.status(400).json({
-            message: `Missing required field: ${field}`,
-            received: req.body,
-          });
+        // Get user-specific template
+        let template = await storage.getTemplateByUser(userId);
+
+        // If no template exists for user, create one with default values
+        if (!template) {
+          const defaultTemplate = {
+            companyName: `${
+              req.user!.firstName || req.user!.username
+            }'s Real Estate Company`,
+            agentName: `${req.user!.firstName || req.user!.username} ${
+              req.user!.lastName || ""
+            }`.trim(),
+            agentTitle: "Principal Broker",
+            agentEmail: req.user!.email,
+            companyDescription:
+              "We believe that luxury is not a price point but an experience.",
+            homesSold: 0,
+            totalSalesVolume: "$0",
+            serviceAreas: ["Your Primary City", "Your Secondary City"],
+            phone: "",
+            address: {
+              street: "123 Main Street",
+              city: "Your City",
+              state: "Your State",
+              zip: "12345",
+            },
+          };
+
+          template = await storage.createTemplateForUser(
+            userId,
+            defaultTemplate
+          );
         }
+
+        res.json(template);
+      } catch (error) {
+        console.error("Error fetching user template:", error);
+        res.status(500).json({ message: "Failed to fetch template" });
       }
-
-      // Clean the data - remove empty strings and convert them to null
-      const cleanedData = Object.entries(req.body).reduce(
-        (acc, [key, value]) => {
-          if (value === "") {
-            acc[key] = null;
-          } else {
-            acc[key] = value;
-          }
-          return acc;
-        },
-        {} as any
-      );
-
-      console.log(
-        "Cleaned template data:",
-        JSON.stringify(cleanedData, null, 2)
-      );
-
-      // Development: update in-memory cache only
-      if (process.env.NODE_ENV === "development") {
-        devTemplateCache = { ...devTemplateCache, ...cleanedData };
-        console.log("(dev) Template updated in memory:", devTemplateCache);
-        return res.json(devTemplateCache);
-      }
-
-      const template = await storage.updateTemplate(cleanedData);
-      console.log("Template updated successfully:", template);
-      res.json(template);
-    } catch (error) {
-      console.error("Error updating template:", error);
-      console.error(
-        "Error stack:",
-        error instanceof Error ? error.stack : "No stack trace"
-      );
-      res.status(500).json({
-        message: "Failed to update template",
-        error: error instanceof Error ? error.message : "Unknown error",
-        details: req.body,
-      });
     }
-  });
+  );
+
+  // Update user's template (requires authentication)
+  app.post(
+    "/api/template",
+    authenticateUser,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        const userId = req.user!.id;
+
+        console.log(
+          `Template update for user ${userId}:`,
+          JSON.stringify(req.body, null, 2)
+        );
+
+        // Validate required fields
+        const requiredFields = ["companyName", "agentName"];
+        for (const field of requiredFields) {
+          if (!req.body[field]) {
+            return res.status(400).json({
+              message: `Missing required field: ${field}`,
+              received: req.body,
+            });
+          }
+        }
+
+        // Clean the data - remove empty strings and convert them to null
+        const cleanedData = Object.entries(req.body).reduce(
+          (acc, [key, value]) => {
+            if (value === "") {
+              acc[key] = null;
+            } else {
+              acc[key] = value;
+            }
+            return acc;
+          },
+          {} as any
+        );
+
+        console.log(
+          `Cleaned template data for user ${userId}:`,
+          JSON.stringify(cleanedData, null, 2)
+        );
+
+        const template = await storage.updateTemplateByUser(
+          userId,
+          cleanedData
+        );
+        console.log("User template updated successfully:", template);
+        res.json(template);
+      } catch (error) {
+        console.error("Error updating user template:", error);
+        console.error(
+          "Error stack:",
+          error instanceof Error ? error.stack : "No stack trace"
+        );
+        res.status(500).json({
+          message: "Failed to update template",
+          error: error instanceof Error ? error.message : "Unknown error",
+          details: req.body,
+        });
+      }
+    }
+  );
 
   const httpServer = createServer(app);
   return httpServer;

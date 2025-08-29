@@ -122,6 +122,11 @@ export interface IStorage {
   // Template methods
   getTemplate(): Promise<any>;
   updateTemplate(template: any): Promise<any>;
+
+  // User-specific template methods
+  getTemplateByUser(userId: number): Promise<any>;
+  updateTemplateByUser(userId: number, template: any): Promise<any>;
+  createTemplateForUser(userId: number, template: any): Promise<any>;
 }
 
 export class MemStorage implements IStorage {
@@ -841,6 +846,22 @@ export class MemStorage implements IStorage {
     // In a real implementation, this would save to database
     return template;
   }
+
+  // User-specific template methods for MemStorage
+  async getTemplateByUser(userId: number): Promise<any> {
+    // For development, return default template regardless of user
+    return this.getTemplate();
+  }
+
+  async updateTemplateByUser(userId: number, template: any): Promise<any> {
+    // For development, just return the template
+    return template;
+  }
+
+  async createTemplateForUser(userId: number, template: any): Promise<any> {
+    // For development, just return the template with the userId
+    return { ...template, userId };
+  }
 }
 
 // DatabaseStorage implementation using real PostgreSQL
@@ -1168,6 +1189,47 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return created;
     }
+  }
+
+  // User-specific template methods for DatabaseStorage
+  async getTemplateByUser(userId: number): Promise<any> {
+    const [template] = await db
+      .select()
+      .from(templates)
+      .where(eq(templates.userId, userId))
+      .limit(1);
+    return template;
+  }
+
+  async updateTemplateByUser(userId: number, templateData: any): Promise<any> {
+    const [existingTemplate] = await db
+      .select()
+      .from(templates)
+      .where(eq(templates.userId, userId))
+      .limit(1);
+
+    if (existingTemplate) {
+      const [updated] = await db
+        .update(templates)
+        .set({ ...templateData, updatedAt: new Date() })
+        .where(eq(templates.id, existingTemplate.id))
+        .returning();
+      return updated;
+    } else {
+      // Create new template for user
+      return this.createTemplateForUser(userId, templateData);
+    }
+  }
+
+  async createTemplateForUser(userId: number, templateData: any): Promise<any> {
+    const [created] = await db
+      .insert(templates)
+      .values({
+        userId,
+        ...templateData,
+      })
+      .returning();
+    return created;
   }
 }
 

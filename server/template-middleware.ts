@@ -32,14 +32,14 @@ export async function loadTemplate(
 
     // For now, get the first template or create a demo template
     const [existingTemplate] = await db.select().from(templates).limit(1);
-    
+
     if (existingTemplate) {
       req.template = existingTemplate;
     } else {
       // No template exists, use default template data
       req.template = getDefaultTemplate();
     }
-    
+
     next();
   } catch (error) {
     console.error("Template loading error:", error);
@@ -63,10 +63,12 @@ function getDefaultTemplate() {
       street: "123 Main Street",
       city: "Omaha",
       state: "Nebraska",
-      zip: "68102"
+      zip: "68102",
     },
-    companyDescription: "We believe that luxury is not a price point but an experience. With over 15 years of experience in the Omaha market, we provide personalized service to help you find your dream home.",
-    agentBio: "Professional real estate agent with years of experience serving the greater Omaha area.",
+    companyDescription:
+      "We believe that luxury is not a price point but an experience. With over 15 years of experience in the Omaha market, we provide personalized service to help you find your dream home.",
+    agentBio:
+      "Professional real estate agent with years of experience serving the greater Omaha area.",
     homesSold: 500,
     totalSalesVolume: "$200M+",
     yearsExperience: 15,
@@ -76,7 +78,7 @@ function getDefaultTemplate() {
     accentColor: "hsl(213, 100%, 45%)",
     beigeColor: "hsl(25, 35%, 75%)",
     isConfigured: false, // Flag to show "not configured" message
-    isActive: true
+    isActive: true,
   };
 }
 
@@ -84,10 +86,12 @@ function getDefaultTemplate() {
  * Check if template is properly configured
  */
 export function isTemplateConfigured(template: any): boolean {
-  return template && 
-         template.id !== "default" &&
-         template.companyName !== "Your Real Estate Company" &&
-         template.agentName !== "Your Name";
+  return (
+    template &&
+    template.id !== "default" &&
+    template.companyName !== "Your Real Estate Company" &&
+    template.agentName !== "Your Name"
+  );
 }
 
 export { getDefaultTemplate };

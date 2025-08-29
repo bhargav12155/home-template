@@ -5,7 +5,13 @@ import { drizzle as pgDrizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 const { Pool: PgPool } = pg;
 import ws from "ws";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import * as schema from "@shared/schema";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 neonConfig.webSocketConstructor = ws;
 
@@ -32,14 +38,17 @@ if (DATABASE_URL) {
       };
 
       if (isRDS) {
+        // AWS RDS SSL configuration - bypass certificate validation for development
         poolConfig.ssl = {
           rejectUnauthorized: false,
+          checkServerIdentity: () => undefined,
         };
+        console.log("DB: Using AWS RDS with SSL bypass for development");
       }
 
       pool = new PgPool(poolConfig);
       db = pgDrizzle(pool, { schema });
-      console.log("DB: connected using pg (RDS/Postgres) driver");
+      console.log("DB: connected using pg (RDS/Postgres) driver with SSL");
     }
   } catch (err) {
     console.error(

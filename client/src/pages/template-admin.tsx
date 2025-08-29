@@ -13,14 +13,22 @@ import { Badge } from "@/components/ui/badge";
 import { Upload, Save, Eye, Globe, Settings, Palette, User, FileText } from "lucide-react";
 import { templateSchema, type Template, type InsertTemplate } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/context/auth";
+import ImageUpload from "@/components/ui/image-upload";
 
 export default function TemplateAdmin() {
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadedImages, setUploadedImages] = useState<{
+    logo?: string;
+    hero?: string;
+    agent?: string;
+  }>({});
+  const { user } = useAuth();
 
-  // Query current template
+  // Query current user's template (now requires authentication)
   const { data: template, isLoading } = useQuery({
     queryKey: ['/api/template'],
-    enabled: true
+    enabled: !!user // Only fetch when user is authenticated
   });
 
   const form = useForm<InsertTemplate>({
@@ -49,7 +57,8 @@ export default function TemplateAdmin() {
 
   const updateTemplateMutation = useMutation({
     mutationFn: async (data: InsertTemplate) => {
-      return apiRequest("POST", "/api/template", data);
+      const response = await apiRequest("POST", "/api/template", data);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/template'] });
@@ -60,29 +69,6 @@ export default function TemplateAdmin() {
     updateTemplateMutation.mutate(data);
   };
 
-  const handleFileUpload = async (file: File, category: string) => {
-    setIsUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('category', category);
-      
-      const result = await apiRequest("POST", "/api/template/upload", formData) as { fileUrl: string };
-      // Update form with new file URL
-      if (category === 'logo') {
-        form.setValue('logoUrl', result.fileUrl);
-      } else if (category === 'hero') {
-        form.setValue('heroImageUrl', result.fileUrl);
-      } else if (category === 'agent') {
-        form.setValue('agentImageUrl', result.fileUrl);
-      }
-    } catch (error) {
-      console.error('Upload failed:', error);
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
   if (isLoading) {
     return <div className="pt-20 p-8">Loading template...</div>;
   }
@@ -91,10 +77,17 @@ export default function TemplateAdmin() {
     <div className="min-h-screen bg-gray-50 pt-20">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Template Customization</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Welcome, {user?.firstName || user?.username}!
+          </h1>
           <p className="text-gray-600 mt-2">
-            Customize your real estate website template with your branding, content, and media.
+            Customize your personal real estate website template with your branding, content, and media.
           </p>
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-blue-800 text-sm">
+              <strong>Multi-User Platform:</strong> This is your personal template. All changes you make here will only affect your website. Other users have their own separate templates.
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -363,50 +356,107 @@ export default function TemplateAdmin() {
                     <Card>
                       <CardHeader>
                         <CardTitle>Media Files</CardTitle>
+                        <p className="text-sm text-gray-600">
+                          Upload images to personalize your real estate website. All images are stored securely in the cloud.
+                        </p>
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          <div className="space-y-2">
+                          {/* Company Logo */}
+                          <div className="space-y-3">
                             <label className="text-sm font-medium">Company Logo</label>
-                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                              <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-                              <p className="text-sm text-gray-600">Upload Logo</p>
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'logo')}
-                                className="mt-2"
-                              />
-                            </div>
+                            <ImageUpload
+                              folder="logos"
+                              onUploadSuccess={(result) => {
+                                setUploadedImages(prev => ({ ...prev, logo: result.url }));
+                                // Update the form field if it exists
+                                if (form.setValue) {
+                                  form.setValue('logoUrl', result.url);
+                                }
+                              }}
+                              onUploadError={(error) => {
+                                console.error('Logo upload error:', error);
+                                // You can add toast notification here
+                              }}
+                              maxSize={5}
+                            />
+                            {uploadedImages.logo && (
+                              <div className="mt-2">
+                                <img 
+                                  src={uploadedImages.logo} 
+                                  alt="Company Logo" 
+                                  className="h-16 w-auto object-contain border rounded"
+                                />
+                                <p className="text-xs text-green-600 mt-1">✓ Logo uploaded successfully</p>
+                              </div>
+                            )}
                           </div>
                           
-                          <div className="space-y-2">
+                          {/* Hero Image */}
+                          <div className="space-y-3">
                             <label className="text-sm font-medium">Hero Image</label>
-                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                              <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-                              <p className="text-sm text-gray-600">Upload Hero Image</p>
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'hero')}
-                                className="mt-2"
-                              />
-                            </div>
+                            <ImageUpload
+                              folder="heroes"
+                              onUploadSuccess={(result) => {
+                                setUploadedImages(prev => ({ ...prev, hero: result.url }));
+                                if (form.setValue) {
+                                  form.setValue('heroImageUrl', result.url);
+                                }
+                              }}
+                              onUploadError={(error) => {
+                                console.error('Hero image upload error:', error);
+                              }}
+                              maxSize={10}
+                            />
+                            {uploadedImages.hero && (
+                              <div className="mt-2">
+                                <img 
+                                  src={uploadedImages.hero} 
+                                  alt="Hero Image" 
+                                  className="h-16 w-auto object-cover border rounded"
+                                />
+                                <p className="text-xs text-green-600 mt-1">✓ Hero image uploaded successfully</p>
+                              </div>
+                            )}
                           </div>
 
-                          <div className="space-y-2">
+                          {/* Agent Photo */}
+                          <div className="space-y-3">
                             <label className="text-sm font-medium">Agent Photo</label>
-                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                              <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-                              <p className="text-sm text-gray-600">Upload Agent Photo</p>
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'agent')}
-                                className="mt-2"
-                              />
-                            </div>
+                            <ImageUpload
+                              folder="agents"
+                              onUploadSuccess={(result) => {
+                                setUploadedImages(prev => ({ ...prev, agent: result.url }));
+                                if (form.setValue) {
+                                  form.setValue('agentPhotoUrl', result.url);
+                                }
+                              }}
+                              onUploadError={(error) => {
+                                console.error('Agent photo upload error:', error);
+                              }}
+                              maxSize={5}
+                            />
+                            {uploadedImages.agent && (
+                              <div className="mt-2">
+                                <img 
+                                  src={uploadedImages.agent} 
+                                  alt="Agent Photo" 
+                                  className="h-16 w-16 object-cover border rounded-full"
+                                />
+                                <p className="text-xs text-green-600 mt-1">✓ Agent photo uploaded successfully</p>
+                              </div>
+                            )}
                           </div>
+                        </div>
+
+                        {/* Upload Guidelines */}
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <h4 className="font-medium text-blue-900 mb-2">Image Guidelines</h4>
+                          <ul className="text-sm text-blue-800 space-y-1">
+                            <li>• <strong>Logo:</strong> Square format (1:1 ratio), PNG with transparent background preferred</li>
+                            <li>• <strong>Hero Image:</strong> Landscape format (16:9 ratio), high resolution (1920x1080 recommended)</li>
+                            <li>• <strong>Agent Photo:</strong> Professional headshot, square format, clear background</li>
+                          </ul>
                         </div>
                       </CardContent>
                     </Card>

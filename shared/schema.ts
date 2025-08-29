@@ -306,10 +306,12 @@ export const templates = pgTable("templates", {
     .primaryKey()
     .default(sql`gen_random_uuid()`),
   // User ownership
-  userId: integer("user_id").references(() => users.id, {
-    onDelete: "cascade",
-  }).notNull(),
-  
+  userId: integer("user_id")
+    .references(() => users.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
+
   // Company Information
   companyName: text("company_name")
     .notNull()

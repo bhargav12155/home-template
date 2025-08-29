@@ -7,14 +7,21 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, User, LogOut, Settings } from "lucide-react";
 import { NAVIGATION_ITEMS } from "@/lib/constants";
+import { useAuth } from "@/context/auth";
 import logoImage from "@assets/2408BjorkGroupFinalLogo1_Bjork Group Black Square BHHS_1753648666870.png";
 
 export default function Header() {
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
@@ -65,6 +72,59 @@ export default function Header() {
                 </Link>
               );
             })}
+            
+            {/* Authentication section */}
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center gap-2 text-soft-black hover:text-bjork-blue transition-colors duration-300 bg-transparent border-none outline-none">
+                  <User className="h-4 w-4" />
+                  <span>{user?.firstName || user?.username}</span>
+                  <ChevronDown className="h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-white border border-gray-200 shadow-lg">
+                  <DropdownMenuItem className="p-0">
+                    <Link 
+                      href="/template-admin"
+                      className="w-full px-3 py-2 text-soft-black hover:text-bjork-blue hover:bg-gray-50 transition-colors duration-300 flex items-center gap-2"
+                    >
+                      <Settings className="h-4 w-4" />
+                      Template Settings
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="p-0">
+                    <Link 
+                      href="/admin"
+                      className="w-full px-3 py-2 text-soft-black hover:text-bjork-blue hover:bg-gray-50 transition-colors duration-300 flex items-center gap-2"
+                    >
+                      <User className="h-4 w-4" />
+                      Admin Panel
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    onClick={handleLogout}
+                    className="px-3 py-2 text-soft-black hover:text-red-600 hover:bg-gray-50 transition-colors duration-300 flex items-center gap-2 cursor-pointer"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <div className="flex items-center gap-4">
+                <Link href="/login">
+                  <Button variant="ghost" className="text-soft-black hover:text-bjork-blue">
+                    Sign in
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button className="bg-bjork-black text-white hover:bg-bjork-blue transition-colors duration-300">
+                    Get Started
+                  </Button>
+                </Link>
+              </div>
+            )}
+            
             <Link href="/contact">
               <Button className="bg-bjork-black text-white hover:bg-bjork-blue transition-colors duration-300">
                 Contact Us
@@ -121,6 +181,56 @@ export default function Header() {
                     </Link>
                   );
                 })}
+                
+                {/* Mobile Authentication section */}
+                {isAuthenticated ? (
+                  <div className="space-y-4 border-t pt-4">
+                    <div className="text-lg font-medium text-soft-black">
+                      Welcome, {user?.firstName || user?.username}!
+                    </div>
+                    <Link 
+                      href="/template-admin" 
+                      onClick={() => setIsOpen(false)}
+                      className="block text-base text-gray-600 hover:text-bjork-blue transition-colors duration-300 flex items-center gap-2"
+                    >
+                      <Settings className="h-4 w-4" />
+                      Template Settings
+                    </Link>
+                    <Link 
+                      href="/admin" 
+                      onClick={() => setIsOpen(false)}
+                      className="block text-base text-gray-600 hover:text-bjork-blue transition-colors duration-300 flex items-center gap-2"
+                    >
+                      <User className="h-4 w-4" />
+                      Admin Panel
+                    </Link>
+                    <Button 
+                      onClick={() => {
+                        handleLogout();
+                        setIsOpen(false);
+                      }}
+                      variant="ghost"
+                      className="w-full justify-start text-left text-red-600 hover:text-red-700 hover:bg-red-50 flex items-center gap-2"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign out
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4 border-t pt-4">
+                    <Link href="/login" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" className="w-full">
+                        Sign in
+                      </Button>
+                    </Link>
+                    <Link href="/register" onClick={() => setIsOpen(false)}>
+                      <Button className="w-full bg-bjork-black text-white hover:bg-bjork-blue transition-colors duration-300">
+                        Get Started
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+                
                 <Link href="/contact" onClick={() => setIsOpen(false)}>
                   <Button className="w-full bg-bjork-black text-white hover:bg-bjork-blue transition-colors duration-300">
                     Contact Us
