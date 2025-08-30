@@ -692,46 +692,195 @@ export default function TemplateAdmin() {
                         <CardTitle>Brand Colors</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <FormField
-                            control={form.control}
-                            name="primaryColor"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Primary Color</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="hsl(20, 14.3%, 4.1%)" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name="accentColor"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Accent Color</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="hsl(213, 100%, 45%)" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name="beigeColor"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Secondary Color</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="hsl(25, 35%, 75%)" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                        {/* Color Presets */}
+                        <div className="mb-6">
+                          <h4 className="text-sm font-medium mb-3">Choose a Color Scheme:</h4>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {/* Professional Blue */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                form.setValue("primaryColor", "#1e293b");
+                                form.setValue("accentColor", "#3b82f6");
+                                form.setValue("beigeColor", "#f1f5f9");
+                              }}
+                              className="p-3 border rounded-lg hover:shadow-md transition-shadow"
+                            >
+                              <div className="flex space-x-1 mb-2">
+                                <div className="w-6 h-6 rounded" style={{backgroundColor: "#1e293b"}}></div>
+                                <div className="w-6 h-6 rounded" style={{backgroundColor: "#3b82f6"}}></div>
+                                <div className="w-6 h-6 rounded" style={{backgroundColor: "#f1f5f9"}}></div>
+                              </div>
+                              <span className="text-xs font-medium">Professional Blue</span>
+                            </button>
+
+                            {/* Luxury Gold */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                form.setValue("primaryColor", "#1c1917");
+                                form.setValue("accentColor", "#d97706");
+                                form.setValue("beigeColor", "#fef3c7");
+                              }}
+                              className="p-3 border rounded-lg hover:shadow-md transition-shadow"
+                            >
+                              <div className="flex space-x-1 mb-2">
+                                <div className="w-6 h-6 rounded" style={{backgroundColor: "#1c1917"}}></div>
+                                <div className="w-6 h-6 rounded" style={{backgroundColor: "#d97706"}}></div>
+                                <div className="w-6 h-6 rounded" style={{backgroundColor: "#fef3c7"}}></div>
+                              </div>
+                              <span className="text-xs font-medium">Luxury Gold</span>
+                            </button>
+
+                            {/* Modern Green */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                form.setValue("primaryColor", "#0f172a");
+                                form.setValue("accentColor", "#059669");
+                                form.setValue("beigeColor", "#ecfdf5");
+                              }}
+                              className="p-3 border rounded-lg hover:shadow-md transition-shadow"
+                            >
+                              <div className="flex space-x-1 mb-2">
+                                <div className="w-6 h-6 rounded" style={{backgroundColor: "#0f172a"}}></div>
+                                <div className="w-6 h-6 rounded" style={{backgroundColor: "#059669"}}></div>
+                                <div className="w-6 h-6 rounded" style={{backgroundColor: "#ecfdf5"}}></div>
+                              </div>
+                              <span className="text-xs font-medium">Modern Green</span>
+                            </button>
+
+                            {/* Classic Red */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                form.setValue("primaryColor", "#1e1b1b");
+                                form.setValue("accentColor", "#dc2626");
+                                form.setValue("beigeColor", "#fef2f2");
+                              }}
+                              className="p-3 border rounded-lg hover:shadow-md transition-shadow"
+                            >
+                              <div className="flex space-x-1 mb-2">
+                                <div className="w-6 h-6 rounded" style={{backgroundColor: "#1e1b1b"}}></div>
+                                <div className="w-6 h-6 rounded" style={{backgroundColor: "#dc2626"}}></div>
+                                <div className="w-6 h-6 rounded" style={{backgroundColor: "#fef2f2"}}></div>
+                              </div>
+                              <span className="text-xs font-medium">Classic Red</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Custom Color Inputs */}
+                        <div>
+                          <h4 className="text-sm font-medium mb-3">Or Customize Colors:</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <FormField
+                              control={form.control}
+                              name="primaryColor"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Primary Color (Dark Text)</FormLabel>
+                                  <div className="flex space-x-2">
+                                    <FormControl>
+                                      <input 
+                                        type="color" 
+                                        value={field.value || "#1e293b"}
+                                        onChange={(e) => field.onChange(e.target.value)}
+                                        className="w-12 h-10 rounded border cursor-pointer"
+                                      />
+                                    </FormControl>
+                                    <FormControl>
+                                      <Input 
+                                        placeholder="#1e293b" 
+                                        value={field.value || ""}
+                                        onChange={field.onChange}
+                                        className="flex-1"
+                                      />
+                                    </FormControl>
+                                  </div>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="accentColor"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Accent Color (Buttons/Links)</FormLabel>
+                                  <div className="flex space-x-2">
+                                    <FormControl>
+                                      <input 
+                                        type="color" 
+                                        value={field.value || "#3b82f6"}
+                                        onChange={(e) => field.onChange(e.target.value)}
+                                        className="w-12 h-10 rounded border cursor-pointer"
+                                      />
+                                    </FormControl>
+                                    <FormControl>
+                                      <Input 
+                                        placeholder="#3b82f6" 
+                                        value={field.value || ""}
+                                        onChange={field.onChange}
+                                        className="flex-1"
+                                      />
+                                    </FormControl>
+                                  </div>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="beigeColor"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Background Color (Light)</FormLabel>
+                                  <div className="flex space-x-2">
+                                    <FormControl>
+                                      <input 
+                                        type="color" 
+                                        value={field.value || "#f1f5f9"}
+                                        onChange={(e) => field.onChange(e.target.value)}
+                                        className="w-12 h-10 rounded border cursor-pointer"
+                                      />
+                                    </FormControl>
+                                    <FormControl>
+                                      <Input 
+                                        placeholder="#f1f5f9" 
+                                        value={field.value || ""}
+                                        onChange={field.onChange}
+                                        className="flex-1"
+                                      />
+                                    </FormControl>
+                                  </div>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Color Preview */}
+                        <div className="mt-6 p-4 border rounded-lg">
+                          <h4 className="text-sm font-medium mb-3">Preview:</h4>
+                          <div 
+                            className="p-4 rounded-lg"
+                            style={{
+                              backgroundColor: form.watch("beigeColor") || "#f1f5f9",
+                              color: form.watch("primaryColor") || "#1e293b"
+                            }}
+                          >
+                            <h3 className="font-bold text-lg mb-2">Your Real Estate Company</h3>
+                            <p className="mb-3">This is how your brand colors will look on your website.</p>
+                            <button 
+                              type="button"
+                              className="px-4 py-2 rounded text-white font-medium"
+                              style={{backgroundColor: form.watch("accentColor") || "#3b82f6"}}
+                            >
+                              Contact Us Button
+                            </button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
