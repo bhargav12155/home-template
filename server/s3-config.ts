@@ -19,9 +19,21 @@ export const S3_CONFIG = {
   // Cost Optimization Settings
   storageClass: "STANDARD_IA", // Cheaper for infrequently accessed files
 
-  // Image Upload Settings
-  maxFileSize: 10 * 1024 * 1024, // 10MB max per image
-  allowedTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+  // Upload Settings
+  maxFileSize: 100 * 1024 * 1024, // 100MB max per file (increased for videos)
+  allowedTypes: [
+    // Images
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+    // Videos
+    "video/mp4",
+    "video/webm",
+    "video/avi",
+    "video/mov",
+    "video/quicktime",
+  ],
 
   // File Organization
   folders: {
@@ -33,23 +45,15 @@ export const S3_CONFIG = {
   },
 };
 
-// S3 Client instance (only initialize if AWS credentials are available)
-let s3Client: S3Client | null = null;
+// S3 Client instance - AWS CloudShell provides automatic credentials
+export const s3Client = new S3Client({
+  region: S3_CONFIG.region,
+  // No explicit credentials needed - AWS CloudShell/EB provides them automatically
+});
 
-if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
-  s3Client = new S3Client({
-    region: S3_CONFIG.region,
-    credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    },
-  });
-  console.log("S3: Configured with AWS credentials");
-} else {
-  console.log("S3: AWS credentials not found, S3 features disabled");
-}
-
-export { s3Client };
+console.log(
+  `S3: Configured for bucket '${S3_CONFIG.bucket}' in region '${S3_CONFIG.region}'`
+);
 
 // Helper function to generate S3 URL
 export function getS3Url(key: string): string {

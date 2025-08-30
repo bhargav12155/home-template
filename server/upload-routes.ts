@@ -234,4 +234,97 @@ router.get(
   }
 );
 
+/**
+ * POST /api/upload/cleanup/:folder
+ * Cleanup old files in a specific folder for the authenticated user
+ */
+router.post(
+  "/cleanup/:folder",
+  authenticateUser,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const { folder } = req.params;
+
+      // Validate folder
+      if (!Object.keys(S3_CONFIG.folders).includes(folder)) {
+        return res.status(400).json({
+          message: `Invalid folder. Allowed folders: ${Object.keys(
+            S3_CONFIG.folders
+          ).join(", ")}`,
+        });
+      }
+
+      const { cleanupUserFolder } = await import("./s3-service");
+      await cleanupUserFolder(
+        folder as keyof typeof S3_CONFIG.folders,
+        req.user.id
+      );
+
+      res.json({
+        message: `Successfully cleaned up ${folder} folder for user ${req.user.id}`,
+        folder,
+        userId: req.user.id,
+      });
+    } catch (error) {
+      console.error("Cleanup error:", error);
+      res.status(500).json({
+        message:
+          error instanceof Error ? error.message : "Failed to cleanup folder",
+      });
+    }
+  }
+);
+
+/**
+ * POST /api/upload/cleanup-all
+ * Cleanup old files in all folders for the authenticated user
+ */
+router.post(
+  "/cleanup-all",
+  authenticateUser,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const { cleanupUserFolder } = await import("./s3-service");
+      const folders = Object.keys(S3_CONFIG.folders) as Array<
+        keyof typeof S3_CONFIG.folders
+      >;
+      const results = [];
+
+      for (const folder of folders) {
+        try {
+          await cleanupUserFolder(folder, req.user.id);
+          results.push({ folder, status: "success" });
+        } catch (error) {
+          console.error(`Cleanup failed for ${folder}:`, error);
+          results.push({
+            folder,
+            status: "error",
+            error: error instanceof Error ? error.message : "Unknown error",
+          });
+        }
+      }
+
+      res.json({
+        message: `Cleanup completed for user ${req.user.id}`,
+        userId: req.user.id,
+        results,
+      });
+    } catch (error) {
+      console.error("Cleanup all error:", error);
+      res.status(500).json({
+        message:
+          error instanceof Error ? error.message : "Failed to cleanup folders",
+      });
+    }
+  }
+);
+
 export { router as uploadRoutes };

@@ -2,25 +2,35 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Phone, Mail, Star, Award, Home, Users } from "lucide-react";
-import mikeBjorkPhoto from "@assets/White background_1753818665671.jpg";
-import mandyVistyPhoto from "@assets/Mandy Visty headshot (1)_1753818758165.jpg";
+import { useQuery } from "@tanstack/react-query";
+import { Template } from "@/types/template";
+// Fallback images
+import fallbackMikeBjorkPhoto from "@assets/White background_1753818665671.jpg";
+import fallbackMandyVistyPhoto from "@assets/Mandy Visty headshot (1)_1753818758165.jpg";
 
 export default function Agents() {
+  // Fetch template configuration for agent photos
+  const { data: template } = useQuery<Template>({
+    queryKey: ["/api/template/public", "v2"],
+    refetchOnMount: true,
+    staleTime: 0,
+  });
+
   const agents = [
     {
       id: 1,
-      name: "Michael Bjork",
-      title: "Principal Broker & Team Leader",
-      email: "mike.bjork@bhhsamb.com",
-      phone: "(402) 522-6131",
-      image: mikeBjorkPhoto,
-      bio: "With over 15 years of experience in luxury real estate, Michael leads the Bjork Group with unmatched expertise in the Omaha and Lincoln markets. Specializing in high-end properties and exceptional client service.",
+      name: template?.agentName || "Michael Bjork",
+      title: template?.agentTitle || "Principal Broker & Team Leader",
+      email: template?.agentEmail || "mike.bjork@bhhsamb.com",
+      phone: template?.contactPhone || "(402) 522-6131",
+      image: template?.agentImageUrl || fallbackMikeBjorkPhoto,
+      bio: template?.agentBio || "With over 15 years of experience in luxury real estate, Michael leads the Bjork Group with unmatched expertise in the Omaha and Lincoln markets. Specializing in high-end properties and exceptional client service.",
       specialties: ["Luxury Homes", "Investment Properties", "New Construction", "Relocation"],
       stats: {
-        yearsSelling: 15,
-        homesSold: 850,
+        yearsSelling: template?.yearsExperience || 15,
+        homesSold: template?.homesSold || 850,
         avgSalePrice: "$425,000",
-        clientSatisfaction: 98
+        clientSatisfaction: parseInt(template?.clientSatisfaction?.replace('%', '') || "98")
       },
       certifications: ["CRS", "GRI", "ABR"],
       languages: ["English"]
@@ -28,10 +38,10 @@ export default function Agents() {
     {
       id: 2,
       name: "Mandy Visty",
-      title: "Senior Real Estate Advisor",
+      title: "Associate Broker",
       email: "mandy.visty@bhhsamb.com",
-      phone: "(402) 555-0123",
-      image: mandyVistyPhoto,
+      phone: "(402) 522-6131",
+      image: fallbackMandyVistyPhoto,
       bio: "Mandy brings a fresh perspective to real estate with her background in marketing and design. She excels at helping first-time buyers navigate the market and find their perfect home.",
       specialties: ["First-Time Buyers", "Condos & Townhomes", "Marketing", "Staging"],
       stats: {

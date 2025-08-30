@@ -33,6 +33,7 @@ import { formatDistanceToNow } from "date-fns";
 import { insertTrackingCodeSchema, type TrackingCode, type InsertTrackingCode, type Lead } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import IdxAdmin from "@/components/sections/idx-admin";
+import UserSettings from "@/pages/admin/user-settings";
 
 export default function Admin() {
   const { toast } = useToast();
@@ -202,7 +203,7 @@ export default function Admin() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="tracking" className="flex items-center">
               <Code className="w-4 h-4 mr-2" />
               Tracking Codes
@@ -210,6 +211,10 @@ export default function Admin() {
             <TabsTrigger value="leads" className="flex items-center">
               <Users className="w-4 h-4 mr-2" />
               Leads
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center">
+              <Settings className="w-4 h-4 mr-2" />
+              User Settings
             </TabsTrigger>
             <TabsTrigger value="idx" className="flex items-center">
               <Database className="w-4 h-4 mr-2" />
@@ -488,6 +493,11 @@ export default function Admin() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* User Settings Tab */}
+          <TabsContent value="settings">
+            <UserSettings />
           </TabsContent>
 
           {/* IDX Management Tab */}

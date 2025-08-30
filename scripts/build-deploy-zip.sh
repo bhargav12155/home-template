@@ -7,6 +7,8 @@ set -euo pipefail
 APP_NAME="rest-express"
 ZIP_NAME="deploy.zip"
 STAGE_DIR=".deploy-stage"
+PRUNE_MEDIA=${PRUNE_MEDIA:-0}
+MEDIA_EXTENSIONS="mp4 webm mov jpg jpeg png gif svg avif"
 
 echo "[1/9] Clean previous artifacts"
 rm -rf dist "$STAGE_DIR" "$ZIP_NAME"
@@ -32,11 +34,21 @@ mkdir -p "$STAGE_DIR"
 cp -R dist "$STAGE_DIR/dist"
 cp package.json "$STAGE_DIR/package.json"
 
+if [[ "$PRUNE_MEDIA" == 1 ]]; then
+  echo "[6.1/9] PRUNE_MEDIA enabled – removing large static media from dist/public/assets"
+  BEFORE_SZ=$(du -sh dist/public/assets 2>/dev/null | awk '{print $1}')
+  for ext in $MEDIA_EXTENSIONS; do
+    # Keep a tiny placeholder strategy optional later
+    find dist/public/assets -maxdepth 1 -type f -name "*.$ext" -size +50k -print -delete 2>/dev/null || true
+  done
+  AFTER_SZ=$(du -sh dist/public/assets 2>/dev/null | awk '{print $1}')
+  echo "      Assets size: $BEFORE_SZ -> $AFTER_SZ (pruned)"
+fi
+
 echo "[7/9] Create prod-only node_modules in staging"
 pushd "$STAGE_DIR" >/dev/null
   npm install --omit=dev --no-audit --no-fund
-  # Optional: remove large media not needed in deploy (uncomment if desired)
-  # rm -f dist/public/assets/*.mp4 || true
+  # Note: Static media has been optionally pruned earlier when PRUNE_MEDIA=1.
 popd >/dev/null
 
 echo "[8/9] Zip artifact"

@@ -127,6 +127,14 @@ export interface IStorage {
   getTemplateByUser(userId: number): Promise<any>;
   updateTemplateByUser(userId: number, template: any): Promise<any>;
   createTemplateForUser(userId: number, template: any): Promise<any>;
+
+  // User management methods for multi-tenant
+  getUserById(id: number): Promise<any>;
+  getUserByUsername(username: string): Promise<any>;
+  getUserBySlug(slug: string): Promise<any>;
+  updateUserProfile(userId: number, data: any): Promise<any>;
+  setUserCustomSlug(userId: number, slug: string): Promise<any>;
+  getAllActiveUsers(): Promise<any[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -140,6 +148,7 @@ export class MemStorage implements IStorage {
   private idxAgents: Map<number, IdxAgent>;
   private idxMedia: Map<number, IdxMedia>;
   private idxSyncLogs: Map<number, IdxSyncLog>;
+  private templates: Map<string, any>;
   private currentId: number;
 
   constructor() {
@@ -153,6 +162,7 @@ export class MemStorage implements IStorage {
     this.idxAgents = new Map();
     this.idxMedia = new Map();
     this.idxSyncLogs = new Map();
+    this.templates = new Map();
     this.currentId = 1;
     this.seedData();
   }
@@ -283,14 +293,9 @@ export class MemStorage implements IStorage {
       },
     ];
 
+    // Insert sample properties using createProperty to ensure proper shape
     sampleProperties.forEach((property) => {
-      const id = this.currentId++;
-      this.properties.set(id, {
-        ...property,
-        id,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
+      this.createProperty(property);
     });
 
     // Sample communities
@@ -338,8 +343,7 @@ export class MemStorage implements IStorage {
     ];
 
     sampleCommunities.forEach((community) => {
-      const id = this.currentId++;
-      this.communities.set(id, { ...community, id });
+      this.createCommunity(community);
     });
 
     // Sample blog posts
@@ -356,8 +360,6 @@ export class MemStorage implements IStorage {
         category: "Market Analysis",
         author: "Michael Bjork",
         published: true,
-        createdAt: new Date("2025-01-23"),
-        updatedAt: new Date("2025-01-23"),
       },
       {
         title: "Why You Should Consider Selling in the Winter",
@@ -370,8 +372,6 @@ export class MemStorage implements IStorage {
         category: "Selling Tips",
         author: "Michael Bjork",
         published: true,
-        createdAt: new Date("2025-01-20"),
-        updatedAt: new Date("2025-01-20"),
       },
       {
         title: "Things to Look Out for Before Buying Your Dream Home",
@@ -384,14 +384,21 @@ export class MemStorage implements IStorage {
         category: "Buying Guide",
         author: "Michael Bjork",
         published: true,
-        createdAt: new Date("2025-01-18"),
-        updatedAt: new Date("2025-01-18"),
       },
     ];
 
     sampleBlogPosts.forEach((post) => {
       const id = this.currentId++;
-      this.blogPosts.set(id, { ...post, id });
+      this.blogPosts.set(id, {
+        ...post,
+        id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        image: post.image ?? null,
+        excerpt: post.excerpt ?? null,
+        published: post.published ?? null,
+        author: post.author || "Michael Bjork",
+      });
     });
   }
 
@@ -408,7 +415,18 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentId++;
-    const user: User = { ...insertUser, id };
+    const user: User = {
+      id,
+      username: insertUser.username,
+      email: `${insertUser.username}@example.com`,
+      password: insertUser.password,
+      firstName: null,
+      lastName: null,
+      customSlug: null,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as User;
     this.users.set(id, user);
     return user;
   }
@@ -505,11 +523,51 @@ export class MemStorage implements IStorage {
 
   async createProperty(property: InsertProperty): Promise<Property> {
     const id = this.currentId++;
+    const now = new Date();
     const newProperty: Property = {
-      ...property,
       id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: now,
+      updatedAt: now,
+      mlsId: property.mlsId,
+      listingKey: property.listingKey ?? null,
+      title: property.title,
+      description: property.description ?? null,
+      price: property.price,
+      address: property.address,
+      city: property.city,
+      state: property.state ?? "NE",
+      zipCode: property.zipCode,
+      beds: property.beds,
+      baths: property.baths,
+      sqft: property.sqft,
+      yearBuilt: property.yearBuilt ?? null,
+      propertyType: property.propertyType,
+      status: property.status ?? "active",
+      standardStatus: property.standardStatus ?? null,
+      featured: property.featured ?? null,
+      luxury: property.luxury ?? null,
+      images: property.images ?? null,
+      neighborhood: property.neighborhood ?? null,
+      schoolDistrict: property.schoolDistrict ?? null,
+      style: property.style ?? null,
+      coordinates: property.coordinates ?? null,
+      features: property.features ?? null,
+      architecturalStyle: property.architecturalStyle ?? null,
+      secondaryStyle: property.secondaryStyle ?? null,
+      styleConfidence: property.styleConfidence ?? null,
+      styleFeatures: property.styleFeatures ?? null,
+      styleAnalyzed: property.styleAnalyzed ?? null,
+      listingAgentKey: property.listingAgentKey ?? null,
+      listingOfficeName: property.listingOfficeName ?? null,
+      listingContractDate: property.listingContractDate ?? null,
+      daysOnMarket: property.daysOnMarket ?? null,
+      originalListPrice: property.originalListPrice ?? null,
+      mlsStatus: property.mlsStatus ?? null,
+      modificationTimestamp: property.modificationTimestamp ?? null,
+      photoCount: property.photoCount ?? null,
+      virtualTourUrl: property.virtualTourUrl ?? null,
+      isIdxListing: property.isIdxListing ?? null,
+      idxSyncedAt: property.idxSyncedAt ?? null,
     };
     this.properties.set(id, newProperty);
     return newProperty;
@@ -599,7 +657,16 @@ export class MemStorage implements IStorage {
 
   async createCommunity(community: InsertCommunity): Promise<Community> {
     const id = this.currentId++;
-    const newCommunity: Community = { ...community, id };
+    const newCommunity: Community = {
+      id,
+      name: community.name,
+      slug: community.slug,
+      description: community.description ?? null,
+      image: community.image ?? null,
+      propertyCount: community.propertyCount ?? null,
+      averagePrice: community.averagePrice ?? null,
+      highlights: community.highlights ?? null,
+    };
     this.communities.set(id, newCommunity);
     return newCommunity;
   }
@@ -622,11 +689,19 @@ export class MemStorage implements IStorage {
 
   async createBlogPost(post: InsertBlogPost): Promise<BlogPost> {
     const id = this.currentId++;
+    const now = new Date();
     const newPost: BlogPost = {
-      ...post,
       id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      title: post.title,
+      slug: post.slug,
+      excerpt: post.excerpt ?? null,
+      content: post.content,
+      image: post.image ?? null,
+      category: post.category,
+      author: post.author ?? "Michael Bjork",
+      published: post.published ?? null,
+      createdAt: now,
+      updatedAt: now,
     };
     this.blogPosts.set(id, newPost);
     return newPost;
@@ -636,9 +711,16 @@ export class MemStorage implements IStorage {
   async createLead(lead: InsertLead): Promise<Lead> {
     const id = this.currentId++;
     const newLead: Lead = {
-      ...lead,
       id,
+      email: lead.email,
+      firstName: lead.firstName,
+      lastName: lead.lastName,
       createdAt: new Date(),
+      message: lead.message ?? null,
+      phone: lead.phone ?? null,
+      propertyAddress: lead.propertyAddress ?? null,
+      interest: lead.interest ?? null,
+      source: lead.source ?? null,
     };
     this.leads.set(id, newLead);
     return newLead;
@@ -663,8 +745,11 @@ export class MemStorage implements IStorage {
   async createTrackingCode(code: InsertTrackingCode): Promise<TrackingCode> {
     const id = this.currentId++;
     const newCode: TrackingCode = {
-      ...code,
       id,
+      name: code.name,
+      code: code.code,
+      type: code.type,
+      active: code.active ?? null,
       createdAt: new Date(),
     };
     this.trackingCodes.set(id, newCode);
@@ -696,7 +781,16 @@ export class MemStorage implements IStorage {
 
   async createMarketStats(stats: InsertMarketStats): Promise<MarketStats> {
     const id = this.currentId++;
-    const newStats: MarketStats = { ...stats, id };
+    const newStats: MarketStats = {
+      id,
+      date: stats.date,
+      avgPrice: stats.avgPrice ?? null,
+      medianPrice: stats.medianPrice ?? null,
+      totalListings: stats.totalListings ?? null,
+      avgDaysOnMarket: stats.avgDaysOnMarket ?? null,
+      soldProperties: stats.soldProperties ?? null,
+      area: stats.area ?? "omaha",
+    };
     this.marketStats.set(id, newStats);
     return newStats;
   }
@@ -720,11 +814,22 @@ export class MemStorage implements IStorage {
 
   async createIdxAgent(agent: InsertIdxAgent): Promise<IdxAgent> {
     const id = this.currentId++;
+    const now = new Date();
     const newAgent: IdxAgent = {
-      ...agent,
       id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      memberKey: agent.memberKey,
+      memberMlsId: agent.memberMlsId,
+      firstName: agent.firstName,
+      lastName: agent.lastName,
+      email: agent.email ?? null,
+      phone: agent.phone ?? null,
+      officeName: agent.officeName ?? null,
+      officeKey: agent.officeKey ?? null,
+      stateLicense: agent.stateLicense ?? null,
+      isActive: agent.isActive ?? null,
+      modificationTimestamp: agent.modificationTimestamp ?? null,
+      createdAt: now,
+      updatedAt: now,
     };
     this.idxAgents.set(id, newAgent);
     return newAgent;
@@ -766,10 +871,18 @@ export class MemStorage implements IStorage {
   async createIdxMedia(media: InsertIdxMedia): Promise<IdxMedia> {
     const id = this.currentId++;
     const newMedia: IdxMedia = {
-      ...media,
       id,
+      mediaKey: media.mediaKey,
+      listingKey: media.listingKey,
+      mlsId: media.mlsId,
+      mediaUrl: media.mediaUrl,
+      mediaType: media.mediaType,
+      mediaObjectId: media.mediaObjectId ?? null,
+      shortDescription: media.shortDescription ?? null,
+      longDescription: media.longDescription ?? null,
+      sequence: media.sequence ?? null,
+      modificationTimestamp: media.modificationTimestamp ?? null,
       createdAt: new Date(),
-      updatedAt: new Date(),
     };
     this.idxMedia.set(id, newMedia);
     return newMedia;
@@ -785,7 +898,6 @@ export class MemStorage implements IStorage {
     const updated: IdxMedia = {
       ...existing,
       ...media,
-      updatedAt: new Date(),
     };
     this.idxMedia.set(id, updated);
     return updated;
@@ -811,7 +923,17 @@ export class MemStorage implements IStorage {
 
   async createIdxSyncLog(log: InsertIdxSyncLog): Promise<IdxSyncLog> {
     const id = this.currentId++;
-    const newLog: IdxSyncLog = { ...log, id };
+    const newLog: IdxSyncLog = {
+      id,
+      syncType: log.syncType,
+      status: log.status,
+      recordsProcessed: log.recordsProcessed ?? null,
+      recordsUpdated: log.recordsUpdated ?? null,
+      recordsCreated: log.recordsCreated ?? null,
+      errorMessage: log.errorMessage ?? null,
+      startedAt: log.startedAt,
+      completedAt: log.completedAt ?? null,
+    };
     this.idxSyncLogs.set(id, newLog);
     return newLog;
   }
@@ -849,18 +971,59 @@ export class MemStorage implements IStorage {
 
   // User-specific template methods for MemStorage
   async getTemplateByUser(userId: number): Promise<any> {
-    // For development, return default template regardless of user
-    return this.getTemplate();
+    const userKey = `template_user_${userId}`;
+    if (this.templates.has(userKey)) return this.templates.get(userKey);
+    const defaultTemplate = await this.getTemplate();
+    const withUser = { ...defaultTemplate, userId };
+    this.templates.set(userKey, withUser);
+    return withUser;
   }
 
   async updateTemplateByUser(userId: number, template: any): Promise<any> {
-    // For development, just return the template
-    return template;
+    const userKey = `template_user_${userId}`;
+    const existing =
+      this.templates.get(userKey) || (await this.getTemplateByUser(userId));
+    const merged = { ...existing, ...template, userId };
+    this.templates.set(userKey, merged);
+    return merged;
   }
 
   async createTemplateForUser(userId: number, template: any): Promise<any> {
-    // For development, just return the template with the userId
-    return { ...template, userId };
+    const userKey = `template_user_${userId}`;
+    const created = { ...template, userId };
+    this.templates.set(userKey, created);
+    return created;
+  }
+
+  // Multi-tenant helper methods
+  async getUserById(id: number): Promise<User | undefined> {
+    return this.getUser(id);
+  }
+
+  async getUserBySlug(slug: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find((u) => u.customSlug === slug);
+  }
+
+  async updateUserProfile(
+    userId: number,
+    data: any
+  ): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (!user) return undefined;
+    const updated = { ...user, ...data, updatedAt: new Date() } as User;
+    this.users.set(userId, updated);
+    return updated;
+  }
+
+  async setUserCustomSlug(
+    userId: number,
+    slug: string
+  ): Promise<User | undefined> {
+    return this.updateUserProfile(userId, { customSlug: slug });
+  }
+
+  async getAllActiveUsers(): Promise<User[]> {
+    return Array.from(this.users.values()).filter((u) => u.isActive ?? true);
   }
 }
 
@@ -873,6 +1036,46 @@ export class DatabaseStorage implements IStorage {
         "DatabaseStorage: No database connection available in development mode"
       );
     }
+  }
+
+  // Additional user/multi-tenant methods required by IStorage
+  async getUserById(id: number): Promise<User | undefined> {
+    return this.getUser(id);
+  }
+
+  async getUserBySlug(slug: string): Promise<any> {
+    if (!db) return undefined;
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.customSlug, slug));
+    return user || undefined;
+  }
+
+  async updateUserProfile(userId: number, data: any): Promise<any> {
+    if (!db) return undefined;
+    const [updated] = await db
+      .update(users)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return updated || undefined;
+  }
+
+  async setUserCustomSlug(userId: number, slug: string): Promise<any> {
+    if (!db) return undefined;
+    const [updated] = await db
+      .update(users)
+      .set({ customSlug: slug, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return updated || undefined;
+  }
+
+  async getAllActiveUsers(): Promise<any[]> {
+    if (!db) return [];
+    const rows = await db.select().from(users).where(eq(users.isActive, true));
+    return rows;
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -1202,33 +1405,86 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateTemplateByUser(userId: number, templateData: any): Promise<any> {
+    console.log(`🔄 updateTemplateByUser called for userId: ${userId}`);
+    console.log(
+      `📋 Template data received:`,
+      JSON.stringify(templateData, null, 2)
+    );
+
     const [existingTemplate] = await db
       .select()
       .from(templates)
       .where(eq(templates.userId, userId))
       .limit(1);
 
+    console.log(`🔍 Existing template found:`, existingTemplate ? "YES" : "NO");
     if (existingTemplate) {
+      console.log(`📋 Existing template ID:`, existingTemplate.id);
+    }
+
+    if (existingTemplate) {
+      // Shallow merge so unspecified fields persist
+      const merged = { ...existingTemplate, ...templateData };
+      // Prevent overwriting primary key / userId inadvertently
+      delete (merged as any).id;
+      delete (merged as any).userId;
+
+      console.log(`🔄 Updating existing template`);
+      console.log(
+        `📝 Merged data (no id/userId):`,
+        JSON.stringify(merged, null, 2)
+      );
+
       const [updated] = await db
         .update(templates)
-        .set({ ...templateData, updatedAt: new Date() })
+        .set({ ...merged, updatedAt: new Date() })
         .where(eq(templates.id, existingTemplate.id))
         .returning();
+
+      console.log(`✅ Template updated successfully`);
       return updated;
-    } else {
-      // Create new template for user
-      return this.createTemplateForUser(userId, templateData);
     }
+
+    console.log(`🆕 Creating new template for user ${userId}`);
+    // Clean the template data to ensure no conflicting IDs
+    const cleanTemplateData = { ...templateData };
+    delete (cleanTemplateData as any).id; // Remove any existing ID
+    delete (cleanTemplateData as any).userId; // Remove userId from data (will be set explicitly)
+
+    console.log(
+      `📝 Clean template data for creation:`,
+      JSON.stringify(cleanTemplateData, null, 2)
+    );
+
+    return this.createTemplateForUser(userId, cleanTemplateData);
   }
 
   async createTemplateForUser(userId: number, templateData: any): Promise<any> {
+    console.log(`🆕 createTemplateForUser called for userId: ${userId}`);
+    console.log(
+      `📋 Template data received:`,
+      JSON.stringify(templateData, null, 2)
+    );
+
+    // Clean the template data - remove any ID field to let the database auto-generate
+    const cleanData = { ...templateData };
+    delete (cleanData as any).id; // Let database auto-generate UUID
+    delete (cleanData as any).userId; // Will be set explicitly
+
+    console.log(
+      `📝 Clean data for insertion:`,
+      JSON.stringify(cleanData, null, 2)
+    );
+
     const [created] = await db
       .insert(templates)
       .values({
         userId,
-        ...templateData,
+        ...cleanData,
       })
       .returning();
+
+    console.log(`✅ Template created successfully with ID:`, created.id);
     return created;
   }
 }

@@ -5,6 +5,7 @@ export interface Template {
   agentTitle?: string;
   agentEmail?: string;
   companyDescription?: string;
+  agentBio?: string;
 
   // Hero section fields
   heroTitle?: string;
@@ -18,8 +19,12 @@ export interface Template {
   officeState?: string;
   officeZip?: string;
 
+  // Statistics
   homesSold?: number;
   totalSalesVolume?: string;
+  yearsExperience?: number;
+  clientSatisfaction?: string;
+
   serviceAreas?: string[];
   primaryColor?: string;
   secondaryColor?: string;
@@ -35,10 +40,14 @@ export interface Template {
   instagramUrl?: string;
   linkedinUrl?: string;
   youtubeUrl?: string;
+
+  // S3 Media URLs
   logoUrl?: string;
   heroImageUrl?: string;
   aboutImageUrl?: string;
   heroVideoUrl?: string;
+  agentImageUrl?: string;
+
   createdAt?: Date;
   updatedAt?: Date;
 }

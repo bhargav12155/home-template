@@ -1,11 +1,29 @@
-import { pgTable, text, serial, integer, boolean, timestamp, decimal, jsonb } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  serial,
+  integer,
+  boolean,
+  timestamp,
+  decimal,
+  jsonb,
+  varchar,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
+import { relations, sql } from "drizzle-orm";
 import { z } from "zod";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
+  email: text("email").notNull().unique(),
   password: text("password").notNull(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  customSlug: text("custom_slug").unique(), // NEW: Custom URL slug
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const properties = pgTable("properties", {
@@ -44,7 +62,10 @@ export const properties = pgTable("properties", {
   listingOfficeName: text("listing_office_name"),
   listingContractDate: timestamp("listing_contract_date"),
   daysOnMarket: integer("days_on_market"),
-  originalListPrice: decimal("original_list_price", { precision: 12, scale: 2 }),
+  originalListPrice: decimal("original_list_price", {
+    precision: 12,
+    scale: 2,
+  }),
   mlsStatus: text("mls_status"), // MLS-specific status
   modificationTimestamp: timestamp("modification_timestamp"),
   photoCount: integer("photo_count"),
@@ -225,18 +246,26 @@ export const contactFormSchema = z.object({
 // Property search schema
 export const propertySearchSchema = z.object({
   query: z.string().optional(),
-  minPrice: z.number().optional(),
-  maxPrice: z.number().optional(),
-  beds: z.number().optional(),
-  baths: z.number().optional(),
+  minPrice: z.coerce.number().optional(),
+  maxPrice: z.coerce.number().optional(),
+  beds: z.coerce.number().optional(),
+  baths: z.coerce.number().optional(),
   propertyType: z.string().optional(),
   city: z.string().optional(),
   neighborhood: z.string().optional(),
   schoolDistrict: z.string().optional(),
   style: z.string().optional(),
-  luxury: z.boolean().optional(),
-  featured: z.boolean().optional(),
+  luxury: z
+    .union([z.boolean(), z.string().transform((s) => s === "true")])
+    .optional(),
+  featured: z
+    .union([z.boolean(), z.string().transform((s) => s === "true")])
+    .optional(),
   architecturalStyle: z.string().optional(),
+  // Extended for Paragon external queries
+  status: z.enum(["Active", "Closed", "Both"]).optional(),
+  days: z.coerce.number().optional(), // recent closed window in days
+  limit: z.coerce.number().optional(), // max records to fetch
 });
 
 // Types
@@ -271,6 +300,137 @@ export type InsertIdxSyncLog = z.infer<typeof insertIdxSyncLogSchema>;
 export type IdxSyncLog = typeof idxSyncLog.$inferSelect;
 
 export type ContactForm = z.infer<typeof contactFormSchema>;
+
+// Template system for multi-tenant customization
+export const templates = pgTable("templates", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  // User ownership
+  userId: integer("user_id")
+    .references(() => users.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
+
+  // Company Information
+  companyName: text("company_name")
+    .notNull()
+    .default("Your Real Estate Company"),
+  agentName: text("agent_name").notNull().default("Your Name"),
+  agentTitle: text("agent_title").default("Principal Broker"),
+  agentEmail: text("agent_email"),
+
+  // Contact Information
+  phone: text("phone"),
+  address: jsonb("address").default({
+    street: "123 Main Street",
+    city: "Your City",
+    state: "Your State",
+    zip: "12345",
+  }),
+
+  // Hero Section Content
+  heroTitle: text("hero_title").default("Ready to Find Your Dream Home?"),
+  heroSubtitle: text("hero_subtitle").default(
+    "Let's start your luxury real estate journey today. Our team is here to make your Nebraska home buying or selling experience exceptional."
+  ),
+
+  // Contact Information for Hero/Contact sections
+  contactPhone: text("contact_phone").default("(402) 522-6131"),
+  contactPhoneText: text("contact_phone_text").default("Call or text anytime"),
+  officeAddress: text("office_address").default("331 Village Pointe Plaza"),
+  officeCity: text("office_city").default("Omaha"),
+  officeState: text("office_state").default("NE"),
+  officeZip: text("office_zip").default("68130"),
+
+  // Company Description & Bio
+  companyDescription: text("company_description").default(
+    "We believe that luxury is not a price point but an experience."
+  ),
+  agentBio: text("agent_bio").default(
+    "Professional real estate agent with years of experience."
+  ),
+
+  // Statistics
+  homesSold: integer("homes_sold").default(500),
+  totalSalesVolume: text("total_sales_volume").default("$200M+"),
+  yearsExperience: integer("years_experience").default(15),
+  clientSatisfaction: text("client_satisfaction").default("98%"),
+
+  // Service Areas
+  serviceAreas: text("service_areas")
+    .array()
+    .default(["Your Primary City", "Your Secondary City"]),
+
+  // Brand Colors (HSL format)
+  primaryColor: text("primary_color").default("hsl(20, 14.3%, 4.1%)"), // bjork-black
+  accentColor: text("accent_color").default("hsl(213, 100%, 45%)"), // bjork-blue
+  beigeColor: text("beige_color").default("hsl(25, 35%, 75%)"), // bjork-beige
+
+  // Media URLs (stored as file paths)
+  logoUrl: text("logo_url"),
+  heroImageUrl: text("hero_image_url"),
+  agentImageUrl: text("agent_image_url"),
+  heroVideoUrl: text("hero_video_url"),
+
+  // MLS Integration
+  mlsId: text("mls_id"),
+  mlsApiKey: text("mls_api_key"),
+  mlsRegion: text("mls_region"),
+
+  // Domain/Subdomain
+  subdomain: text("subdomain").unique(),
+  customDomain: text("custom_domain"),
+
+  // Status
+  isActive: boolean("is_active").default(true),
+
+  // Metadata
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Template media files
+export const templateMedia = pgTable("template_media", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  templateId: varchar("template_id").references(() => templates.id, {
+    onDelete: "cascade",
+  }),
+  fileName: text("file_name").notNull(),
+  originalName: text("original_name").notNull(),
+  fileType: text("file_type").notNull(), // image, video, document
+  fileUrl: text("file_url").notNull(),
+  fileSize: integer("file_size"),
+  mimeType: text("mime_type"),
+  category: text("category"), // logo, hero, agent, property, testimonial
+
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Template relations
+export const templateRelations = relations(templates, ({ many }) => ({
+  media: many(templateMedia),
+}));
+
+export const templateMediaRelations = relations(templateMedia, ({ one }) => ({
+  template: one(templates, {
+    fields: [templateMedia.templateId],
+    references: [templates.id],
+  }),
+}));
+
+// Template schemas
+export const insertTemplateSchema = createInsertSchema(templates);
+export const templateSchema = createInsertSchema(templates);
+export type Template = typeof templates.$inferSelect;
+export type InsertTemplate = z.infer<typeof insertTemplateSchema>;
+
+export const insertTemplateMediaSchema = createInsertSchema(templateMedia);
+export type TemplateMedia = typeof templateMedia.$inferSelect;
+export type InsertTemplateMedia = z.infer<typeof insertTemplateMediaSchema>;
 export type PropertySearch = z.infer<typeof propertySearchSchema>;
 
 // RESO Web API specific types

@@ -16,21 +16,25 @@ import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/context/auth";
 import { useToast } from "@/hooks/use-toast";
 import ImageUpload from "@/components/ui/image-upload";
+import { getImageUrlWithFallback, handleImageError } from "@/lib/media-utils";
 
 export default function TemplateAdmin() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<{
     logo?: string;
     hero?: string;
+    heroVideo?: string;
     agent?: string;
   }>({});
   const { user } = useAuth();
   const { toast } = useToast();
 
   // Query current user's template (now requires authentication)
-  const { data: template, isLoading } = useQuery({
-    queryKey: ['/api/template'],
-    enabled: !!user // Only fetch when user is authenticated
+  const { data: template, isLoading } = useQuery<Template>({
+    queryKey: ['/api/template', user?.id], // Include user ID in query key
+    enabled: !!user, // Only fetch when user is authenticated
+    staleTime: 0, // Always fetch fresh data
+    refetchOnMount: true, // Refetch when component mounts
   });
 
   const form = useForm<InsertTemplate>({
@@ -60,6 +64,10 @@ export default function TemplateAdmin() {
       primaryColor: "hsl(20, 14.3%, 4.1%)",
       accentColor: "hsl(213, 100%, 45%)",
       beigeColor: "hsl(25, 35%, 75%)",
+  // Media defaults
+  logoUrl: "",
+  heroImageUrl: "",
+  agentImageUrl: "",
       subdomain: "",
       customDomain: "",
       isActive: true
@@ -89,14 +97,23 @@ export default function TemplateAdmin() {
 
   const updateTemplateMutation = useMutation({
     mutationFn: async (data: InsertTemplate) => {
-      console.log("Submitting template data:", data);
+      console.log("🚀 Starting template update mutation");
+      console.log("📋 User ID:", user?.id);
+      console.log("📋 Submitting template data:", JSON.stringify(data, null, 2));
+      
       const response = await apiRequest("POST", "/api/template", data);
-      return response.json();
+      console.log("📤 API Response status:", response.status);
+      
+      const result = await response.json();
+      console.log("📥 API Response data:", JSON.stringify(result, null, 2));
+      
+      return result;
     },
     onSuccess: () => {
       console.log("Template updated successfully");
       // Invalidate both the authenticated and public template caches
       queryClient.invalidateQueries({ queryKey: ['/api/template'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/template', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['/api/template/public'] });
       queryClient.invalidateQueries({ queryKey: ['/api/template/public', 'v2'] });
       toast({
@@ -105,7 +122,10 @@ export default function TemplateAdmin() {
       });
     },
     onError: (error: any) => {
-      console.error("Template update error:", error);
+      console.error("❌ Template update error:", error);
+      console.error("❌ Error details:", JSON.stringify(error, null, 2));
+      console.error("❌ Error message:", error.message);
+      console.error("❌ Error stack:", error.stack);
       toast({
         title: "Error",
         description: error.message || "Failed to save template. Please try again.",
@@ -115,7 +135,9 @@ export default function TemplateAdmin() {
   });
 
   const onSubmit = (data: InsertTemplate) => {
-    console.log("Form submit triggered with data:", data);
+    console.log("🎯 Form submit triggered");
+    console.log("👤 Current user:", user);
+    console.log("📝 Form data received:", JSON.stringify(data, null, 2));
     
     // Remove timestamp fields and ensure userId is present
     const { createdAt, updatedAt, ...cleanData } = data as any;
@@ -245,7 +267,7 @@ export default function TemplateAdmin() {
                               <FormItem>
                                 <FormLabel>Company Name</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="Your Real Estate Company" {...field} />
+                                  <Input placeholder="Your Real Estate Company" {...field} value={field.value ?? ''} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -258,7 +280,7 @@ export default function TemplateAdmin() {
                               <FormItem>
                                 <FormLabel>Agent Name</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="Your Name" {...field} />
+                                  <Input placeholder="Your Name" {...field} value={field.value ?? ''} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -274,7 +296,7 @@ export default function TemplateAdmin() {
                               <FormItem>
                                 <FormLabel>Agent Title</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="Principal Broker" {...field} />
+                                  <Input placeholder="Principal Broker" {...field} value={field.value ?? ''} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -287,7 +309,7 @@ export default function TemplateAdmin() {
                               <FormItem>
                                 <FormLabel>Email Address</FormLabel>
                                 <FormControl>
-                                  <Input type="email" placeholder="agent@yourcompany.com" {...field} />
+                                  <Input type="email" placeholder="agent@yourcompany.com" {...field} value={field.value ?? ''} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -302,7 +324,7 @@ export default function TemplateAdmin() {
                             <FormItem>
                               <FormLabel>Phone Number</FormLabel>
                               <FormControl>
-                                <Input placeholder="(555) 123-4567" {...field} />
+                                <Input placeholder="(555) 123-4567" {...field} value={field.value ?? ''} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -332,6 +354,7 @@ export default function TemplateAdmin() {
                                   <Input 
                                     placeholder="Ready to Find Your Dream Home?" 
                                     {...field} 
+                                    value={field.value ?? ''}
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -350,6 +373,7 @@ export default function TemplateAdmin() {
                                     rows={3}
                                     placeholder="Let's start your luxury real estate journey today. Our team is here to make your Nebraska home buying or selling experience exceptional." 
                                     {...field} 
+                                    value={field.value ?? ''}
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -372,6 +396,7 @@ export default function TemplateAdmin() {
                                     <Input 
                                       placeholder="(402) 522-6131" 
                                       {...field} 
+                                      value={field.value ?? ''}
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -389,6 +414,7 @@ export default function TemplateAdmin() {
                                     <Input 
                                       placeholder="Call or text anytime" 
                                       {...field} 
+                                      value={field.value ?? ''}
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -405,10 +431,11 @@ export default function TemplateAdmin() {
                                 <FormItem>
                                   <FormLabel>Office Address</FormLabel>
                                   <FormControl>
-                                    <Input 
-                                      placeholder="331 Village Pointe Plaza" 
-                                      {...field} 
-                                    />
+                                      <Input 
+                                        placeholder="331 Village Pointe Plaza" 
+                                        {...field} 
+                                        value={field.value ?? ''}
+                                      />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -426,6 +453,7 @@ export default function TemplateAdmin() {
                                       <Input 
                                         placeholder="Omaha" 
                                         {...field} 
+                                        value={field.value ?? ''}
                                       />
                                     </FormControl>
                                     <FormMessage />
@@ -443,6 +471,7 @@ export default function TemplateAdmin() {
                                       <Input 
                                         placeholder="NE" 
                                         {...field} 
+                                        value={field.value ?? ''}
                                       />
                                     </FormControl>
                                     <FormMessage />
@@ -460,6 +489,7 @@ export default function TemplateAdmin() {
                                       <Input 
                                         placeholder="68130" 
                                         {...field} 
+                                        value={field.value ?? ''}
                                       />
                                     </FormControl>
                                     <FormMessage />
@@ -481,6 +511,7 @@ export default function TemplateAdmin() {
                                   rows={4}
                                   placeholder="We believe that luxury is not a price point but an experience..." 
                                   {...field} 
+                                  value={field.value ?? ''}
                                 />
                               </FormControl>
                               <FormMessage />
@@ -499,6 +530,7 @@ export default function TemplateAdmin() {
                                   rows={6}
                                   placeholder="Professional real estate agent with years of experience..." 
                                   {...field} 
+                                  value={field.value ?? ''}
                                 />
                               </FormControl>
                               <FormMessage />
@@ -518,7 +550,8 @@ export default function TemplateAdmin() {
                                     type="number" 
                                     placeholder="500"
                                     {...field}
-                                    onChange={e => field.onChange(parseInt(e.target.value))}
+                                    value={field.value ?? ''}
+                                    onChange={e => field.onChange(e.target.value === '' ? null : parseInt(e.target.value))}
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -532,7 +565,7 @@ export default function TemplateAdmin() {
                               <FormItem>
                                 <FormLabel>Sales Volume</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="$200M+" {...field} />
+                                  <Input placeholder="$200M+" {...field} value={field.value ?? ''} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -549,7 +582,8 @@ export default function TemplateAdmin() {
                                     type="number" 
                                     placeholder="15"
                                     {...field}
-                                    onChange={e => field.onChange(parseInt(e.target.value))}
+                                    value={field.value ?? ''}
+                                    onChange={e => field.onChange(e.target.value === '' ? null : parseInt(e.target.value))}
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -563,7 +597,7 @@ export default function TemplateAdmin() {
                               <FormItem>
                                 <FormLabel>Client Satisfaction</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="98%" {...field} />
+                                  <Input placeholder="98%" {...field} value={field.value ?? ''} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -575,6 +609,7 @@ export default function TemplateAdmin() {
                   </TabsContent>
 
                   {/* Media Upload */}
+                  {/* Media Upload */}
                   <TabsContent value="media">
                     <Card>
                       <CardHeader>
@@ -583,7 +618,96 @@ export default function TemplateAdmin() {
                           Upload images to personalize your real estate website. All images are stored securely in the cloud.
                         </p>
                       </CardHeader>
-                      <CardContent className="space-y-6">
+                      <CardContent className="space-y-8">
+                        {/* Current Images Preview */}
+                        {(() => {
+                          const currentLogo = uploadedImages.logo || form.watch('logoUrl') || template?.logoUrl;
+                          const currentHero = uploadedImages.hero || form.watch('heroImageUrl') || template?.heroImageUrl;
+                          const currentHeroVideo = uploadedImages.heroVideo || form.watch('heroVideoUrl') || template?.heroVideoUrl;
+                          const currentAgent = uploadedImages.agent || form.watch('agentImageUrl') || template?.agentImageUrl;
+                          if (!currentLogo && !currentHero && !currentHeroVideo && !currentAgent) return null;
+                          return (
+                            <div>
+                              <h4 className="text-sm font-medium mb-3">Current Images</h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                {currentLogo && (
+                                  <div className="space-y-2">
+                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Logo</p>
+                                    <img 
+                                      src={currentLogo} 
+                                      alt="Current Logo" 
+                                      className="h-20 w-auto object-contain border rounded bg-white p-2" 
+                                      onError={(e) => {
+                                        const img = e.currentTarget;
+                                        if (!img.src.includes('data:image')) {
+                                          // Use a simple SVG placeholder instead of missing file
+                                          img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjUwIiB5PSI1NSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5Mb2dvPC90ZXh0Pjwvc3ZnPg==';
+                                        }
+                                      }}
+                                    />
+                                    <p className="text-[10px] text-gray-500">{uploadedImages.logo ? 'New upload (unsaved)' : 'Loaded from template'}</p>
+                                  </div>
+                                )}
+                                {currentHero && (
+                                  <div className="space-y-2">
+                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Hero Image</p>
+                                    <img 
+                                      src={currentHero} 
+                                      alt="Current Hero" 
+                                      className="h-20 w-auto object-cover border rounded" 
+                                      onError={(e) => {
+                                        const img = e.currentTarget;
+                                        if (!img.src.includes('data:image')) {
+                                          // Use a simple SVG placeholder instead of missing file
+                                          img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjEwMCIgeT0iNTUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+SGVybyBJbWFnZTwvdGV4dD48L3N2Zz4=';
+                                        }
+                                      }}
+                                    />
+                                    <p className="text-[10px] text-gray-500">{uploadedImages.hero ? 'New upload (unsaved)' : 'Loaded from template'}</p>
+                                  </div>
+                                )}
+                                {currentHeroVideo && (
+                                  <div className="space-y-2">
+                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Hero Video</p>
+                                    <video 
+                                      src={currentHeroVideo} 
+                                      className="h-20 w-auto object-cover border rounded"
+                                      muted
+                                      onError={(e) => {
+                                        const video = e.currentTarget;
+                                        if (!video.src.includes('data:')) {
+                                          // Hide broken video
+                                          video.style.display = 'none';
+                                        }
+                                      }}
+                                    />
+                                    <p className="text-[10px] text-gray-500">{uploadedImages.heroVideo ? 'New upload (unsaved)' : 'Loaded from template'}</p>
+                                  </div>
+                                )}
+                                {currentAgent && (
+                                  <div className="space-y-2">
+                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Agent Photo</p>
+                                    <img 
+                                      src={currentAgent} 
+                                      alt="Current Agent" 
+                                      className="h-20 w-20 object-cover border rounded-full" 
+                                      onError={(e) => {
+                                        const img = e.currentTarget;
+                                        if (!img.src.includes('data:image')) {
+                                          // Use a simple SVG placeholder instead of missing file
+                                          img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjUwIiB5PSI1NSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5BZ2VudDwvdGV4dD48L3N2Zz4=';
+                                        }
+                                      }}
+                                    />
+                                    <p className="text-[10px] text-gray-500">{uploadedImages.agent ? 'New upload (unsaved)' : 'Loaded from template'}</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })()}
+
+                        {/* Uploaders */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           {/* Company Logo */}
                           <div className="space-y-3">
@@ -592,55 +716,61 @@ export default function TemplateAdmin() {
                               folder="logos"
                               onUploadSuccess={(result) => {
                                 setUploadedImages(prev => ({ ...prev, logo: result.url }));
-                                // Update the form field if it exists
-                                if (form.setValue) {
-                                  form.setValue('logoUrl', result.url);
-                                }
+                                form.setValue('logoUrl', result.url);
                               }}
-                              onUploadError={(error) => {
-                                console.error('Logo upload error:', error);
-                                // You can add toast notification here
-                              }}
+                              onUploadError={(error) => console.error('Logo upload error:', error)}
                               maxSize={5}
                             />
-                            {uploadedImages.logo && (
-                              <div className="mt-2">
-                                <img 
-                                  src={uploadedImages.logo} 
-                                  alt="Company Logo" 
-                                  className="h-16 w-auto object-contain border rounded"
-                                />
-                                <p className="text-xs text-green-600 mt-1">✓ Logo uploaded successfully</p>
-                              </div>
+                            {(uploadedImages.logo || form.watch('logoUrl') || template?.logoUrl) && (
+                              <p className="text-xs text-green-600">✓ Logo {uploadedImages.logo ? 'uploaded' : 'loaded'}</p>
                             )}
                           </div>
-                          
-                          {/* Hero Image */}
+
+                          {/* Hero Media (Image or Video) */}
                           <div className="space-y-3">
-                            <label className="text-sm font-medium">Hero Image</label>
-                            <ImageUpload
-                              folder="heroes"
-                              onUploadSuccess={(result) => {
-                                setUploadedImages(prev => ({ ...prev, hero: result.url }));
-                                if (form.setValue) {
+                            <label className="text-sm font-medium">Hero Background</label>
+                            <p className="text-xs text-gray-500">Upload an image or video for the hero background. Video will take priority if both are uploaded.</p>
+                            
+                            {/* Hero Image Upload */}
+                            <div className="space-y-2">
+                              <label className="text-xs font-medium text-gray-600">Hero Image</label>
+                              <ImageUpload
+                                folder="heroes"
+                                onUploadSuccess={(result) => {
+                                  setUploadedImages(prev => ({ ...prev, hero: result.url, heroVideo: '' }));
                                   form.setValue('heroImageUrl', result.url);
-                                }
-                              }}
-                              onUploadError={(error) => {
-                                console.error('Hero image upload error:', error);
-                              }}
-                              maxSize={10}
-                            />
-                            {uploadedImages.hero && (
-                              <div className="mt-2">
-                                <img 
-                                  src={uploadedImages.hero} 
-                                  alt="Hero Image" 
-                                  className="h-16 w-auto object-cover border rounded"
-                                />
-                                <p className="text-xs text-green-600 mt-1">✓ Hero image uploaded successfully</p>
-                              </div>
-                            )}
+                                  // Clear video when image is uploaded
+                                  form.setValue('heroVideoUrl', '');
+                                  console.log('Hero image uploaded, cleared hero video');
+                                }}
+                                onUploadError={(error) => console.error('Hero image upload error:', error)}
+                                maxSize={10}
+                              />
+                              {(uploadedImages.hero || form.watch('heroImageUrl') || template?.heroImageUrl) && (
+                                <p className="text-xs text-green-600">✓ Hero image {uploadedImages.hero ? 'uploaded' : 'loaded'}</p>
+                              )}
+                            </div>
+
+                            {/* Hero Video Upload */}
+                            <div className="space-y-2">
+                              <label className="text-xs font-medium text-gray-600">Hero Video (Takes Priority)</label>
+                              <ImageUpload
+                                folder="heroes"
+                                onUploadSuccess={(result) => {
+                                  setUploadedImages(prev => ({ ...prev, heroVideo: result.url, hero: '' }));
+                                  form.setValue('heroVideoUrl', result.url);
+                                  // Clear image when video is uploaded
+                                  form.setValue('heroImageUrl', '');
+                                  console.log('Hero video uploaded, cleared hero image');
+                                }}
+                                onUploadError={(error) => console.error('Hero video upload error:', error)}
+                                maxSize={50}
+                                accept="video/*"
+                              />
+                              {(uploadedImages.heroVideo || form.watch('heroVideoUrl') || template?.heroVideoUrl) && (
+                                <p className="text-xs text-green-600">✓ Hero video {uploadedImages.heroVideo ? 'uploaded' : 'loaded'}</p>
+                              )}
+                            </div>
                           </div>
 
                           {/* Agent Photo */}
@@ -650,24 +780,13 @@ export default function TemplateAdmin() {
                               folder="agents"
                               onUploadSuccess={(result) => {
                                 setUploadedImages(prev => ({ ...prev, agent: result.url }));
-                                if (form.setValue) {
-                                  form.setValue('agentPhotoUrl', result.url);
-                                }
+                                form.setValue('agentImageUrl' as any, result.url);
                               }}
-                              onUploadError={(error) => {
-                                console.error('Agent photo upload error:', error);
-                              }}
+                              onUploadError={(error) => console.error('Agent photo upload error:', error)}
                               maxSize={5}
                             />
-                            {uploadedImages.agent && (
-                              <div className="mt-2">
-                                <img 
-                                  src={uploadedImages.agent} 
-                                  alt="Agent Photo" 
-                                  className="h-16 w-16 object-cover border rounded-full"
-                                />
-                                <p className="text-xs text-green-600 mt-1">✓ Agent photo uploaded successfully</p>
-                              </div>
+                            {(uploadedImages.agent || form.watch('agentImageUrl') || template?.agentImageUrl) && (
+                              <p className="text-xs text-green-600">✓ Agent photo {uploadedImages.agent ? 'uploaded' : 'loaded'}</p>
                             )}
                           </div>
                         </div>
@@ -675,12 +794,61 @@ export default function TemplateAdmin() {
                         {/* Upload Guidelines */}
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                           <h4 className="font-medium text-blue-900 mb-2">Image Guidelines</h4>
-                          <ul className="text-sm text-blue-800 space-y-1">
-                            <li>• <strong>Logo:</strong> Square format (1:1 ratio), PNG with transparent background preferred</li>
-                            <li>• <strong>Hero Image:</strong> Landscape format (16:9 ratio), high resolution (1920x1080 recommended)</li>
-                            <li>• <strong>Agent Photo:</strong> Professional headshot, square format, clear background</li>
+                          <ul className="text-sm space-y-1 list-disc pl-4 text-blue-800">
+                            <li><strong>Logo:</strong> Square format (1:1), PNG with transparent background preferred</li>
+                            <li><strong>Hero Image:</strong> Landscape 16:9, high resolution (1920x1080 recommended)</li>
+                            <li><strong>Agent Photo:</strong> Professional headshot, square, clear background</li>
                           </ul>
                         </div>
+
+                        {/* S3 Cleanup Section */}
+                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                          <h4 className="font-medium text-orange-900 mb-2">🧹 Storage Cleanup</h4>
+                          <p className="text-sm text-orange-800 mb-3">
+                            Each folder should only contain one file. If you see multiple files or broken images, cleanup old files.
+                          </p>
+                          <div className="flex gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={async () => {
+                                try {
+                                  const response = await fetch('/api/upload/cleanup-all', {
+                                    method: 'POST',
+                                    credentials: 'include',
+                                  });
+                                  const result = await response.json();
+                                  if (response.ok) {
+                                    alert('✅ Cleanup completed! ' + result.message);
+                                  } else {
+                                    alert('❌ Cleanup failed: ' + result.message);
+                                  }
+                                } catch (error) {
+                                  alert('❌ Cleanup error: ' + (error instanceof Error ? error.message : 'Unknown error'));
+                                }
+                              }}
+                              className="text-orange-700 border-orange-300 hover:bg-orange-100"
+                            >
+                              Clean All Folders
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Debug Info - Remove in production */}
+                        {template && (
+                          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <h4 className="font-medium text-yellow-900 mb-2">🔧 Debug Info (S3 URLs)</h4>
+                            <div className="text-xs space-y-1 font-mono text-yellow-800">
+                              <div><strong>Logo:</strong> {template.logoUrl || 'None'}</div>
+                              <div><strong>Hero:</strong> {template.heroImageUrl || 'None'}</div>
+                              <div><strong>Agent:</strong> {template.agentImageUrl || 'None'}</div>
+                              <div className="mt-2 text-yellow-700">
+                                If images are broken, check S3 CORS configuration or network access.
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   </TabsContent>
@@ -692,8 +860,6 @@ export default function TemplateAdmin() {
                         <CardTitle>Brand Colors</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        {/* Color Presets */}
-                        <div className="mb-6">
                           <h4 className="text-sm font-medium mb-3">Choose a Color Scheme:</h4>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                             {/* Professional Blue */}
@@ -768,8 +934,6 @@ export default function TemplateAdmin() {
                               <span className="text-xs font-medium">Classic Red</span>
                             </button>
                           </div>
-                        </div>
-
                         {/* Custom Color Inputs */}
                         <div>
                           <h4 className="text-sm font-medium mb-3">Or Customize Colors:</h4>
@@ -901,7 +1065,7 @@ export default function TemplateAdmin() {
                               <FormLabel>Subdomain</FormLabel>
                               <FormControl>
                                 <div className="flex items-center">
-                                  <Input placeholder="youragent" {...field} />
+                                  <Input placeholder="youragent" {...field} value={field.value ?? ''} />
                                   <span className="ml-2 text-gray-500">.realestatesite.com</span>
                                 </div>
                               </FormControl>
@@ -917,7 +1081,7 @@ export default function TemplateAdmin() {
                             <FormItem>
                               <FormLabel>Custom Domain (Optional)</FormLabel>
                               <FormControl>
-                                <Input placeholder="www.youragency.com" {...field} />
+                                <Input placeholder="www.youragency.com" {...field} value={field.value ?? ''} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>

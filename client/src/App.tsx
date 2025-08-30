@@ -31,44 +31,54 @@ import HomeValuation from "@/pages/home-valuation";
 import ListingServices from "@/pages/listing-services";
 import OpenHouses from "@/pages/open-houses";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import AgentPage from "@/pages/agent/[slug]";
 
 function Router() {
   return (
     <div className="min-h-screen bg-soft-white">
       <ScrollToTop />
-      <Header />
-      <main>
-        <Switch>
-          <Route path="/" component={Home} />
-          <Route path="/search" component={Search} />
-          <Route path="/property/:id" component={PropertyDetail} />
-          <Route path="/buying" component={Buying} />
-          <Route path="/selling" component={Selling} />
-          <Route path="/lincoln-homes" component={LincolnHomes} />
-          <Route path="/featured" component={Featured} />
-          <Route path="/featured-listings" component={FeaturedListings} />
-          <Route path="/home-builders" component={HomeBuilders} />
-          <Route path="/communities" component={Communities} />
-          <Route path="/about" component={About} />
-          <Route path="/agents" component={Agents} />
-          <Route path="/contact" component={Contact} />
-          <Route path="/blog" component={Blog} />
-          <Route path="/admin" component={Admin} />
-          <Route path="/login" component={LoginPage} />
-          <Route path="/register" component={RegisterPage} />
-          <Route path="/template-admin">
-            <ProtectedRoute>
-              <TemplateAdmin />
-            </ProtectedRoute>
-          </Route>
-          <Route path="/market-analysis" component={MarketAnalysis} />
-          <Route path="/home-valuation" component={HomeValuation} />
-          <Route path="/listing-services" component={ListingServices} />
-          <Route path="/open-houses" component={OpenHouses} />
-          <Route component={NotFound} />
-        </Switch>
-      </main>
-      <Footer />
+      
+      <Switch>
+        {/* Agent pages without header/footer */}
+        <Route path="/agent/:slug" component={AgentPage} />
+        
+        {/* Regular site pages with header/footer */}
+        <Route>
+          <Header />
+          <main>
+            <Switch>
+              <Route path="/" component={Home} />
+              <Route path="/search" component={Search} />
+              <Route path="/property/:id" component={PropertyDetail} />
+              <Route path="/buying" component={Buying} />
+              <Route path="/selling" component={Selling} />
+              <Route path="/lincoln-homes" component={LincolnHomes} />
+              <Route path="/featured" component={Featured} />
+              <Route path="/featured-listings" component={FeaturedListings} />
+              <Route path="/home-builders" component={HomeBuilders} />
+              <Route path="/communities" component={Communities} />
+              <Route path="/about" component={About} />
+              <Route path="/agents" component={Agents} />
+              <Route path="/contact" component={Contact} />
+              <Route path="/blog" component={Blog} />
+              <Route path="/admin" component={Admin} />
+              <Route path="/login" component={LoginPage} />
+              <Route path="/register" component={RegisterPage} />
+              <Route path="/template-admin">
+                <ProtectedRoute>
+                  <TemplateAdmin />
+                </ProtectedRoute>
+              </Route>
+              <Route path="/market-analysis" component={MarketAnalysis} />
+              <Route path="/home-valuation" component={HomeValuation} />
+              <Route path="/listing-services" component={ListingServices} />
+              <Route path="/open-houses" component={OpenHouses} />
+              <Route component={NotFound} />
+            </Switch>
+          </main>
+          <Footer />
+        </Route>
+      </Switch>
     </div>
   );
 }

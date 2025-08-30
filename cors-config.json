@@ -1,0 +1,14 @@
+[
+  {
+    "AllowedHeaders": ["*"],
+    "AllowedMethods": ["GET", "HEAD"],
+    "AllowedOrigins": [
+      "http://localhost:3001",
+      "http://localhost:3000",
+      "http://home-template-star2-env.eba-gnqk3279.us-east-2.elasticbeanstalk.com",
+      "https://home-template-star2-env.eba-gnqk3279.us-east-2.elasticbeanstalk.com"
+    ],
+    "ExposeHeaders": ["ETag"],
+    "MaxAgeSeconds": 3000
+  }
+]

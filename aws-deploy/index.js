@@ -31,8 +31,8 @@ var init_s3_config = __esm({
       storageClass: "STANDARD_IA",
       // Cheaper for infrequently accessed files
       // Image Upload Settings
-      maxFileSize: 10 * 1024 * 1024,
-      // 10MB max per image
+      maxFileSize: 50 * 1024 * 1024,
+      // 50MB max per image
       allowedTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
       // File Organization
       folders: {
@@ -48,19 +48,13 @@ var init_s3_config = __esm({
         // Hero/banner images
       }
     };
-    s3Client = null;
-    if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
-      s3Client = new S3Client({
-        region: S3_CONFIG.region,
-        credentials: {
-          accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-        }
-      });
-      console.log("S3: Configured with AWS credentials");
-    } else {
-      console.log("S3: AWS credentials not found, S3 features disabled");
-    }
+    s3Client = new S3Client({
+      region: S3_CONFIG.region
+      // No explicit credentials needed - AWS CloudShell/EB provides them automatically
+    });
+    console.log(
+      `S3: Configured for bucket '${S3_CONFIG.bucket}' in region '${S3_CONFIG.region}'`
+    );
   }
 });
 
@@ -286,6 +280,8 @@ var users = pgTable("users", {
   password: text("password").notNull(),
   firstName: text("first_name"),
   lastName: text("last_name"),
+  customSlug: text("custom_slug").unique(),
+  // NEW: Custom URL slug
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`)
@@ -1441,13 +1437,24 @@ var MemStorage = class {
   }
   // User-specific template methods for MemStorage
   async getTemplateByUser(userId) {
-    return this.getTemplate();
+    const userKey = `template_user_${userId}`;
+    if (this.templates.has(userKey)) {
+      return this.templates.get(userKey);
+    }
+    const defaultTemplate = this.getTemplate();
+    this.templates.set(userKey, defaultTemplate);
+    return defaultTemplate;
   }
   async updateTemplateByUser(userId, template) {
+    const userKey = `template_user_${userId}`;
+    this.templates.set(userKey, template);
     return template;
   }
   async createTemplateForUser(userId, template) {
-    return { ...template, userId };
+    const userKey = `template_user_${userId}`;
+    const templateWithUserId = { ...template, userId };
+    this.templates.set(userKey, templateWithUserId);
+    return templateWithUserId;
   }
 };
 var DatabaseStorage = class {
@@ -2789,6 +2796,13 @@ The Omaha real estate market presents compelling investment opportunities for bo
   return posts;
 }
 async function registerRoutes(app2) {
+  app2.get("/health", (req, res) => {
+    res.status(200).json({
+      status: "healthy",
+      timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+      service: "bjork-homes-real-estate"
+    });
+  });
   const paragonCache = /* @__PURE__ */ new Map();
   const PARAGON_TTL_MS = 6e4;
   app2.get("/api/paragon/properties", async (req, res) => {
@@ -3686,6 +3700,14 @@ async function registerRoutes(app2) {
       res.status(500).json({ message: "Failed to fetch sync logs", error });
     }
   });
+  app2.get("/api/health", (req, res) => {
+    res.json({
+      status: "ok",
+      timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+      environment: "production",
+      version: "1.0.0"
+    });
+  });
   app2.get("/api/template/public", async (req, res) => {
     try {
       let template = await storage.getTemplate();
@@ -3708,6 +3730,7 @@ async function registerRoutes(app2) {
           totalSalesVolume: "$250M+",
           serviceAreas: ["Omaha", "Lincoln", "Elkhorn", "Papillion"],
           phone: "(402) 555-0123",
+          logoUrl: "https://home-template-images.s3.us-east-2.amazonaws.com/logos/user-1/2408BjorkGroupFinalLogo1_Bjork%20Group%20Black%20Square%20BHHS_1753648666870.png",
           address: {
             street: "123 Main Street",
             city: "Omaha",
@@ -3815,6 +3838,223 @@ async function registerRoutes(app2) {
       }
     }
   );
+  app2.post(
+    "/api/upload/presigned-url",
+    authenticateUser,
+    async (req, res) => {
+      try {
+        const { filename, contentType, folder } = req.body;
+        if (!filename || !contentType) {
+          return res.status(400).json({
+            message: "Filename and content type are required"
+          });
+        }
+        const allowedTypes = [
+          "image/jpeg",
+          "image/png",
+          "image/webp",
+          "image/gif"
+        ];
+        if (!allowedTypes.includes(contentType)) {
+          return res.status(400).json({
+            message: "Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed."
+          });
+        }
+        const { getPresignedUploadUrl: getPresignedUploadUrl2 } = await Promise.resolve().then(() => (init_s3_service(), s3_service_exports));
+        const uploadFolder = folder || "uploads";
+        const userId = req.user.id;
+        const result = await getPresignedUploadUrl2(
+          uploadFolder,
+          userId,
+          filename,
+          contentType
+        );
+        res.json(result);
+      } catch (error) {
+        console.error("Error generating presigned URL:", error);
+        res.status(500).json({
+          message: "Failed to generate upload URL",
+          error: error instanceof Error ? error.message : "Unknown error"
+        });
+      }
+    }
+  );
+  app2.post(
+    "/api/upload/image",
+    authenticateUser,
+    async (req, res) => {
+      try {
+        res.status(501).json({
+          message: "Use /api/upload/presigned-url for file uploads"
+        });
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        res.status(500).json({
+          message: "Failed to upload image",
+          error: error instanceof Error ? error.message : "Unknown error"
+        });
+      }
+    }
+  );
+  app2.get("/api/agent/:slug/template", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      console.log(`Looking for agent with slug: ${slug}`);
+      let user = await storage.getUserBySlug(slug);
+      if (!user) {
+        return res.status(404).json({
+          message: "Agent not found",
+          slug
+        });
+      }
+      const template = await storage.getTemplateByUser(user.id);
+      if (!template) {
+        return res.status(404).json({
+          message: "Agent template not found",
+          slug
+        });
+      }
+      const publicTemplate = {
+        ...template,
+        agent: {
+          id: user.id,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          customSlug: user.customSlug,
+          fullName: `${user.firstName || ""} ${user.lastName || ""}`.trim()
+        }
+      };
+      console.log(`Found template for agent: ${publicTemplate.agent.fullName}`);
+      res.json(publicTemplate);
+    } catch (error) {
+      console.error("Error fetching agent template:", error);
+      res.status(500).json({ message: "Failed to fetch agent template" });
+    }
+  });
+  app2.get("/api/agent/:slug/profile", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      let user = await storage.getUserBySlug(slug);
+      if (!user) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+      const template = await storage.getTemplateByUser(user.id);
+      const publicProfile = {
+        id: user.id,
+        username: user.username,
+        customSlug: user.customSlug,
+        displayName: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+        companyName: template?.companyName || `${user.firstName}'s Real Estate`,
+        agentName: template?.agentName || user.firstName,
+        agentTitle: template?.agentTitle || "Real Estate Agent",
+        companyDescription: template?.companyDescription || "Professional real estate services",
+        serviceAreas: template?.serviceAreas || [],
+        homesSold: template?.homesSold || 0,
+        totalSalesVolume: template?.totalSalesVolume || "$0",
+        yearsExperience: template?.yearsExperience || 0,
+        contactPhone: template?.contactPhone || "",
+        officeAddress: template?.officeAddress || "",
+        officeCity: template?.officeCity || "",
+        officeState: template?.officeState || "",
+        officeZip: template?.officeZip || "",
+        isActive: user.isActive !== false
+      };
+      res.json(publicProfile);
+    } catch (error) {
+      console.error("Error fetching agent profile:", error);
+      res.status(500).json({ message: "Failed to fetch agent profile" });
+    }
+  });
+  app2.get("/api/agent/:slug/properties", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const { limit = 20, featured, luxury } = req.query;
+      let user = await storage.getUserBySlug(slug);
+      if (!user) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+      const searchParams = {
+        limit: parseInt(limit),
+        featured: featured === "true",
+        luxury: luxury === "true"
+        // agentId: user.id, // When you implement agent-specific properties
+      };
+      const properties2 = await storage.getProperties(searchParams);
+      res.json({
+        ...properties2,
+        agent: {
+          id: user.id,
+          name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+          username: user.username,
+          customSlug: user.customSlug
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching agent properties:", error);
+      res.status(500).json({ message: "Failed to fetch properties" });
+    }
+  });
+  app2.get("/api/user/profile", authenticateUser, async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUserById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      const { password, ...safeUser } = user;
+      res.json(safeUser);
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      res.status(500).json({ message: "Failed to fetch profile" });
+    }
+  });
+  app2.post("/api/user/custom-slug", authenticateUser, async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { customSlug } = req.body;
+      if (!customSlug || typeof customSlug !== "string") {
+        return res.status(400).json({ message: "Valid custom slug is required" });
+      }
+      const slugRegex = /^[a-z0-9-]+$/;
+      if (!slugRegex.test(customSlug)) {
+        return res.status(400).json({
+          message: "Custom slug can only contain lowercase letters, numbers, and hyphens"
+        });
+      }
+      if (customSlug.length < 3) {
+        return res.status(400).json({
+          message: "Custom slug must be at least 3 characters long"
+        });
+      }
+      const updatedUser = await storage.setUserCustomSlug(userId, customSlug);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating custom slug:", error);
+      if (error instanceof Error && error.message.includes("already taken")) {
+        res.status(409).json({ message: "This custom URL is already taken" });
+      } else {
+        res.status(500).json({ message: "Failed to update custom URL" });
+      }
+    }
+  });
+  app2.get("/api/agents/directory", async (req, res) => {
+    try {
+      const users2 = await storage.getAllActiveUsers();
+      const publicDirectory = users2.map((user) => ({
+        id: user.id,
+        username: user.username,
+        displayName: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+        customSlug: user.customSlug || user.username,
+        profileUrl: `/agent/${user.customSlug || user.username}`,
+        isActive: user.isActive
+      }));
+      res.json(publicDirectory);
+    } catch (error) {
+      console.error("Error fetching agents directory:", error);
+      res.status(500).json({ message: "Failed to fetch agents directory" });
+    }
+  });
   const httpServer = createServer(app2);
   return httpServer;
 }
@@ -3886,11 +4126,13 @@ router.post("/register", async (req, res) => {
     res.cookie("authToken", result.token, {
       httpOnly: true,
       secure: false,
-      // AWS ELB handles HTTPS termination, backend is HTTP
+      // Allow HTTP for AWS EB (EB handles HTTPS termination)
       sameSite: "lax",
-      // Lax for better compatibility with AWS load balancer
-      maxAge: 7 * 24 * 60 * 60 * 1e3
+      // Less restrictive for cross-origin requests in production
+      maxAge: 7 * 24 * 60 * 60 * 1e3,
       // 7 days
+      path: "/"
+      // Ensure cookie is available for all routes
     });
     res.status(201).json({
       message: "Registration successful",
@@ -3920,11 +4162,13 @@ router.post("/login", async (req, res) => {
     res.cookie("authToken", result.token, {
       httpOnly: true,
       secure: false,
-      // AWS ELB handles HTTPS termination, backend is HTTP
+      // Allow HTTP for AWS EB (EB handles HTTPS termination)
       sameSite: "lax",
-      // Lax for better compatibility with AWS load balancer
-      maxAge: 7 * 24 * 60 * 60 * 1e3
+      // Less restrictive for cross-origin requests in production
+      maxAge: 7 * 24 * 60 * 60 * 1e3,
       // 7 days
+      path: "/"
+      // Ensure cookie is available for all routes
     });
     res.json({
       message: "Login successful",

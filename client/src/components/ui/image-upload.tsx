@@ -29,7 +29,7 @@ export default function ImageUpload({
   onUploadSuccess,
   onUploadError,
   accept = 'image/*',
-  maxSize = 10, // 10MB default
+  maxSize = 50, // 50MB default
   className,
   children,
 }: ImageUploadProps) {
@@ -41,13 +41,20 @@ export default function ImageUpload({
 
   const handleFile = async (file: File) => {
     if (!user) {
-      onUploadError?.('Please log in to upload images');
+      onUploadError?.('Please log in to upload files');
       return;
     }
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      onUploadError?.('Please select an image file');
+    // Validate file type based on accept prop
+    const isImage = accept.includes('image');
+    const isVideo = accept.includes('video');
+    const isValidType = (isImage && file.type.startsWith('image/')) || 
+                       (isVideo && file.type.startsWith('video/')) ||
+                       accept === '*/*';
+    
+    if (!isValidType) {
+      const expectedType = isVideo ? 'video' : 'image';
+      onUploadError?.(`Please select ${isVideo && isImage ? 'an image or video' : `a ${expectedType}`} file`);
       return;
     }
 
@@ -63,6 +70,7 @@ export default function ImageUpload({
 
     try {
       const formData = new FormData();
+      // Always use 'image' field name since server expects this regardless of file type
       formData.append('image', file);
       formData.append('folder', folder);
 
@@ -182,13 +190,17 @@ export default function ImageUpload({
               </div>
               <div>
                 <p className="text-lg font-medium text-gray-900">
-                  Upload an image
+                  Upload {accept.includes('video') ? (accept.includes('image') ? 'a file' : 'a video') : 'an image'}
                 </p>
                 <p className="text-sm text-gray-500 mt-1">
-                  Drag and drop your image here, or click to browse
+                  Drag and drop your {accept.includes('video') ? (accept.includes('image') ? 'file' : 'video') : 'image'} here, or click to browse
                 </p>
                 <p className="text-xs text-gray-400 mt-2">
-                  Supports: JPG, PNG, WebP, GIF (max {maxSize}MB)
+                  Supports: {accept.includes('video') && accept.includes('image') 
+                    ? 'Images (JPG, PNG, WebP, GIF) and Videos (MP4, WebM, MOV)' 
+                    : accept.includes('video') 
+                      ? 'Videos (MP4, WebM, MOV, AVI)' 
+                      : 'Images (JPG, PNG, WebP, GIF)'} (max {maxSize}MB)
                 </p>
               </div>
               <Button type="button" variant="outline" size="sm">

@@ -12,12 +12,29 @@ import {
 import { Menu, X, ChevronDown, User, LogOut, Settings } from "lucide-react";
 import { NAVIGATION_ITEMS } from "@/lib/constants";
 import { useAuth } from "@/context/auth";
-import logoImage from "@assets/2408BjorkGroupFinalLogo1_Bjork Group Black Square BHHS_1753648666870.png";
+import { useQuery } from "@tanstack/react-query";
+import { getQueryFn } from "@/lib/queryClient";
+import { Template } from "@/types/template";
+// Fallback logo for when template doesn't have logoUrl
+import fallbackLogoImage from "@assets/2408BjorkGroupFinalLogo1_Bjork Group Black Square BHHS_1753648666870.png";
 
 export default function Header() {
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
+
+  // Try authenticated template first (returns null on 401), otherwise fallback to public
+  const { data: authTemplate } = useQuery<Template | null>({
+    queryKey: ["/api/template", "v2"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
+    staleTime: 0,
+  });
+  const { data: publicTemplate } = useQuery<Template>({
+    queryKey: ["/api/template/public", "v2"],
+    enabled: !authTemplate,
+    staleTime: 0,
+  });
+  const template = authTemplate || publicTemplate;
 
   const handleLogout = async () => {
     await logout();
@@ -29,8 +46,8 @@ export default function Header() {
         <div className="flex justify-between items-center h-24">
           <Link href="/" className="flex items-center">
             <img 
-              src={logoImage} 
-              alt="Bjork Group" 
+              src={template?.logoUrl || fallbackLogoImage} 
+              alt={template?.companyName || "Company Logo"} 
               className="h-20 w-auto drop-shadow-sm"
             />
           </Link>
@@ -143,7 +160,7 @@ export default function Header() {
               <div className="flex flex-col space-y-6 mt-8">
                 <div className="flex items-center">
                   <img 
-                    src={logoImage} 
+                    src={template?.logoUrl || fallbackLogoImage} 
                     alt="Bjork Group" 
                     className="h-10 w-auto"
                   />

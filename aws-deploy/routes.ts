@@ -219,6 +219,15 @@ The Omaha real estate market presents compelling investment opportunities for bo
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint for Elastic Beanstalk
+  app.get("/health", (req, res) => {
+    res.status(200).json({
+      status: "healthy",
+      timestamp: new Date().toISOString(),
+      service: "bjork-homes-real-estate",
+    });
+  });
+
   // Initialize IDX sync service
   const paragonCache = new Map<string, { ts: number; data: any }>();
   const PARAGON_TTL_MS = 60_000; // 1 minute cache

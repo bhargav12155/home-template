@@ -4,15 +4,32 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { Phone, Mail, MapPin, Award, Users, TrendingUp, Heart } from "lucide-react";
 import { CONTACT_INFO } from "@/lib/constants";
+import { useAuth } from "@/context/auth";
+import { useQuery } from "@tanstack/react-query";
+import { TEMPLATE_PLACEHOLDERS, getTemplateValue } from "@/lib/template-placeholders";
 
 import White_background from "@assets/White background.jpg";
 
 export default function About() {
+  const { user } = useAuth();
+  
+  // Fetch template data for the current user
+  const { data: template } = useQuery({
+    queryKey: ['template', 'public', user?.id],
+    queryFn: async () => {
+      const response = await fetch(`/api/template/public?user=${user?.id}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch template');
+      }
+      return response.json();
+    },
+    enabled: !!user?.id
+  });
   const achievements = [
-    { icon: TrendingUp, label: "Total Sales Volume", value: "$200M+" },
-    { icon: Users, label: "Happy Clients", value: "500+" },
-    { icon: Award, label: "Years Experience", value: "15+" },
-    { icon: Heart, label: "Client Satisfaction", value: "98%" }
+    { icon: TrendingUp, label: "Total Sales Volume", value: getTemplateValue(template?.totalSalesVolume, TEMPLATE_PLACEHOLDERS.totalSalesVolume) },
+    { icon: Users, label: "Happy Clients", value: getTemplateValue(template?.homesSold, TEMPLATE_PLACEHOLDERS.homesSold) + "+" },
+    { icon: Award, label: "Years Experience", value: getTemplateValue(template?.yearsExperience, TEMPLATE_PLACEHOLDERS.yearsExperience) + "+" },
+    { icon: Heart, label: "Client Satisfaction", value: getTemplateValue(template?.clientSatisfaction, TEMPLATE_PLACEHOLDERS.clientSatisfaction) }
   ];
 
   const testimonials = [
@@ -67,13 +84,13 @@ export default function About() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-light leading-tight text-bjork-black mb-6">
-                About <span className="text-bjork-beige">Bjork Group</span>
+                About <span className="text-bjork-beige">{getTemplateValue(template?.companyName, TEMPLATE_PLACEHOLDERS.companyName)}</span>
               </h1>
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                At Bjork Group Real Estate, we believe that luxury is not a price point but an experience. Our commitment to delivering unparalleled service, attention to detail, and a personalized approach ensures that every client feels like a priority, no matter their budget.
+                {getTemplateValue(template?.companyDescription, TEMPLATE_PLACEHOLDERS.companyDescription)}
               </p>
               <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                With Bjork Group, luxury means going beyond expectations to create a friendly, personal experience that transforms the way you buy and sell real estate in Nebraska.
+                With {getTemplateValue(template?.companyName, TEMPLATE_PLACEHOLDERS.companyName)}, luxury means going beyond expectations to create a friendly, personal experience that transforms the way you buy and sell real estate.
               </p>
               <div className="flex space-x-4">
                 <Link href="/contact">
@@ -90,9 +107,15 @@ export default function About() {
             </div>
             <div>
               <img 
-                src={White_background}
-                alt="Michael Bjork, Principal Broker"
-                className="w-full h-96 object-contain rounded-lg shadow-lg bg-white"
+                src={getTemplateValue(template?.agentImageUrl, TEMPLATE_PLACEHOLDERS.agentImageUrl)}
+                alt={`${getTemplateValue(template?.agentName, TEMPLATE_PLACEHOLDERS.agentName)}, ${getTemplateValue(template?.agentTitle, TEMPLATE_PLACEHOLDERS.agentTitle)}`}
+                className="w-full h-96 object-cover rounded-lg shadow-lg"
+                onError={(e) => {
+                  console.error("Agent image loading error:", e);
+                  console.log("Failed agent image URL:", template?.agentImageUrl);
+                  // Fallback to placeholder if agent image fails
+                  e.currentTarget.src = TEMPLATE_PLACEHOLDERS.agentImageUrl;
+                }}
               />
             </div>
           </div>
@@ -127,21 +150,21 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
             <div className="lg:col-span-2">
-                            <h2 className="text-4xl md:text-5xl font-display font-light leading-tight text-bjork-black mb-6">
-                Meet Michael Bjork
+              <h2 className="text-4xl md:text-5xl font-display font-light leading-tight text-bjork-black mb-6">
+                Meet {getTemplateValue(template?.agentName, TEMPLATE_PLACEHOLDERS.agentName)}
               </h2>
               <div className="space-y-6 text-lg text-gray-600 leading-relaxed">
                 <p>
-                  Michael Bjork brings over 15 years of real estate expertise to Nebraska's luxury market. As the principal broker of Bjork Group Real Estate, Michael has built his reputation on a foundation of integrity, market knowledge, and unwavering dedication to his clients.
+                  {getTemplateValue(template?.agentBio, TEMPLATE_PLACEHOLDERS.agentBio)}
                 </p>
                 <p>
-                  His philosophy is simple: luxury is an experience, not a price point. This approach has earned him recognition as one of Nebraska's top real estate professionals, with over $200 million in career sales and a client satisfaction rate that speaks to his commitment to excellence.
+                  Our philosophy is simple: luxury is an experience, not a price point. This approach has earned recognition as one of the area's top real estate professionals, with {getTemplateValue(template?.totalSalesVolume, TEMPLATE_PLACEHOLDERS.totalSalesVolume)} in career sales and a client satisfaction rate that speaks to our commitment to excellence.
                 </p>
                 <p>
-                  Michael specializes in luxury properties throughout Omaha, Lincoln, Elkhorn, and surrounding communities. His deep understanding of local markets, combined with cutting-edge marketing strategies and a personalized approach, ensures that every client receives the highest level of service.
+                  {getTemplateValue(template?.agentName, TEMPLATE_PLACEHOLDERS.agentName)} specializes in properties throughout {getTemplateValue(template?.serviceAreas, TEMPLATE_PLACEHOLDERS.serviceAreas).join(', ')}. Deep understanding of local markets, combined with cutting-edge marketing strategies and a personalized approach, ensures that every client receives the highest level of service.
                 </p>
                 <p>
-                  When he's not helping clients achieve their real estate goals, Michael enjoys giving back to the Nebraska community through various charitable initiatives and mentoring upcoming real estate professionals.
+                  When not helping clients achieve their real estate goals, {getTemplateValue(template?.agentName, TEMPLATE_PLACEHOLDERS.agentName)} enjoys giving back to the community through various charitable initiatives and mentoring upcoming real estate professionals.
                 </p>
               </div>
               
@@ -159,21 +182,21 @@ export default function About() {
             <div className="space-y-6">
               <Card>
                 <CardContent className="p-6">
-                  <h3 className="text-3xl md:text-4xl font-display font-light leading-tight text-bjork-black mb-4">Contact Michael</h3>
+                  <h3 className="text-3xl md:text-4xl font-display font-light leading-tight text-bjork-black mb-4">Contact {getTemplateValue(template?.agentName, TEMPLATE_PLACEHOLDERS.agentName)}</h3>
                   <div className="space-y-4 text-sm">
                     <div className="flex items-center">
                       <Phone className="w-4 h-4 text-bjork-beige mr-3" />
-                      <span>{CONTACT_INFO.phone}</span>
+                      <span>{getTemplateValue(template?.contactPhone, TEMPLATE_PLACEHOLDERS.contactPhone)}</span>
                     </div>
                     <div className="flex items-center">
                       <Mail className="w-4 h-4 text-bjork-beige mr-3" />
-                      <span>michael@bjorkhomes.com</span>
+                      <span>{getTemplateValue(template?.agentEmail, TEMPLATE_PLACEHOLDERS.agentEmail)}</span>
                     </div>
                     <div className="flex items-center">
                       <MapPin className="w-4 h-4 text-bjork-beige mr-3" />
                       <div>
-                        <div>{CONTACT_INFO.address.street}</div>
-                        <div>{CONTACT_INFO.address.city}, {CONTACT_INFO.address.state} {CONTACT_INFO.address.zip}</div>
+                        <div>{getTemplateValue(template?.officeAddress, TEMPLATE_PLACEHOLDERS.officeAddress)}</div>
+                        <div>{getTemplateValue(template?.officeCity, TEMPLATE_PLACEHOLDERS.officeCity)}, {getTemplateValue(template?.officeState, TEMPLATE_PLACEHOLDERS.officeState)} {getTemplateValue(template?.officeZip, TEMPLATE_PLACEHOLDERS.officeZip)}</div>
                       </div>
                     </div>
                   </div>

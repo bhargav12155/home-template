@@ -13,13 +13,14 @@ import { Phone, MapPin } from "lucide-react";
 import { contactFormSchema, type ContactForm } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { CONTACT_INFO } from "@/lib/constants";
+import { Template } from "@/types/template";
 
 export default function ContactSection() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch template data
-  const { data: template } = useQuery({
+  // Fetch template data using proper typing and fallback logic
+  const { data: template } = useQuery<Template>({
     queryKey: ["/api/template/public", "v2"],
     refetchOnMount: true,
     staleTime: 0,
@@ -98,7 +99,10 @@ export default function ContactSection() {
                 <div>
                   <div className="font-medium">{template?.officeAddress || CONTACT_INFO.address.street}</div>
                   <div className="text-sm opacity-80">
-                    {template?.officeCity || CONTACT_INFO.address.city}, {template?.officeState || CONTACT_INFO.address.state} {template?.officeZip || CONTACT_INFO.address.zip}
+                    {template?.officeCity && template?.officeState && template?.officeZip 
+                      ? `${template.officeCity}, ${template.officeState} ${template.officeZip}`
+                      : `${CONTACT_INFO.address.city}, ${CONTACT_INFO.address.state} ${CONTACT_INFO.address.zip}`
+                    }
                   </div>
                 </div>
               </div>

@@ -2,9 +2,26 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { CONTACT_INFO, SOCIAL_LINKS } from "@/lib/constants";
 import { Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
-import logoImage from "@assets/2408BjorkGroupFinalLogo1_Bjork Group Black Square BHHS_1753648666870.png";
+import { useQuery } from "@tanstack/react-query";
+import { getQueryFn } from "@/lib/queryClient";
+import { Template } from "@/types/template";
+// Fallback logo
+import fallbackLogoImage from "@assets/2408BjorkGroupFinalLogo1_Bjork Group Black Square BHHS_1753648666870.png";
 
 export default function Footer() {
+  // Prefer authenticated template when logged in; fallback to public
+  const { data: authTemplate } = useQuery<Template | null>({
+    queryKey: ["/api/template", "v2"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
+    staleTime: 0,
+  });
+  const { data: publicTemplate } = useQuery<Template>({
+    queryKey: ["/api/template/public", "v2"],
+    enabled: !authTemplate,
+    staleTime: 0,
+  });
+  const template = authTemplate || publicTemplate;
+
   return (
     <footer className="bg-white border-t border-gray-200 py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -12,13 +29,13 @@ export default function Footer() {
           <div className="md:col-span-2">
             <div className="mb-8">
               <img 
-                src={logoImage} 
-                alt="Bjork Group" 
+                src={template?.logoUrl || fallbackLogoImage} 
+                alt={template?.companyName || "Company Logo"} 
                 className="h-24 w-auto drop-shadow-md hover:drop-shadow-lg transition-all duration-300"
               />
             </div>
             <p className="text-gray-600 mb-6 max-w-md">
-              Nebraska's premier luxury real estate team, delivering exceptional service and unparalleled results in Omaha, Lincoln, and surrounding communities.
+              {template?.companyDescription || "Nebraska's premier luxury real estate team, delivering exceptional service and unparalleled results in Omaha, Lincoln, and surrounding communities."}
             </p>
             <div className="flex space-x-4">
               <a 

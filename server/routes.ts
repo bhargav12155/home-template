@@ -219,6 +219,15 @@ The Omaha real estate market presents compelling investment opportunities for bo
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint for Elastic Beanstalk
+  app.get("/health", (req, res) => {
+    res.status(200).json({
+      status: "healthy",
+      timestamp: new Date().toISOString(),
+      service: "bjork-homes-real-estate",
+    });
+  });
+
   // Initialize IDX sync service
   const paragonCache = new Map<string, { ts: number; data: any }>();
   const PARAGON_TTL_MS = 60_000; // 1 minute cache
@@ -1366,22 +1375,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // **TEMPLATE ROUTES** - Multi-tenant customization with user authentication
-  
+
   // Public health check endpoint
   app.get("/api/health", (req, res) => {
-    res.json({ 
-      status: "ok", 
+    res.json({
+      status: "ok",
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || "development",
-      version: "1.0.0"
+      version: "1.0.0",
     });
   });
 
   // Get public template (no authentication required - for public display)
   app.get("/api/template/public", async (req, res) => {
     try {
-      // Try to get saved template from database first
-      let template = await storage.getTemplate();
+      console.log("Public template request from:", req.get("host"));
+      console.log("Query parameters:", req.query);
+
+      let template;
+      const host = req.get("host") || "";
+
+      // For development/testing, check for user parameter or use default
+      const userParam = req.query.user as string;
+      console.log("User param from query:", userParam);
+
+      if (userParam) {
+        // If user parameter is provided (for testing), get that user's template
+        const userId = parseInt(userParam);
+        if (!isNaN(userId)) {
+          console.log(`🔍 Getting template for user ${userId} via query param`);
+          template = await storage.getTemplateByUser(userId);
+          console.log(
+            `📋 Template found for user ${userId}:`,
+            template ? "YES" : "NO"
+          );
+          if (template) {
+            console.log(`📋 Template ID:`, template.id);
+            console.log(`🖼️ Hero image URL:`, template.heroImageUrl);
+          }
+        }
+      } else {
+        console.log("🔄 No user param, getting default template");
+        // TODO: In production, determine user by subdomain/custom domain
+        // For now, get the first template as fallback
+        template = await storage.getTemplate();
+      }
 
       // If no template exists in database, return default template for public display
       if (!template) {
@@ -1405,6 +1443,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalSalesVolume: "$250M+",
           serviceAreas: ["Omaha", "Lincoln", "Elkhorn", "Papillion"],
           phone: "(402) 555-0123",
+          logoUrl:
+            "https://home-template-images.s3.us-east-2.amazonaws.com/logos/user-1/2408BjorkGroupFinalLogo1_Bjork%20Group%20Black%20Square%20BHHS_1753648666870.png",
+          heroImageUrl:
+            "https://home-template-images.s3.us-east-2.amazonaws.com/heroes/user-1/White%20background_1753818665671.jpg",
+          agentImageUrl:
+            "https://home-template-images.s3.us-east-2.amazonaws.com/agents/user-1/Mandy%20Visty%20headshot%20(1)_1753818758165.jpg",
+          heroVideoUrl:
+            "https://home-template-images.s3.us-east-2.amazonaws.com/heroes/user-1/Web%20page%20video_1753809980517.mp4",
           address: {
             street: "123 Main Street",
             city: "Omaha",
@@ -1414,6 +1460,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
         template = defaultTemplate;
       }
+
+      // Ensure media fallbacks if template exists but missing specific media fields
+      template = {
+        ...template,
+        logoUrl:
+          template.logoUrl ||
+          "https://home-template-images.s3.us-east-2.amazonaws.com/logos/user-1/2408BjorkGroupFinalLogo1_Bjork%20Group%20Black%20Square%20BHHS_1753648666870.png",
+        heroImageUrl:
+          template.heroImageUrl ||
+          "https://home-template-images.s3.us-east-2.amazonaws.com/heroes/user-1/White%20background_1753818665671.jpg",
+        agentImageUrl:
+          template.agentImageUrl ||
+          "https://home-template-images.s3.us-east-2.amazonaws.com/agents/user-1/Mandy%20Visty%20headshot%20(1)_1753818758165.jpg",
+        heroVideoUrl:
+          template.heroVideoUrl ||
+          "https://home-template-images.s3.us-east-2.amazonaws.com/heroes/user-1/Web%20page%20video_1753809980517.mp4",
+      };
 
       console.log("Public template endpoint returning:", template);
       res.json(template);
@@ -1481,19 +1544,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const userId = req.user!.id;
 
-        console.log(
-          `Template update for user ${userId}:`,
-          JSON.stringify(req.body, null, 2)
-        );
+        console.log(`🚀 Template update request started`);
+        console.log(`👤 User ID: ${userId}`);
+        console.log(`📝 Request body:`, JSON.stringify(req.body, null, 2));
 
         // Validate required fields
         const requiredFields = ["companyName", "agentName"];
         for (const field of requiredFields) {
           if (!req.body[field]) {
+            console.log(`❌ Missing required field: ${field}`);
             return res.status(400).json({
               message: `Missing required field: ${field}`,
               received: req.body,
             });
+          }
+        }
+
+        console.log(`✅ Required fields validation passed`);
+
+        // Get current template to check for old image URLs
+        console.log(`🔍 Getting current template for user ${userId}`);
+        const currentTemplate = await storage.getTemplateByUser(userId);
+        console.log(
+          `📋 Current template:`,
+          currentTemplate ? "Found" : "Not found"
+        );
+        if (currentTemplate) {
+          console.log(`📋 Current template ID:`, currentTemplate.id);
+        }
+
+        // Import S3 delete function
+        const { deleteFromS3 } = await import("./s3-service");
+
+        // Helper function to extract S3 key from URL
+        const extractS3Key = (url: string | null): string | null => {
+          if (
+            !url ||
+            !url.includes("home-template-images.s3.us-east-2.amazonaws.com")
+          ) {
+            return null;
+          }
+
+          // Extract key from URL: https://bucket.s3.region.amazonaws.com/key
+          const parts = url.split(".amazonaws.com/");
+          return parts.length > 1 ? decodeURIComponent(parts[1]) : null;
+        };
+
+        // Delete old S3 files if new ones are being uploaded
+        const imagesToDelete: string[] = [];
+
+        if (currentTemplate) {
+          // Check if logoUrl is being updated
+          if (
+            req.body.logoUrl &&
+            req.body.logoUrl !== currentTemplate.logoUrl
+          ) {
+            const oldKey = extractS3Key(currentTemplate.logoUrl);
+            if (oldKey) {
+              imagesToDelete.push(oldKey);
+              console.log("Marking old logo for deletion:", oldKey);
+            }
+          }
+
+          // Check if heroImageUrl is being updated
+          if (
+            req.body.heroImageUrl &&
+            req.body.heroImageUrl !== currentTemplate.heroImageUrl
+          ) {
+            const oldKey = extractS3Key(currentTemplate.heroImageUrl);
+            if (oldKey) {
+              imagesToDelete.push(oldKey);
+              console.log("Marking old hero image for deletion:", oldKey);
+            }
+          }
+
+          // Check if agentImageUrl is being updated
+          if (
+            req.body.agentImageUrl &&
+            req.body.agentImageUrl !== currentTemplate.agentImageUrl
+          ) {
+            const oldKey = extractS3Key(currentTemplate.agentImageUrl);
+            if (oldKey) {
+              imagesToDelete.push(oldKey);
+              console.log("Marking old agent image for deletion:", oldKey);
+            }
+          }
+
+          // Check if heroVideoUrl is being updated
+          if (
+            req.body.heroVideoUrl &&
+            req.body.heroVideoUrl !== currentTemplate.heroVideoUrl
+          ) {
+            const oldKey = extractS3Key(currentTemplate.heroVideoUrl);
+            if (oldKey) {
+              imagesToDelete.push(oldKey);
+              console.log("Marking old hero video for deletion:", oldKey);
+            }
+          }
+        }
+
+        // Delete old files from S3
+        for (const key of imagesToDelete) {
+          try {
+            await deleteFromS3(key);
+            console.log("Successfully deleted old S3 file:", key);
+          } catch (error) {
+            console.error("Failed to delete old S3 file:", key, error);
+            // Continue with update even if deletion fails
           }
         }
 
@@ -1535,6 +1692,352 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   );
+
+  // **S3 IMAGE UPLOAD ROUTES** - File upload functionality
+  app.post(
+    "/api/upload/presigned-url",
+    authenticateUser,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        const { filename, contentType, folder } = req.body;
+
+        if (!filename || !contentType) {
+          return res.status(400).json({
+            message: "Filename and content type are required",
+          });
+        }
+
+        // Validate file type
+        const allowedTypes = [
+          // Images
+          "image/jpeg",
+          "image/png",
+          "image/webp",
+          "image/gif",
+          // Videos
+          "video/mp4",
+          "video/webm",
+          "video/avi",
+          "video/mov",
+          "video/quicktime",
+        ];
+        if (!allowedTypes.includes(contentType)) {
+          return res.status(400).json({
+            message:
+              "Invalid file type. Only JPEG, PNG, WebP, GIF, MP4, WebM, AVI, and MOV files are allowed.",
+          });
+        }
+
+        const { getPresignedUploadUrl } = await import("./s3-service");
+        const uploadFolder = folder || "uploads";
+        const userId = req.user!.id;
+
+        const result = await getPresignedUploadUrl(
+          uploadFolder,
+          userId,
+          filename,
+          contentType
+        );
+
+        res.json(result);
+      } catch (error) {
+        console.error("Error generating presigned URL:", error);
+        res.status(500).json({
+          message: "Failed to generate upload URL",
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
+    }
+  );
+
+  // Direct file upload endpoint
+  app.post(
+    "/api/upload/image",
+    authenticateUser,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        // This would typically use multer middleware for file uploads
+        // For now, we'll use the presigned URL approach which is more secure
+        res.status(501).json({
+          message: "Use /api/upload/presigned-url for file uploads",
+        });
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        res.status(500).json({
+          message: "Failed to upload image",
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
+    }
+  );
+
+  // **MULTI-TENANT SLUG-BASED ROUTES** - Individual user websites
+
+  // Get template by custom slug (e.g., /api/agent/mike-bjork/template)
+  app.get("/api/agent/:slug/template", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      console.log(`Looking for agent with slug: ${slug}`);
+
+      // Find user by custom slug or username
+      let user = await storage.getUserBySlug(slug);
+
+      if (!user) {
+        return res.status(404).json({
+          message: "Agent not found",
+          slug,
+        });
+      }
+
+      const template = await storage.getTemplateByUser(user.id);
+
+      if (!template) {
+        return res.status(404).json({
+          message: "Agent template not found",
+          slug,
+        });
+      }
+
+      // Return template with public user info
+      const publicTemplate = {
+        ...template,
+        agent: {
+          id: user.id,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          customSlug: user.customSlug,
+          fullName: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+        },
+      };
+
+      console.log(`Found template for agent: ${publicTemplate.agent.fullName}`);
+      res.json(publicTemplate);
+    } catch (error) {
+      console.error("Error fetching agent template:", error);
+      res.status(500).json({ message: "Failed to fetch agent template" });
+    }
+  });
+
+  // Get agent profile by slug (e.g., /api/agent/mike-bjork/profile)
+  app.get("/api/agent/:slug/profile", async (req, res) => {
+    try {
+      const { slug } = req.params;
+
+      let user = await storage.getUserBySlug(slug);
+
+      if (!user) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+
+      const template = await storage.getTemplateByUser(user.id);
+
+      // Return public profile data
+      const publicProfile = {
+        id: user.id,
+        username: user.username,
+        customSlug: user.customSlug,
+        displayName: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+        companyName: template?.companyName || `${user.firstName}'s Real Estate`,
+        agentName: template?.agentName || user.firstName,
+        agentTitle: template?.agentTitle || "Real Estate Agent",
+        companyDescription:
+          template?.companyDescription || "Professional real estate services",
+        serviceAreas: template?.serviceAreas || [],
+        homesSold: template?.homesSold || 0,
+        totalSalesVolume: template?.totalSalesVolume || "$0",
+        yearsExperience: template?.yearsExperience || 0,
+        contactPhone: template?.contactPhone || "",
+        officeAddress: template?.officeAddress || "",
+        officeCity: template?.officeCity || "",
+        officeState: template?.officeState || "",
+        officeZip: template?.officeZip || "",
+        isActive: user.isActive !== false,
+      };
+
+      res.json(publicProfile);
+    } catch (error) {
+      console.error("Error fetching agent profile:", error);
+      res.status(500).json({ message: "Failed to fetch agent profile" });
+    }
+  });
+
+  // Get properties for a specific agent by slug
+  app.get("/api/agent/:slug/properties", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const { limit = 20, featured, luxury } = req.query;
+
+      let user = await storage.getUserBySlug(slug);
+
+      if (!user) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+
+      // Get properties (for now, same as general properties)
+      // In the future, you could filter by agent or assign properties to specific users
+      const searchParams = {
+        limit: parseInt(limit as string),
+        featured: featured === "true",
+        luxury: luxury === "true",
+        // agentId: user.id, // When you implement agent-specific properties
+      };
+
+      const properties = await storage.getProperties(searchParams);
+
+      res.json({
+        ...properties,
+        agent: {
+          id: user.id,
+          name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+          username: user.username,
+          customSlug: user.customSlug,
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching agent properties:", error);
+      res.status(500).json({ message: "Failed to fetch properties" });
+    }
+  });
+
+  // User profile management routes (authenticated)
+
+  // Get current user's profile (authenticated)
+  app.get(
+    "/api/user/profile",
+    authenticateUser,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        const userId = req.user!.id;
+        const user = await storage.getUserById(userId);
+
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+
+        // Remove sensitive data
+        const { password, ...safeUser } = user;
+        res.json(safeUser);
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        res.status(500).json({ message: "Failed to fetch profile" });
+      }
+    }
+  );
+
+  // Update user's custom slug
+  app.post(
+    "/api/user/custom-slug",
+    authenticateUser,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        const userId = req.user!.id;
+        const { customSlug } = req.body;
+
+        if (!customSlug || typeof customSlug !== "string") {
+          return res
+            .status(400)
+            .json({ message: "Valid custom slug is required" });
+        }
+
+        // Validate slug format (lowercase, alphanumeric, hyphens only)
+        const slugRegex = /^[a-z0-9-]+$/;
+        if (!slugRegex.test(customSlug)) {
+          return res.status(400).json({
+            message:
+              "Custom slug can only contain lowercase letters, numbers, and hyphens",
+          });
+        }
+
+        // Check minimum length
+        if (customSlug.length < 3) {
+          return res.status(400).json({
+            message: "Custom slug must be at least 3 characters long",
+          });
+        }
+
+        const updatedUser = await storage.setUserCustomSlug(userId, customSlug);
+        res.json(updatedUser);
+      } catch (error) {
+        console.error("Error updating custom slug:", error);
+        if (error instanceof Error && error.message.includes("already taken")) {
+          res.status(409).json({ message: "This custom URL is already taken" });
+        } else {
+          res.status(500).json({ message: "Failed to update custom URL" });
+        }
+      }
+    }
+  );
+
+  // List all active agents/users (public directory)
+  app.get("/api/agents/directory", async (req, res) => {
+    try {
+      const users = await storage.getAllActiveUsers();
+
+      const publicDirectory = users.map((user) => ({
+        id: user.id,
+        username: user.username,
+        displayName: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+        customSlug: user.customSlug || user.username,
+        profileUrl: `/agent/${user.customSlug || user.username}`,
+        isActive: user.isActive,
+      }));
+
+      res.json(publicDirectory);
+    } catch (error) {
+      console.error("Error fetching agents directory:", error);
+      res.status(500).json({ message: "Failed to fetch agents directory" });
+    }
+  });
+
+  // **S3 PROXY ENDPOINT** - Serve S3 images through our server to avoid CORS issues
+  app.get("/api/media/proxy", async (req, res) => {
+    try {
+      const { url } = req.query;
+
+      if (!url || typeof url !== "string") {
+        return res.status(400).json({ message: "URL parameter is required" });
+      }
+
+      // Validate that the URL is from our S3 bucket
+      const allowedDomain = "home-template-images.s3.us-east-2.amazonaws.com";
+      if (!url.includes(allowedDomain)) {
+        return res.status(403).json({ message: "Invalid URL domain" });
+      }
+
+      console.log("Proxying S3 URL:", url);
+
+      // Fetch the image from S3
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        console.error("S3 fetch failed:", response.status, response.statusText);
+        return res.status(response.status).json({
+          message: `Failed to fetch image: ${response.statusText}`,
+        });
+      }
+
+      // Get the content type and stream the response
+      const contentType =
+        response.headers.get("content-type") || "application/octet-stream";
+      res.setHeader("Content-Type", contentType);
+      res.setHeader("Cache-Control", "public, max-age=86400"); // Cache for 24 hours
+
+      // Stream the image data
+      if (response.body) {
+        const buffer = await response.arrayBuffer();
+        res.send(Buffer.from(buffer));
+      } else {
+        res.status(500).json({ message: "No response body" });
+      }
+    } catch (error) {
+      console.error("Media proxy error:", error);
+      res.status(500).json({
+        message: "Failed to proxy media",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
