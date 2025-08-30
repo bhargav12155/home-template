@@ -25,12 +25,13 @@ router.post("/register", async (req, res) => {
 
     const result = await registerUser(registrationData);
 
-    // Set secure HTTP-only cookie
+    // Set secure HTTP-only cookie with production-compatible settings
     res.cookie("authToken", result.token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: false, // Allow HTTP for AWS EB (EB handles HTTPS termination)
+      sameSite: "lax", // Less restrictive for cross-origin requests in production
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: "/", // Ensure cookie is available for all routes
     });
 
     res.status(201).json({
@@ -65,12 +66,13 @@ router.post("/login", async (req, res) => {
 
     const result = await loginUser(credentials);
 
-    // Set secure HTTP-only cookie
+    // Set secure HTTP-only cookie with production-compatible settings
     res.cookie("authToken", result.token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: false, // Allow HTTP for AWS EB (EB handles HTTPS termination)
+      sameSite: "lax", // Less restrictive for cross-origin requests in production
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: "/", // Ensure cookie is available for all routes
     });
 
     res.json({

@@ -1366,6 +1366,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // **TEMPLATE ROUTES** - Multi-tenant customization with user authentication
+  
+  // Public health check endpoint
+  app.get("/api/health", (req, res) => {
+    res.json({ 
+      status: "ok", 
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || "development",
+      version: "1.0.0"
+    });
+  });
+
   // Get public template (no authentication required - for public display)
   app.get("/api/template/public", async (req, res) => {
     try {
